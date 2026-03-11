@@ -440,6 +440,34 @@ struct ProfileView: View {
             }
 
             NavigationLink {
+                MyAnswersView()
+            } label: {
+                HStack {
+                    Text("My answers")
+                    Spacer()
+                    Image(systemName: "text.book.closed.fill")
+                }
+                .font(BoopTypography.callout)
+                .foregroundStyle(BoopColors.textPrimary)
+                .padding(BoopSpacing.md)
+                .boopCard(radius: BoopRadius.xl)
+            }
+
+            NavigationLink {
+                PersonalityReportView()
+            } label: {
+                HStack {
+                    Text("Personality insights")
+                    Spacer()
+                    Image(systemName: "brain.head.profile.fill")
+                }
+                .font(BoopTypography.callout)
+                .foregroundStyle(BoopColors.textPrimary)
+                .padding(BoopSpacing.md)
+                .boopCard(radius: BoopRadius.xl)
+            }
+
+            NavigationLink {
                 NotificationSettingsView()
             } label: {
                 HStack {

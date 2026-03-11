@@ -10,6 +10,7 @@ class QuestionsViewModel {
     var errorMessage: String?
     var answeredCount = 0
     var isComplete = false
+    var allBatchDone = false
 
     // Current answer
     var textAnswer = ""
@@ -47,12 +48,18 @@ class QuestionsViewModel {
         }
     }
 
+    /// User can skip to homepage after answering 6+ questions
+    var canSkipToHome: Bool {
+        answeredCount >= 6
+    }
+
     var progressText: String {
         "Question \(currentIndex + 1) of \(questions.count)"
     }
 
     // MARK: - Fetch Questions
 
+    /// Fetch all available questions for onboarding (no limit)
     @MainActor
     func fetchQuestions() async {
         isLoading = true
@@ -60,8 +67,7 @@ class QuestionsViewModel {
 
         do {
             let response: AvailableQuestionsResponse = try await APIClient.shared.request(.getQuestions)
-            // Only show first 6 for onboarding
-            questions = Array(response.questions.prefix(6))
+            questions = response.questions
             answeredCount = response.meta.totalAnswered
             questionStartTime = Date()
         } catch let error as APIError {
@@ -204,12 +210,23 @@ class QuestionsViewModel {
             }
             questionStartTime = Date()
         } else {
-            // All 6 answered
-            isComplete = true
+            // All available questions in this batch answered
+            allBatchDone = true
             Task {
                 let wrapper: UserWrapper = try await APIClient.shared.request(.me)
                 AuthManager.shared.updateUser(wrapper.user)
             }
+        }
+    }
+
+    /// Refresh user data and mark onboarding questions as done
+    @MainActor
+    func goToHomepage() async {
+        do {
+            let wrapper: UserWrapper = try await APIClient.shared.request(.me)
+            AuthManager.shared.updateUser(wrapper.user)
+        } catch {
+            // Still allow navigation even if refresh fails
         }
     }
 

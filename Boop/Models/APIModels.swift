@@ -156,6 +156,71 @@ struct QuestionDimensionProgress: Decodable, Identifiable {
     var id: String { "\(answered)-\(unlocked)-\(total)" }
 }
 
+// MARK: - Answer History
+
+struct AnswerHistoryResponse: Decodable {
+    let history: [AnswerHistoryItem]
+    let groupedByDimension: [String: [AnswerHistoryItem]]?
+}
+
+struct AnswerHistoryItem: Decodable, Identifiable {
+    let id: String
+    let questionNumber: Int
+    let questionText: String
+    let dimension: String
+    let questionType: String
+    let textAnswer: String?
+    let selectedOption: String?
+    let selectedOptions: [String]?
+    let followUpAnswer: String?
+    let submittedAt: Date?
+}
+
+// MARK: - Personality Analysis
+
+struct PersonalityAnalysisResponse: Decodable {
+    let analysis: PersonalityAnalysis?
+    let nextMilestone: Int
+    let questionsUntilNext: Int
+    let isPreliminary: Bool
+}
+
+struct PersonalityAnalysis: Decodable, Identifiable {
+    let id: String
+    let personalityType: String
+    let summary: String
+    let facets: [PersonalityFacet]
+    let numerology: NumerologyData?
+    let questionsAnalyzed: Int
+    let isPreliminary: Bool
+    let createdAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id = "_id"
+        case personalityType, summary, facets, numerology
+        case questionsAnalyzed, isPreliminary, createdAt
+    }
+}
+
+struct PersonalityFacet: Decodable, Identifiable {
+    let key: String
+    let title: String
+    let score: Int
+    let description: String
+    let emoji: String
+
+    var id: String { key }
+}
+
+struct NumerologyData: Decodable {
+    let lifePathNumber: Int
+    let expressionNumber: Int?
+    let traits: [String]
+    let description: String
+}
+
+// MARK: - Games
+
 struct CreateGameRequest: Encodable {
     let matchId: String
     let gameType: String

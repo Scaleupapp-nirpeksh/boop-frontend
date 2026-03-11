@@ -25,6 +25,8 @@ enum APIEndpoint {
     // Questions
     case getQuestions
     case getQuestionsProgress
+    case getQuestionHistory
+    case getPersonalityAnalysis
     case answerQuestion(SubmitAnswerRequest)
     case submitVoiceAnswer
 
@@ -91,6 +93,8 @@ enum APIEndpoint {
         case .updateNotificationPreferences: return "/profile/notification-preferences"
         case .getQuestions: return "/questions"
         case .getQuestionsProgress: return "/questions/progress"
+        case .getQuestionHistory: return "/questions/history"
+        case .getPersonalityAnalysis: return "/questions/personality"
         case .answerQuestion: return "/questions/answer"
         case .submitVoiceAnswer: return "/questions/voice-answer"
         case .getCandidates(let limit): return "/discover?limit=\(limit)"
@@ -146,7 +150,7 @@ enum APIEndpoint {
              .uploadConversationMedia,
              .sendMessage, .addReaction:
             return .POST
-        case .me, .getProfile, .getQuestions, .getQuestionsProgress,
+        case .me, .getProfile, .getQuestions, .getQuestionsProgress, .getQuestionHistory, .getPersonalityAnalysis,
              .getCandidates, .getDiscoverStats, .getPendingLikes, .suggestNote, .getMatches, .getMatchById,
              .getComfortScore, .getDateReadiness, .getGame, .getGamesForMatch,
              .getScoreHistory, .getRelationshipInsights, .getConversationStarters,

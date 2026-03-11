@@ -27,7 +27,11 @@ struct QuestionsView: View {
                     .tint(BoopColors.primary)
                 Spacer()
             } else if viewModel.isComplete {
-                completionView
+                // Profile stage is ready (15+ answers)
+                fullCompletionView
+            } else if viewModel.allBatchDone {
+                // All available questions answered but profile not yet ready
+                batchCompletionView
             } else if let question = viewModel.currentQuestion {
                 questionContent(question)
             } else {
@@ -45,9 +49,21 @@ struct QuestionsView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: BoopSpacing.lg) {
                 // Progress
-                Text(viewModel.progressText)
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textMuted)
+                HStack {
+                    Text(viewModel.progressText)
+                        .font(BoopTypography.footnote)
+                        .foregroundStyle(BoopColors.textMuted)
+
+                    Spacer()
+
+                    Text("\(viewModel.answeredCount) answered")
+                        .font(BoopTypography.caption)
+                        .foregroundStyle(BoopColors.secondary)
+                        .padding(.horizontal, BoopSpacing.xs)
+                        .padding(.vertical, 3)
+                        .background(BoopColors.secondary.opacity(0.1))
+                        .clipShape(Capsule())
+                }
 
                 // Dimension badge
                 Text(question.dimensionDisplayName)
@@ -89,6 +105,32 @@ struct QuestionsView: View {
                     isDisabled: !viewModel.canSubmitAnswer
                 ) {
                     Task { await viewModel.submitAnswer() }
+                }
+
+                // Skip to homepage button (visible after 6+ answers)
+                if viewModel.canSkipToHome {
+                    Button {
+                        Task {
+                            await viewModel.goToHomepage()
+                            onboardingVM.markComplete()
+                        }
+                    } label: {
+                        HStack(spacing: BoopSpacing.xs) {
+                            Text("Skip to homepage")
+                                .font(BoopTypography.callout)
+                            Image(systemName: "arrow.right")
+                                .font(.system(size: 13))
+                        }
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, BoopSpacing.sm)
+                    }
+
+                    Text("You can answer remaining questions from your profile anytime.")
+                        .font(BoopTypography.caption)
+                        .foregroundStyle(BoopColors.textMuted)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
@@ -210,9 +252,9 @@ struct QuestionsView: View {
         .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 
-    // MARK: - Completion
+    // MARK: - Full Completion (profile ready, 15+ answers)
 
-    private var completionView: some View {
+    private var fullCompletionView: some View {
         VStack(spacing: BoopSpacing.xxl) {
             Spacer()
 
@@ -225,7 +267,7 @@ struct QuestionsView: View {
                     .font(BoopTypography.title1)
                     .foregroundStyle(BoopColors.textPrimary)
 
-                Text("Your profile is ready.\nTime to find your connections!")
+                Text("Your personality profile is complete.\nTime to find your connections!")
                     .font(BoopTypography.body)
                     .foregroundStyle(BoopColors.textSecondary)
                     .multilineTextAlignment(.center)
@@ -241,16 +283,101 @@ struct QuestionsView: View {
         .padding(.vertical, BoopSpacing.lg)
     }
 
+    // MARK: - Batch Completion (answered all available but < 15 total)
+
+    private var batchCompletionView: some View {
+        VStack(spacing: BoopSpacing.xxl) {
+            Spacer()
+
+            VStack(spacing: BoopSpacing.md) {
+                ZStack {
+                    Circle()
+                        .fill(BoopColors.secondary.opacity(0.12))
+                        .frame(width: 100, height: 100)
+
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 56))
+                        .foregroundStyle(BoopColors.secondary)
+                }
+
+                Text("Great start!")
+                    .font(BoopTypography.title1)
+                    .foregroundStyle(BoopColors.textPrimary)
+
+                Text("You've answered \(viewModel.answeredCount) questions")
+                    .font(BoopTypography.title3)
+                    .foregroundStyle(BoopColors.secondary)
+
+                if viewModel.answeredCount < 15 {
+                    Text("Answer \(15 - viewModel.answeredCount) more to unlock your full personality profile and get the best matches.")
+                        .font(BoopTypography.body)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, BoopSpacing.lg)
+                }
+
+                Text("New questions unlock every day at midnight.")
+                    .font(BoopTypography.caption)
+                    .foregroundStyle(BoopColors.textMuted)
+                    .multilineTextAlignment(.center)
+            }
+
+            Spacer()
+
+            VStack(spacing: BoopSpacing.sm) {
+                BoopButton(title: "Go to Homepage") {
+                    Task {
+                        await viewModel.goToHomepage()
+                        onboardingVM.markComplete()
+                    }
+                }
+
+                Text("You can continue answering from your profile anytime.")
+                    .font(BoopTypography.caption)
+                    .foregroundStyle(BoopColors.textMuted)
+                    .multilineTextAlignment(.center)
+            }
+        }
+        .padding(.horizontal, BoopSpacing.xl)
+        .padding(.vertical, BoopSpacing.lg)
+    }
+
     private var emptyView: some View {
         VStack(spacing: BoopSpacing.md) {
             Spacer()
-            Text("No questions available right now")
-                .font(BoopTypography.headline)
-                .foregroundStyle(BoopColors.textSecondary)
-            Text("Check back tomorrow for more!")
-                .font(BoopTypography.body)
-                .foregroundStyle(BoopColors.textMuted)
-            Spacer()
+
+            if viewModel.answeredCount >= 6 {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(BoopColors.success)
+                Text("All caught up for today!")
+                    .font(BoopTypography.headline)
+                    .foregroundStyle(BoopColors.textPrimary)
+                Text("New questions unlock tomorrow at midnight.")
+                    .font(BoopTypography.body)
+                    .foregroundStyle(BoopColors.textMuted)
+                    .multilineTextAlignment(.center)
+
+                Spacer()
+
+                BoopButton(title: "Go to Homepage") {
+                    Task {
+                        await viewModel.goToHomepage()
+                        onboardingVM.markComplete()
+                    }
+                }
+            } else {
+                Text("No questions available right now")
+                    .font(BoopTypography.headline)
+                    .foregroundStyle(BoopColors.textSecondary)
+                Text("Check back tomorrow for more!")
+                    .font(BoopTypography.body)
+                    .foregroundStyle(BoopColors.textMuted)
+
+                Spacer()
+            }
         }
+        .padding(.horizontal, BoopSpacing.xl)
+        .padding(.vertical, BoopSpacing.lg)
     }
 }

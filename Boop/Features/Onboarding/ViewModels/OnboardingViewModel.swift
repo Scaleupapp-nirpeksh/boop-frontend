@@ -80,7 +80,12 @@ class OnboardingViewModel {
         case .voicePending:
             currentStep = .voiceIntro
         case .questionsPending:
-            currentStep = .questions
+            // If user already answered 6+ questions, skip onboarding (go to main)
+            if (user.questionsAnswered ?? 0) >= 6 {
+                isComplete = true
+            } else {
+                currentStep = .questions
+            }
         case .ready:
             isComplete = true
         }
@@ -164,6 +169,12 @@ class OnboardingViewModel {
 
     @MainActor
     func markComplete() {
+        // Refresh user data so RootView re-evaluates routing
+        Task {
+            if let wrapper: UserWrapper = try? await APIClient.shared.request(.me) {
+                AuthManager.shared.updateUser(wrapper.user)
+            }
+        }
         isComplete = true
     }
 }
