@@ -1,41 +1,58 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Xcode
+Boop.xcodeproj/xcuserdata/
+Boop.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
+*.xcworkspace/xcuserdata/
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
 
-# dependencies
-node_modules/
+# Swift Package Manager
+.build/
+Packages/
+Package.pins
+Package.resolved
+*.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
-
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
+# CocoaPods (if ever used)
+Pods/
 
 # macOS
 .DS_Store
-*.pem
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
 
-# local env files
-.env*.local
+# Old React Native files (no longer used)
+node_modules/
+App.tsx
+app.json
+index.ts
+package.json
+package-lock.json
+tsconfig.json
+assets/android-icon-background.png
+assets/android-icon-foreground.png
+assets/android-icon-monochrome.png
+assets/favicon.png
+assets/icon.png
+assets/splash-icon.png
 
-# typescript
-*.tsbuildinfo
+# Secrets
+.env
+*.p12
+*.mobileprovision
 
-# generated native folders
-/ios
-/android
+# IDE
+.vscode/
+.idea/
