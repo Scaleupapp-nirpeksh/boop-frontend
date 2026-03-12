@@ -155,7 +155,7 @@ class HomeViewModel {
         for match in activeMatches {
             if let streak = match.streak?.current, streak > bestStreak {
                 bestStreak = streak
-                bestStreakName = match.otherUser?.firstName
+                bestStreakName = match.otherUser.firstName
             }
         }
         defaults.set(bestStreak, forKey: "widget_streak")

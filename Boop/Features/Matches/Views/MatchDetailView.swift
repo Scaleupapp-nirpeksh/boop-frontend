@@ -29,7 +29,7 @@ struct MatchDetailView: View {
                     readinessCard(readiness)
 
                     // Date planning CTA when readiness >= 70
-                    if readiness.overall >= 70 {
+                    if readiness.score >= 70 {
                         NavigationLink {
                             DatePlanView(matchId: matchId)
                         } label: {
