@@ -363,6 +363,19 @@ struct ChatConversationView: View {
                     }
                 }
             }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    ChatMediaGalleryView(
+                        conversationId: conversation.conversationId,
+                        otherUserName: conversation.otherUser.firstName ?? "Chat"
+                    )
+                } label: {
+                    Image(systemName: "photo.stack")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(BoopColors.textSecondary)
+                }
+            }
         }
         .searchable(text: $searchText, prompt: "Search messages")
         .task {
@@ -449,28 +462,8 @@ struct ChatConversationView: View {
             get: { expandedImageURL != nil },
             set: { if !$0 { expandedImageURL = nil } }
         )) {
-            ZStack(alignment: .topTrailing) {
-                Color.black.ignoresSafeArea()
-
-                if let urlString = expandedImageURL, let url = URL(string: urlString) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    } placeholder: {
-                        ProgressView().tint(.white)
-                    }
-                }
-
-                Button {
-                    expandedImageURL = nil
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.system(size: 28))
-                        .foregroundStyle(.white.opacity(0.8))
-                        .padding()
-                }
+            if let urlString = expandedImageURL {
+                ImageViewerView(imageURL: urlString)
             }
         }
     }

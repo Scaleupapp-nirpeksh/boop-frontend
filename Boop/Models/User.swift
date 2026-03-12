@@ -15,6 +15,7 @@ struct User: Codable, Identifiable {
     var photos: UserPhotos?
     var questionsAnswered: Int
     var profileStage: ProfileStage
+    var badges: [UserBadge]?
     var isPremium: Bool?
     var isOnline: Bool?
     var lastSeen: Date?
@@ -27,7 +28,7 @@ struct User: Codable, Identifiable {
         case id = "_id"
         case phone, phoneVerified, firstName, dateOfBirth, gender
         case interestedIn, username, location, bio, voiceIntro, photos
-        case questionsAnswered, profileStage, isPremium, isOnline
+        case questionsAnswered, profileStage, badges, isPremium, isOnline
         case lastSeen, fcmToken, notificationPreferences, createdAt, updatedAt
     }
 }
@@ -112,4 +113,25 @@ struct UserNotificationPreferences: Codable {
     var quietHoursStart: String?
     var quietHoursEnd: String?
     var timezone: String
+}
+
+struct UserBadge: Codable, Identifiable {
+    var id: String { key }
+    let key: String
+    let earnedAt: Date?
+}
+
+struct BadgeCatalogItem: Codable, Identifiable {
+    var id: String { key }
+    let key: String
+    let title: String
+    let emoji: String
+    let description: String
+    let category: String
+    let earned: Bool
+    let earnedAt: Date?
+}
+
+struct BadgeCatalogResponse: Codable {
+    let badges: [BadgeCatalogItem]
 }

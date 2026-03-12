@@ -1,4 +1,5 @@
 import SwiftUI
+import WidgetKit
 
 @Observable
 class HomeViewModel {
@@ -35,6 +36,7 @@ class HomeViewModel {
 
         _ = await (statsTask, matchesTask, pendingTask, questionsTask)
         isLoading = false
+        updateWidgetData()
     }
 
     @MainActor
@@ -137,5 +139,31 @@ class HomeViewModel {
         showMatchCelebration = false
         celebrationMatch = nil
         celebrationName = nil
+    }
+
+    // MARK: - Widget Data
+
+    private func updateWidgetData() {
+        guard let defaults = UserDefaults(suiteName: "group.com.influhitch.boop") else { return }
+        defaults.set(activeMatches.count, forKey: "widget_connections")
+        defaults.set(0, forKey: "widget_unread") // Updated from chat if available
+        defaults.set(AuthManager.shared.currentUser?.questionsAnswered ?? 0, forKey: "widget_questions")
+
+        // Find best streak from active matches
+        var bestStreak = 0
+        var bestStreakName: String?
+        for match in activeMatches {
+            if let streak = match.streak?.current, streak > bestStreak {
+                bestStreak = streak
+                bestStreakName = match.otherUser?.firstName
+            }
+        }
+        defaults.set(bestStreak, forKey: "widget_streak")
+        defaults.set(bestStreakName, forKey: "widget_streak_name")
+
+        // Trigger widget reload
+        if #available(iOS 14.0, *) {
+            WidgetKit.WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 }

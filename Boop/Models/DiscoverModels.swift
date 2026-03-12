@@ -147,6 +147,17 @@ struct LikeResponse: Codable {
 
 // MARK: - Match (from GET /matches)
 
+struct BoopData: Codable {
+    let senderId: String?
+    let sentAt: Date?
+}
+
+struct StreakData: Codable {
+    let current: Int?
+    let longest: Int?
+    let lastActiveDate: Date?
+}
+
 struct MatchInfo: Codable, Identifiable {
     let matchId: String
     let stage: String
@@ -154,6 +165,9 @@ struct MatchInfo: Codable, Identifiable {
     let matchTier: String?
     let comfortScore: Int?
     let matchedAt: Date?
+    let lastBoop: BoopData?
+    let boopCount: Int?
+    let streak: StreakData?
     let otherUser: MatchOtherUser
 
     var id: String { matchId }
@@ -204,6 +218,7 @@ struct MatchOtherUser: Codable {
     let city: String?
     let isOnline: Bool?
     let lastSeen: Date?
+    let blurLevel: Int?
     let voiceIntro: MatchVoiceIntro?
     let photos: MatchPhotos
 

@@ -21,6 +21,7 @@ enum APIEndpoint {
     case deletePhoto(index: Int)
     case updateFCMToken(token: String)
     case updateNotificationPreferences(UpdateNotificationPreferencesRequest)
+    case getBadges
 
     // Questions
     case getQuestions
@@ -46,6 +47,18 @@ enum APIEndpoint {
     case requestReveal(matchId: String)
     case getComfortScore(matchId: String)
     case getDateReadiness(matchId: String)
+    case sendBoop(matchId: String)
+
+    // Date Plans
+    case getDatePlans(matchId: String)
+    case proposeDatePlan(matchId: String, request: ProposeDatePlanRequest)
+    case respondToDatePlan(planId: String, accept: Bool, declineReason: String? = nil)
+    case cancelDatePlan(planId: String)
+    case completeDatePlan(planId: String)
+    case getVenueSuggestions(matchId: String)
+    case setSafetyContact(planId: String, name: String, phone: String)
+    case toggleLocationSharing(planId: String, enabled: Bool)
+    case submitCheckIn(planId: String, status: String)
 
     // Games
     case createGame(CreateGameRequest)
@@ -59,6 +72,7 @@ enum APIEndpoint {
     case getScoreHistory(matchId: String, limit: Int = 50)
     case getRelationshipInsights(matchId: String)
     case getConversationStarters(matchId: String)
+    case getCompatibilityDeepDive(matchId: String)
 
     // Notifications
     case getNotifications(page: Int = 1)
@@ -70,6 +84,7 @@ enum APIEndpoint {
     // Messages
     case getConversations(page: Int = 1)
     case getMessages(conversationId: String, before: String? = nil)
+    case getConversationMedia(conversationId: String, type: String? = nil, page: Int = 1)
     case uploadConversationMedia(conversationId: String)
     case sendMessage(conversationId: String, request: SendMessageRequest)
     case markConversationRead(conversationId: String)
@@ -91,6 +106,7 @@ enum APIEndpoint {
         case .deletePhoto(let index): return "/profile/photos/\(index)"
         case .updateFCMToken: return "/profile/fcm-token"
         case .updateNotificationPreferences: return "/profile/notification-preferences"
+        case .getBadges: return "/profile/badges"
         case .getQuestions: return "/questions"
         case .getQuestionsProgress: return "/questions/progress"
         case .getQuestionHistory: return "/questions/history"
@@ -113,6 +129,16 @@ enum APIEndpoint {
         case .requestReveal(let matchId): return "/matches/\(matchId)/reveal"
         case .getComfortScore(let matchId): return "/matches/\(matchId)/comfort"
         case .getDateReadiness(let matchId): return "/matches/\(matchId)/date-readiness"
+        case .sendBoop(let matchId): return "/matches/\(matchId)/boop"
+        case .getDatePlans(let matchId): return "/matches/\(matchId)/date-plans"
+        case .proposeDatePlan(let matchId, _): return "/matches/\(matchId)/date-plans"
+        case .respondToDatePlan(let planId, _, _): return "/date-plans/\(planId)"
+        case .cancelDatePlan(let planId): return "/date-plans/\(planId)"
+        case .completeDatePlan(let planId): return "/date-plans/\(planId)/complete"
+        case .getVenueSuggestions(let matchId): return "/matches/\(matchId)/venue-suggestions"
+        case .setSafetyContact(let planId, _, _): return "/date-plans/\(planId)/safety-contact"
+        case .toggleLocationSharing(let planId, _): return "/date-plans/\(planId)/location-sharing"
+        case .submitCheckIn(let planId, _): return "/date-plans/\(planId)/check-in"
         case .createGame: return "/games"
         case .getGame(let gameId): return "/games/\(gameId)"
         case .setGameReady(let gameId, _): return "/games/\(gameId)/ready"
@@ -122,11 +148,16 @@ enum APIEndpoint {
         case .getScoreHistory(let matchId, let limit): return "/matches/\(matchId)/score-history?limit=\(limit)"
         case .getRelationshipInsights(let matchId): return "/matches/\(matchId)/insights"
         case .getConversationStarters(let matchId): return "/matches/\(matchId)/conversation-starters"
+        case .getCompatibilityDeepDive(let matchId): return "/matches/\(matchId)/compatibility"
         case .getNotifications(let page): return "/notifications?page=\(page)"
         case .getUnreadNotificationCount: return "/notifications/unread-count"
         case .markNotificationRead(let id): return "/notifications/\(id)/read"
         case .markAllNotificationsRead: return "/notifications/mark-all-read"
         case .deleteNotification(let id): return "/notifications/\(id)"
+        case .getConversationMedia(let conversationId, let type, let page):
+            var path = "/messages/conversations/\(conversationId)/media?page=\(page)"
+            if let type { path += "&type=\(type)" }
+            return path
         case .getConversations(let page): return "/messages/conversations?page=\(page)"
         case .getMessages(let conversationId, let before):
             if let before {
@@ -145,24 +176,28 @@ enum APIEndpoint {
         switch self {
         case .sendOTP, .verifyOTP, .refreshToken, .logout,
              .uploadVoiceIntro, .uploadPhotos, .answerQuestion, .submitVoiceAnswer,
-             .likeUser, .passUser, .requestReveal, .createGame, .submitGameResponse,
+             .likeUser, .passUser, .requestReveal, .sendBoop, .createGame, .submitGameResponse,
              .setGameReady,
+             .proposeDatePlan, .setSafetyContact, .toggleLocationSharing, .submitCheckIn,
              .uploadConversationMedia,
              .sendMessage, .addReaction:
             return .POST
         case .me, .getProfile, .getQuestions, .getQuestionsProgress, .getQuestionHistory, .getPersonalityAnalysis,
+             .getBadges,
              .getCandidates, .getDiscoverStats, .getPendingLikes, .suggestNote, .getMatches, .getMatchById,
-             .getComfortScore, .getDateReadiness, .getGame, .getGamesForMatch,
-             .getScoreHistory, .getRelationshipInsights, .getConversationStarters,
+             .getComfortScore, .getDateReadiness, .getDatePlans, .getVenueSuggestions,
+             .getGame, .getGamesForMatch,
+             .getScoreHistory, .getRelationshipInsights, .getConversationStarters, .getCompatibilityDeepDive,
              .getNotifications, .getUnreadNotificationCount,
-             .getConversations, .getMessages:
+             .getConversations, .getMessages, .getConversationMedia:
             return .GET
         case .updateBasicInfo, .reorderPhotos, .updateFCMToken, .updateNotificationPreferences:
             return .PUT
-        case .advanceMatchStage, .archiveMatch, .cancelGame, .markConversationRead,
+        case .advanceMatchStage, .archiveMatch, .respondToDatePlan, .completeDatePlan,
+             .cancelGame, .markConversationRead,
              .markNotificationRead, .markAllNotificationsRead:
             return .PATCH
-        case .deletePhoto, .removeReaction, .deleteNotification:
+        case .deletePhoto, .removeReaction, .deleteNotification, .cancelDatePlan:
             return .DELETE
         }
     }
@@ -195,6 +230,11 @@ enum APIEndpoint {
             return ["fcmToken": token]
         case .sendMessage(_, let request): return request
         case .addReaction(_, let emoji): return MessageReactionRequest(emoji: emoji)
+        case .proposeDatePlan(_, let request): return request
+        case .respondToDatePlan(_, let accept, let reason): return DatePlanResponseRequest(accept: accept, declineReason: reason)
+        case .setSafetyContact(_, let name, let phone): return SafetyContactRequest(name: name, phone: phone)
+        case .toggleLocationSharing(_, let enabled): return ["enabled": enabled]
+        case .submitCheckIn(_, let status): return ["status": status]
         default: return nil
         }
     }

@@ -9,7 +9,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "2"
+    CURRENT_PROJECT_VERSION: "3"
     DEVELOPMENT_TEAM: "NK5P69WG2H"
     SWIFT_VERSION: "5.9"
     INFOPLIST_KEY_CFBundleDisplayName: "Boop"
@@ -44,10 +44,14 @@ targets:
         product: FirebaseMessaging
       - package: SocketIO
         product: SocketIO
+      - target: BoopWidget
+        embed: true
     entitlements:
       path: Boop/Resources/Boop.entitlements
       properties:
         aps-environment: development
+        com.apple.security.application-groups:
+          - group.com.influhitch.boop
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.influhitch.boop
@@ -84,3 +88,39 @@ targets:
             35.154.171.1:
               NSExceptionAllowsInsecureHTTPLoads: true
               NSIncludesSubdomains: true
+
+  BoopWidget:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BoopWidget
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.influhitch.boop.widget
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: BoopWidget/BoopWidget.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.influhitch.boop
+
+  BoopClip:
+    type: app-clip
+    platform: iOS
+    sources:
+      - path: BoopClip
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.influhitch.boop.clip
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1"
+        INFOPLIST_KEY_CFBundleDisplayName: "Boop"
+    entitlements:
+      path: BoopClip/BoopClip.entitlements
+      properties:
+        com.apple.developer.parent-application-identifiers:
+          - $(AppIdentifierPrefix)com.influhitch.boop
+        com.apple.developer.associated-domains:
+          - appclips:boop.app

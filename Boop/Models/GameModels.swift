@@ -184,6 +184,20 @@ struct MatchStageSocketEvent: Decodable {
     let stage: String
 }
 
+struct BoopSocketEvent: Decodable {
+    let matchId: String
+    let senderId: String
+    let senderName: String
+    let boopCount: Int?
+}
+
+struct BoopResponse: Codable {
+    let matchId: String
+    let boopCount: Int
+    let otherUserId: String
+    let senderName: String
+}
+
 struct MatchRevealSocketEvent: Decodable {
     let matchId: String
     let requestedBy: String?

@@ -215,6 +215,9 @@ final class RealtimeService {
         socket.on("match:revealed") { [weak self] data, _ in
             self?.postDecoded(MatchRevealSocketEvent.self, name: .realtimeMatchRevealed, from: data)
         }
+        socket.on("match:boop") { [weak self] data, _ in
+            self?.postDecoded(BoopSocketEvent.self, name: .realtimeMatchBoop, from: data)
+        }
         socket.on("game:invite") { [weak self] data, _ in
             self?.postDecoded(GameInviteSocketEvent.self, name: .realtimeGameInvite, from: data)
         }
@@ -281,6 +284,7 @@ extension Notification.Name {
     static let realtimeMatchStageChanged = Notification.Name("boop.realtime.match.stage")
     static let realtimeMatchRevealRequest = Notification.Name("boop.realtime.match.reveal_request")
     static let realtimeMatchRevealed = Notification.Name("boop.realtime.match.revealed")
+    static let realtimeMatchBoop = Notification.Name("boop.realtime.match.boop")
     static let realtimeGameInvite = Notification.Name("boop.realtime.game.invite")
     static let realtimeGameResponse = Notification.Name("boop.realtime.game.response")
     static let realtimeGameCancelled = Notification.Name("boop.realtime.game.cancelled")

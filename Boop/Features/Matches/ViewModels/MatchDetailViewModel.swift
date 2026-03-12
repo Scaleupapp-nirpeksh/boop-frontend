@@ -28,6 +28,8 @@ final class MatchDetailViewModel {
     var isLoading = false
     var isWorking = false
     var isLoadingInsights = false
+    var isBoopping = false
+    var boopSuccess = false
     var errorMessage: String?
 
     init(matchId: String) {
@@ -80,6 +82,32 @@ final class MatchDetailViewModel {
             let _: MatchStageActionResponse = try await APIClient.shared.request(.advanceMatchStage(matchId: self.matchId))
             await self.load()
         }
+    }
+
+    @MainActor
+    func sendBoop() async {
+        isBoopping = true
+        defer { isBoopping = false }
+
+        do {
+            let _: BoopResponse = try await APIClient.shared.request(.sendBoop(matchId: matchId))
+            boopSuccess = true
+            // Reset success animation after delay
+            Task {
+                try? await Task.sleep(for: .seconds(2))
+                boopSuccess = false
+            }
+            await load()
+        } catch let error as APIError {
+            errorMessage = error.errorDescription
+        } catch {
+            errorMessage = "Boop failed."
+        }
+    }
+
+    var canBoop: Bool {
+        guard let lastBoop = detail?.lastBoop?.sentAt else { return true }
+        return Date().timeIntervalSince(lastBoop) > 4 * 60 * 60
     }
 
     @MainActor

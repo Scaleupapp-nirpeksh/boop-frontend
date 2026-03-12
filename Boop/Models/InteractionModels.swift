@@ -11,6 +11,9 @@ struct MatchDetail: Codable, Identifiable {
     let comfortScore: Int?
     let matchedAt: Date?
     let revealStatus: MatchRevealStatus?
+    let lastBoop: BoopData?
+    let boopCount: Int?
+    let streak: StreakData?
     let otherUser: MatchDetailUser?
 
     var id: String { matchId }
@@ -34,6 +37,7 @@ struct MatchDetailUser: Codable {
     let city: String?
     let isOnline: Bool?
     let lastSeen: Date?
+    let blurLevel: Int?
     let voiceIntro: MatchOtherUser.MatchVoiceIntro?
     let photos: MatchOtherUser.MatchPhotos?
     let gender: String?
@@ -297,4 +301,147 @@ struct MessageReactionResponse: Codable {
     let messageId: String
     let conversationId: String
     let reactions: [ChatReaction]
+}
+
+// MARK: - Chat Media Gallery
+
+struct ConversationMediaResponse: Codable {
+    let media: [ChatMessage]
+    let total: Int
+    let page: Int
+    let totalPages: Int
+}
+
+// MARK: - Compatibility Deep-Dive
+
+struct CompatibilityDeepDiveResponse: Codable {
+    let matchId: String
+    let compatibilityScore: Int?
+    let matchTier: String?
+    let user1Name: String?
+    let user2Name: String?
+    let dimensions: [CompatibilityDimension]
+    let overallNarrative: String?
+    let strongestBond: String?
+    let growthOpportunity: String?
+}
+
+struct CompatibilityDimension: Codable, Identifiable {
+    let key: String
+    let label: String
+    let icon: String
+    let color: String
+    let score: Int?
+    let narrative: String?
+
+    var id: String { key }
+}
+
+// MARK: - Date Plans
+
+struct DatePlansResponse: Codable {
+    let plans: [DatePlanItem]
+}
+
+struct DatePlanItem: Codable, Identifiable {
+    let _id: String
+    let matchId: String
+    let proposedBy: String
+    let status: String
+    let venue: DatePlanVenue
+    let proposedDate: Date
+    let proposedTime: String?
+    let notes: String?
+    let acceptedAt: Date?
+    let declinedAt: Date?
+    let declineReason: String?
+    let completedAt: Date?
+    let safetyContact: SafetyContact?
+    let locationSharing: LocationSharing?
+    let checkIns: [DateCheckIn]?
+    let createdAt: Date?
+
+    var id: String { _id }
+
+    var statusLabel: String {
+        switch status {
+        case "proposed": return "Pending"
+        case "accepted": return "Confirmed"
+        case "declined": return "Declined"
+        case "completed": return "Completed"
+        case "cancelled": return "Cancelled"
+        default: return status.capitalized
+        }
+    }
+
+    var statusColor: String {
+        switch status {
+        case "proposed": return "accent"
+        case "accepted": return "success"
+        case "declined": return "error"
+        case "completed": return "secondary"
+        case "cancelled": return "textMuted"
+        default: return "textSecondary"
+        }
+    }
+}
+
+struct DatePlanVenue: Codable {
+    let name: String
+    let type: String?
+    let address: String?
+}
+
+struct SafetyContact: Codable {
+    let name: String?
+    let phone: String?
+}
+
+struct LocationSharing: Codable {
+    let enabled: Bool?
+    let startedAt: Date?
+    let expiresAt: Date?
+}
+
+struct DateCheckIn: Codable, Identifiable {
+    let userId: String?
+    let status: String
+    let timestamp: Date?
+
+    var id: String { "\(userId ?? "")_\(timestamp?.timeIntervalSince1970 ?? 0)" }
+}
+
+struct VenueSuggestionsResponse: Codable {
+    let suggestions: [VenueSuggestion]
+}
+
+struct VenueSuggestion: Codable, Identifiable {
+    let name: String
+    let type: String
+    let reason: String
+
+    var id: String { name }
+}
+
+struct ProposeDatePlanRequest: Encodable {
+    let venueName: String
+    let venueType: String
+    let address: String?
+    let proposedDate: String
+    let proposedTime: String?
+    let notes: String?
+}
+
+struct DatePlanResponseRequest: Encodable {
+    let accept: Bool
+    let declineReason: String?
+}
+
+struct SafetyContactRequest: Encodable {
+    let name: String
+    let phone: String
+}
+
+struct DatePlanResponse: Codable {
+    let plan: DatePlanItem
 }

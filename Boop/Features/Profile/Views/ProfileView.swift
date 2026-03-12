@@ -89,6 +89,27 @@ struct ProfileView: View {
                     profileChip(label: "\(viewModel.user?.photos?.totalPhotos ?? 0) photos", tint: BoopColors.primary)
                     profileChip(label: "\(viewModel.user?.questionsAnswered ?? 0) answers", tint: BoopColors.accent)
                 }
+
+                if let badges = viewModel.user?.badges, !badges.isEmpty {
+                    HStack(spacing: BoopSpacing.xs) {
+                        ForEach(Array(badges.prefix(4)), id: \.key) { badge in
+                            Text(badgeEmoji(for: badge.key))
+                                .font(.system(size: 16))
+                                .frame(width: 28, height: 28)
+                                .background(Color.white.opacity(0.15))
+                                .clipShape(Circle())
+                        }
+                        if badges.count > 4 {
+                            Text("+\(badges.count - 4)")
+                                .font(BoopTypography.caption)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 4)
+                                .background(Color.white.opacity(0.15))
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
             }
             .padding(BoopSpacing.lg)
         }
@@ -426,6 +447,25 @@ struct ProfileView: View {
             }
 
             NavigationLink {
+                BadgesView()
+            } label: {
+                HStack {
+                    Text("Badges")
+                    Spacer()
+                    if let badges = viewModel.user?.badges, !badges.isEmpty {
+                        Text("\(badges.count) earned")
+                            .font(BoopTypography.caption)
+                            .foregroundStyle(BoopColors.primary)
+                    }
+                    Image(systemName: "chevron.right")
+                }
+                .font(BoopTypography.callout)
+                .foregroundStyle(BoopColors.textPrimary)
+                .padding(BoopSpacing.md)
+                .boopCard(radius: BoopRadius.xl)
+            }
+
+            NavigationLink {
                 QuestionsProgressView()
             } label: {
                 HStack {
@@ -568,6 +608,24 @@ struct ProfileView: View {
             Text(value)
                 .font(BoopTypography.body)
                 .foregroundStyle(BoopColors.textPrimary)
+        }
+    }
+
+    private func badgeEmoji(for key: String) -> String {
+        switch key {
+        case "voice_verified": return "\u{1F399}\u{FE0F}"
+        case "question_pioneer": return "\u{1F331}"
+        case "question_master": return "\u{1F9E0}"
+        case "game_enthusiast": return "\u{1F3AE}"
+        case "game_master": return "\u{1F3C6}"
+        case "streak_keeper": return "\u{1F525}"
+        case "streak_legend": return "\u{26A1}"
+        case "early_adopter": return "\u{1F680}"
+        case "deep_connector": return "\u{1F49E}"
+        case "personality_unlocked": return "\u{2728}"
+        case "first_boop": return "\u{1F495}"
+        case "photo_revealed": return "\u{1F440}"
+        default: return "\u{2B50}"
         }
     }
 

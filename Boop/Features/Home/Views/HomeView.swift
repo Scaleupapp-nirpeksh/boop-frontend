@@ -12,6 +12,10 @@ struct HomeView: View {
                 VStack(spacing: BoopSpacing.xl) {
                     header
 
+                    if let season = ActiveSeason.current {
+                        seasonalBanner(season)
+                    }
+
                     if viewModel.newQuestionsCount > 0 {
                         newQuestionsBanner
                     }
@@ -346,6 +350,44 @@ struct HomeView: View {
                 }
             }
         }
+    }
+
+    // MARK: - Seasonal Banner
+
+    private func seasonalBanner(_ season: ActiveSeason) -> some View {
+        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
+            HStack(spacing: BoopSpacing.sm) {
+                Text(season.emoji)
+                    .font(.system(size: 28))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(season.title)
+                        .font(BoopTypography.callout)
+                        .fontWeight(.semibold)
+                        .foregroundStyle(BoopColors.textPrimary)
+
+                    Text(season.subtitle)
+                        .font(BoopTypography.caption)
+                        .foregroundStyle(BoopColors.textSecondary)
+                }
+
+                Spacer()
+
+                Text("Live")
+                    .font(BoopTypography.caption)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, BoopSpacing.xs)
+                    .padding(.vertical, 4)
+                    .background(season.tint)
+                    .clipShape(Capsule())
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
+                .stroke(season.tint.opacity(0.3), lineWidth: 1)
+        )
+        .padding(.horizontal, BoopSpacing.xl)
     }
 
     // MARK: - Helpers

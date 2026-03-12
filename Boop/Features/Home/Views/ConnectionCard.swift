@@ -100,6 +100,18 @@ struct ConnectionCard: View {
                         }
                     }
 
+                    // Streak flame
+                    if let streak = match.streak?.current, streak > 0 {
+                        HStack(spacing: 2) {
+                            Text("🔥")
+                                .font(.system(size: 10))
+                            Text("\(streak)")
+                                .font(BoopTypography.caption)
+                                .fontWeight(.bold)
+                                .foregroundStyle(BoopColors.primary)
+                        }
+                    }
+
                     Spacer()
 
                     // Day count

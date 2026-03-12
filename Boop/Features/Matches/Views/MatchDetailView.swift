@@ -16,6 +16,7 @@ struct MatchDetailView: View {
             VStack(spacing: BoopSpacing.lg) {
                 heroCard
                 RealtimeStatusBanner()
+                boopAndStreakRow
                 scoreRow
                 if !viewModel.topInsights.isEmpty || viewModel.growthInsight != nil {
                     chemistryCard
@@ -26,6 +27,46 @@ struct MatchDetailView: View {
                 }
                 if let readiness = viewModel.readiness {
                     readinessCard(readiness)
+
+                    // Date planning CTA when readiness >= 70
+                    if readiness.overall >= 70 {
+                        NavigationLink {
+                            DatePlanView(matchId: matchId)
+                        } label: {
+                            BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
+                                HStack(spacing: BoopSpacing.sm) {
+                                    Circle()
+                                        .fill(BoopColors.primary.opacity(0.15))
+                                        .frame(width: 44, height: 44)
+                                        .overlay(
+                                            Image(systemName: "calendar.badge.plus")
+                                                .font(.system(size: 18))
+                                                .foregroundStyle(BoopColors.primary)
+                                        )
+
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text("Plan a Date")
+                                            .font(BoopTypography.callout)
+                                            .fontWeight(.semibold)
+                                            .foregroundStyle(BoopColors.textPrimary)
+                                        Text("You're both ready! Suggest a time and place.")
+                                            .font(BoopTypography.caption)
+                                            .foregroundStyle(BoopColors.textSecondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "chevron.right")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundStyle(BoopColors.textMuted)
+                                }
+                            }
+                            .overlay(
+                                RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
+                                    .stroke(BoopColors.primary.opacity(0.2), lineWidth: 1)
+                            )
+                        }
+                    }
                 }
 
                 // Score progress chart
@@ -78,6 +119,11 @@ struct MatchDetailView: View {
                   payload.matchId == matchId else { return }
             Task { await viewModel.load() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeMatchBoop)) { notification in
+            guard let payload = notification.userInfo?["payload"] as? BoopSocketEvent,
+                  payload.matchId == matchId else { return }
+            Task { await viewModel.load() }
+        }
     }
 
     private var heroCard: some View {
@@ -100,6 +146,7 @@ struct MatchDetailView: View {
                         }
                         .frame(height: 210)
                         .clipped()
+                        .blur(radius: CGFloat(viewModel.detail?.otherUser?.blurLevel ?? 0))
                         .opacity(0.42)
                     }
 
@@ -146,6 +193,73 @@ struct MatchDetailView: View {
                 }
                 .padding(BoopSpacing.lg)
             }
+        }
+    }
+
+    private var boopAndStreakRow: some View {
+        HStack(spacing: BoopSpacing.sm) {
+            // Boop button
+            Button {
+                Task { await viewModel.sendBoop() }
+            } label: {
+                HStack(spacing: BoopSpacing.xs) {
+                    if viewModel.boopSuccess {
+                        Image(systemName: "heart.fill")
+                            .symbolEffect(.bounce, value: viewModel.boopSuccess)
+                    } else {
+                        Image(systemName: "heart.circle.fill")
+                    }
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(viewModel.boopSuccess ? "Booped!" : "Boop")
+                            .font(BoopTypography.callout)
+                            .fontWeight(.semibold)
+                        if let count = viewModel.detail?.boopCount, count > 0 {
+                            Text("\(count) total")
+                                .font(BoopTypography.caption)
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
+                    }
+                }
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, BoopSpacing.md)
+                .background(
+                    viewModel.boopSuccess
+                        ? BoopColors.success
+                        : viewModel.canBoop ? BoopColors.primary : BoopColors.textMuted
+                )
+                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+            }
+            .disabled(!viewModel.canBoop || viewModel.isBoopping)
+            .sensoryFeedback(.success, trigger: viewModel.boopSuccess)
+
+            // Streak display
+            VStack(spacing: 4) {
+                let streakCurrent = viewModel.detail?.streak?.current ?? 0
+                let streakLongest = viewModel.detail?.streak?.longest ?? 0
+
+                HStack(spacing: 4) {
+                    Text(streakCurrent > 0 ? "🔥" : "💤")
+                    Text("\(streakCurrent)")
+                        .font(BoopTypography.title3)
+                        .fontWeight(.bold)
+                        .foregroundStyle(streakCurrent > 0 ? BoopColors.primary : BoopColors.textMuted)
+                }
+
+                Text(streakCurrent > 0 ? "day streak" : "no streak")
+                    .font(BoopTypography.caption)
+                    .foregroundStyle(BoopColors.textSecondary)
+
+                if streakLongest > streakCurrent {
+                    Text("Best: \(streakLongest)")
+                        .font(.system(size: 10))
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, BoopSpacing.md)
+            .background(Color.white.opacity(0.8))
+            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
         }
     }
 
@@ -307,6 +421,23 @@ struct MatchDetailView: View {
                     .padding(BoopSpacing.md)
                     .background(BoopColors.surfaceGoldenLight)
                     .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+                }
+
+                NavigationLink {
+                    CompatibilityDeepDiveView(matchId: matchId)
+                } label: {
+                    HStack {
+                        Text("View Full Breakdown")
+                            .font(BoopTypography.callout)
+                            .fontWeight(.medium)
+                        Spacer()
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundStyle(BoopColors.secondary)
+                    .padding(BoopSpacing.md)
+                    .background(BoopColors.secondary.opacity(0.08))
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
                 }
             }
         }
