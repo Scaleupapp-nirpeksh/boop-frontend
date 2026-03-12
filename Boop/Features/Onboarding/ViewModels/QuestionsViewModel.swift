@@ -137,13 +137,23 @@ class QuestionsViewModel {
             let response: SubmitAnswerResponse = try await APIClient.shared.request(.answerQuestion(request))
             answeredCount = response.questionsAnswered
 
-            // Check if profile stage changed to ready
-            if response.profileStage == "ready" {
+            // Check if profile stage just changed to ready (onboarding completion)
+            let wasAlreadyReady = AuthManager.shared.currentUser?.profileStage == .ready
+            if response.profileStage == "ready" && !wasAlreadyReady {
                 isComplete = true
                 if let wrapper: UserWrapper = try? await APIClient.shared.request(.me) {
                     AuthManager.shared.updateUser(wrapper.user)
                 }
                 return
+            }
+
+            // Update user data in background (don't block)
+            if response.profileStage == "ready" {
+                Task {
+                    if let wrapper: UserWrapper = try? await APIClient.shared.request(.me) {
+                        AuthManager.shared.updateUser(wrapper.user)
+                    }
+                }
             }
 
             advanceToNext()
