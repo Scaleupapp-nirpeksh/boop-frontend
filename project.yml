@@ -99,8 +99,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.influhitch.boop.widget
         CODE_SIGN_STYLE: Automatic
         TARGETED_DEVICE_FAMILY: "1"
-        GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_KEY_NSExtension_NSExtensionPointIdentifier: com.apple.widgetkit-extension
+        INFOPLIST_FILE: BoopWidget/Info.plist
     entitlements:
       path: BoopWidget/BoopWidget.entitlements
       properties:
