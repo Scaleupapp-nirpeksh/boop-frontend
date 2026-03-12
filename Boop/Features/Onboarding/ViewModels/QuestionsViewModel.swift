@@ -235,6 +235,7 @@ class QuestionsViewModel {
         textAnswer = ""
         selectedChoices = []
         followUpAnswer = ""
+        errorMessage = nil
         isVoiceMode = false
         voiceRecorder.deleteRecording()
     }
