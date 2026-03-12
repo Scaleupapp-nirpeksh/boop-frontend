@@ -131,6 +131,8 @@ class QuestionsViewModel {
             request.followUpAnswer = followUpAnswer
         }
 
+        defer { isSubmitting = false }
+
         do {
             let response: SubmitAnswerResponse = try await APIClient.shared.request(.answerQuestion(request))
             answeredCount = response.questionsAnswered
@@ -138,8 +140,9 @@ class QuestionsViewModel {
             // Check if profile stage changed to ready
             if response.profileStage == "ready" {
                 isComplete = true
-                let wrapper: UserWrapper = try await APIClient.shared.request(.me)
-                AuthManager.shared.updateUser(wrapper.user)
+                if let wrapper: UserWrapper = try? await APIClient.shared.request(.me) {
+                    AuthManager.shared.updateUser(wrapper.user)
+                }
                 return
             }
 
@@ -149,8 +152,6 @@ class QuestionsViewModel {
         } catch {
             errorMessage = "Failed to submit answer"
         }
-
-        isSubmitting = false
     }
 
     // MARK: - Voice Answer (Async / Non-Blocking)
