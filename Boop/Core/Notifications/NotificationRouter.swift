@@ -52,4 +52,10 @@ final class NotificationRouter {
         pendingDestination = nil
         return dest
     }
+
+    /// Programmatically open a match's conversation (e.g. right after a new match).
+    func openChat(matchId: String) {
+        selectedTab = 2
+        pendingDestination = .chat(matchId: matchId)
+    }
 }

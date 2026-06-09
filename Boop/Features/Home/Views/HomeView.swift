@@ -37,6 +37,11 @@ struct HomeView: View {
                     name: viewModel.celebrationName ?? "Someone",
                     matchTier: viewModel.celebrationMatch?.matchTier ?? "gold",
                     score: viewModel.celebrationMatch?.compatibilityScore ?? 0,
+                    onStartTalking: {
+                        let matchId = viewModel.celebrationMatch?.matchId
+                        viewModel.dismissCelebration()
+                        if let matchId { NotificationRouter.shared.openChat(matchId: matchId) }
+                    },
                     onDismiss: { viewModel.dismissCelebration() }
                 )
                 .transition(.opacity.combined(with: .scale))

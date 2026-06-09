@@ -4,6 +4,7 @@ struct MatchCelebrationView: View {
     let name: String
     let matchTier: String
     let score: Int
+    let onStartTalking: () -> Void
     let onDismiss: () -> Void
 
     @State private var showContent = false
@@ -78,8 +79,7 @@ struct MatchCelebrationView: View {
 
                 VStack(spacing: BoopSpacing.sm) {
                     BoopButton(title: "Start Talking", variant: .primary) {
-                        onDismiss()
-                        // TODO: Navigate to chat
+                        onStartTalking()
                     }
 
                     Button("Keep Discovering") {
