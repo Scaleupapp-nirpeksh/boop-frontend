@@ -3,7 +3,7 @@ import Foundation
 actor APIClient {
     static let shared = APIClient()
 
-    private let baseURL = "http://35.154.171.1/api/v1"
+    private let baseURL = "https://api.unmutee.in/api/v1"
     private let session: URLSession
     private let decoder: JSONDecoder
     private let encoder: JSONEncoder

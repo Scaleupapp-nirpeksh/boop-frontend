@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Boop</string>
+	<string>UnMutee</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -19,30 +19,15 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>35.154.171.1</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-		</dict>
-	</dict>
+	<string>8</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Boop needs camera access to take profile photos</string>
+	<string>UnMutee needs camera access to take profile photos</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Boop uses your location to find people near you</string>
+	<string>UnMutee uses your location to find people near you</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Boop needs your microphone to record your voice intro</string>
+	<string>UnMutee needs your microphone to record your voice intro</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Boop needs photo access to add profile photos</string>
+	<string>UnMutee needs photo access to add profile photos</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>Nunito[wght].ttf</string>

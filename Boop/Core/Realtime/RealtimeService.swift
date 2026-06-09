@@ -33,7 +33,7 @@ final class RealtimeService {
         updateConnectionState(.connecting)
         lastErrorMessage = nil
 
-        guard let url = URL(string: "http://35.154.171.1") else { return }
+        guard let url = URL(string: "https://api.unmutee.in") else { return }
 
         let manager = SocketManager(
             socketURL: url,

@@ -24,7 +24,7 @@ class ProfilePreviewViewModel {
         isLoading = true
         defer { isLoading = false }
 
-        guard let url = URL(string: "https://api.boop.app/api/v1/public/profile/\(userId)") else {
+        guard let url = URL(string: "https://api.unmutee.in/api/v1/public/profile/\(userId)") else {
             errorMessage = "Invalid profile link."
             return
         }
@@ -222,7 +222,7 @@ struct ProfilePreviewView: View {
     // MARK: - URL Parsing
 
     static func extractUserId(from url: URL) -> String? {
-        // Expected: https://boop.app/profile/:userId
+        // Expected: https://unmutee.in/profile/:userId
         let components = url.pathComponents
         guard components.count >= 3, components[1] == "profile" else { return nil }
         return components[2]
