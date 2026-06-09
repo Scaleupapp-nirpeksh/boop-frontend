@@ -72,6 +72,7 @@ final class MatchDetailViewModel {
     func requestReveal() async {
         await performAction { [self] in
             let _: RevealRequestResponse = try await APIClient.shared.request(.requestReveal(matchId: self.matchId))
+            Analytics.capture("reveal_requested")
             await self.load()
         }
     }

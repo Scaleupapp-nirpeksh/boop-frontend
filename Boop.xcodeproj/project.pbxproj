@@ -89,9 +89,11 @@
 		92EACB51F46F866825B1EF93 /* RealtimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E9845734EACD34E9FCF27A /* RealtimeService.swift */; };
 		938CE48C77C05910A4312F00 /* BoopSegmentedPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E368B0543C4920A665B80274 /* BoopSegmentedPicker.swift */; };
 		9572FE51CB188211A059780F /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9574B0F10FEF2D9E6173B6E0 /* OnboardingViewModel.swift */; };
+		97FD4A042474F5783A959938 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 7B7546AA5E006645BC968DA9 /* PostHog */; };
 		98C8CA72017A503839A8A330 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DE1C25360541F960A402FCFF /* SocketIO */; };
 		9CB117AD3206799A6191A33B /* BoopPhoneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8BD2A5881D210A06A5888D /* BoopPhoneInput.swift */; };
 		9FE242B2AF0D1A60218E2C76 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABCAC6C867129184B5CD20C /* LocationView.swift */; };
+		A08D887B5D254DBC22440254 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */; };
 		A1765A779E5D1C6FEEAD0FAE /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43316338D42AFAB25864FBF /* SplashView.swift */; };
 		A5D674A4EF62B1C65172414D /* NotificationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E222CBF6A7D59940EE3EC24 /* NotificationModels.swift */; };
 		A859A125CD7781E794D42A12 /* MultipartFormData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5709D716BFF7F7B24781043 /* MultipartFormData.swift */; };
@@ -281,6 +283,7 @@
 		E9C551F76DC11AA967EE0436 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		EA8BD2A5881D210A06A5888D /* BoopPhoneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopPhoneInput.swift; sourceTree = "<group>"; };
 		EB0906A0A2C8E499A39AFB55 /* PhoneInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneInputView.swift; sourceTree = "<group>"; };
+		EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		EF40A424CE2A2723294A4A05 /* APIEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIEndpoint.swift; sourceTree = "<group>"; };
 		F4012798854623C6A1B6B050 /* CompatibilityDeepDiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityDeepDiveView.swift; sourceTree = "<group>"; };
 		F45F291A1D7C182F182A5B80 /* Nunito-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-ExtraBold.ttf"; sourceTree = "<group>"; };
@@ -299,6 +302,7 @@
 				5BA3A0029CD7B8EA3304AC7B /* FirebaseCore in Frameworks */,
 				659475DD7119B0A267A45B73 /* FirebaseMessaging in Frameworks */,
 				98C8CA72017A503839A8A330 /* SocketIO in Frameworks */,
+				97FD4A042474F5783A959938 /* PostHog in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,6 +409,14 @@
 				D055B2448FEC3175B6CBD38C /* TokenPair.swift */,
 			);
 			path = Auth;
+			sourceTree = "<group>";
+		};
+		28FAFFEB455072298B330BEA /* Analytics */ = {
+			isa = PBXGroup;
+			children = (
+				EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */,
+			);
+			path = Analytics;
 			sourceTree = "<group>";
 		};
 		2EBC1B59859E4A07AF4B257A /* Boop */ = {
@@ -856,6 +868,7 @@
 		FEA14F8122D160DBC83815A0 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				28FAFFEB455072298B330BEA /* Analytics */,
 				F27A50BAD2D856AF8419C941 /* Audio */,
 				25539676AE341AF270E89054 /* Auth */,
 				4B4DB3C274397D4AC1851E30 /* Extensions */,
@@ -888,6 +901,7 @@
 				E345BE01BCA03ABF2B8BA957 /* FirebaseCore */,
 				A0320628EA8A85E8FC47C493 /* FirebaseMessaging */,
 				DE1C25360541F960A402FCFF /* SocketIO */,
+				7B7546AA5E006645BC968DA9 /* PostHog */,
 			);
 			productName = Boop;
 			productReference = 21A9F07E87F33B74A2C52C05 /* Boop.app */;
@@ -961,6 +975,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				2ABD5348C3F3363D6CC75059 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				3C482B3CE08841B40560CB0F /* XCRemoteSwiftPackageReference "posthog-ios" */,
 				E92AFE2DED3B95AF30B8B795 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -1024,6 +1039,7 @@
 				0AC868C094C006BC56C523C9 /* APIModels.swift in Sources */,
 				8240F6D99F07C34ADEEED7AB /* APIResponse.swift in Sources */,
 				1DDCB49365CF9F52D3113629 /* ActiveSeason.swift in Sources */,
+				A08D887B5D254DBC22440254 /* Analytics.swift in Sources */,
 				63444116FC97B98A96D29A41 /* AppState.swift in Sources */,
 				CDCC247BBA4B191F90723A39 /* AuthManager.swift in Sources */,
 				0A431C971F44D965C99BADEA /* AuthViewModel.swift in Sources */,
@@ -1207,7 +1223,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = NK5P69WG2H;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1321,7 +1337,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 10;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = NK5P69WG2H;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -1424,6 +1440,14 @@
 				minimumVersion = 12.7.0;
 			};
 		};
+		3C482B3CE08841B40560CB0F /* XCRemoteSwiftPackageReference "posthog-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/PostHog/posthog-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
 		E92AFE2DED3B95AF30B8B795 /* XCRemoteSwiftPackageReference "socket.io-client-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/socketio/socket.io-client-swift";
@@ -1435,6 +1459,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7B7546AA5E006645BC968DA9 /* PostHog */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3C482B3CE08841B40560CB0F /* XCRemoteSwiftPackageReference "posthog-ios" */;
+			productName = PostHog;
+		};
 		A0320628EA8A85E8FC47C493 /* FirebaseMessaging */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2ABD5348C3F3363D6CC75059 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;

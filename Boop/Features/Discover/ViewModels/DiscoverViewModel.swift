@@ -83,11 +83,13 @@ class DiscoverViewModel {
             )
 
             showConnectSheet = false
+            Analytics.capture("connect_sent", ["with_note": note != nil])
 
             if response.isMutual, let match = response.match {
                 celebrationMatch = match
                 celebrationName = candidate.firstName
                 showMatchCelebration = true
+                Analytics.capture("match_created", ["tier": match.matchTier, "compatibility": match.compatibilityScore])
             }
 
             advanceToNextCandidate()

@@ -39,6 +39,7 @@ final class AuthManager: @unchecked Sendable {
             let wrapper: UserWrapper = try await APIClient.shared.request(.me)
             currentUser = wrapper.user
             isAuthenticated = true
+            Analytics.identify(wrapper.user.id)
         } catch {
             // Token invalid — try refresh
             let refreshed = await refreshTokenIfNeeded()
@@ -47,6 +48,7 @@ final class AuthManager: @unchecked Sendable {
                     let wrapper: UserWrapper = try await APIClient.shared.request(.me)
                     currentUser = wrapper.user
                     isAuthenticated = true
+                    Analytics.identify(wrapper.user.id)
                 } catch {
                     clearAuth()
                 }
@@ -70,6 +72,8 @@ final class AuthManager: @unchecked Sendable {
         currentUser = response.user
         isLoading = false
         isAuthenticated = true
+        Analytics.identify(response.user.id)
+        Analytics.capture("login_completed")
     }
 
     // MARK: - Token Refresh
@@ -145,5 +149,6 @@ final class AuthManager: @unchecked Sendable {
         cachedRefreshToken = nil
         currentUser = nil
         isAuthenticated = false
+        Analytics.reset()
     }
 }

@@ -141,6 +141,7 @@ class QuestionsViewModel {
             let wasAlreadyReady = AuthManager.shared.currentUser?.profileStage == .ready
             if response.profileStage == "ready" && !wasAlreadyReady {
                 isComplete = true
+                Analytics.capture("profile_ready", ["answers": answeredCount])
                 if let wrapper: UserWrapper = try? await APIClient.shared.request(.me) {
                     AuthManager.shared.updateUser(wrapper.user)
                 }
@@ -194,6 +195,7 @@ class QuestionsViewModel {
                     // Check if backend says profile is ready
                     if response.profileStage == "ready" {
                         self?.isComplete = true
+                        Analytics.capture("profile_ready")
                         Task {
                             let wrapper: UserWrapper = try await APIClient.shared.request(.me)
                             AuthManager.shared.updateUser(wrapper.user)

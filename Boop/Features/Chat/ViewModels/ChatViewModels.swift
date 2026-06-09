@@ -151,6 +151,7 @@ final class ChatConversationViewModel {
             draft = ""
             replyingTo = nil
             errorMessage = nil
+            Analytics.capture("message_sent", ["type": "text"])
         } catch let error as APIError {
             markPendingMessageFailed(tempId: tempMessage.id)
             errorMessage = error.errorDescription
@@ -189,6 +190,7 @@ final class ChatConversationViewModel {
             )
             resolvePendingMessage(tempId: tempMessage.id, with: message)
             errorMessage = nil
+            Analytics.capture("message_sent", ["type": "image"])
         } catch let error as APIError {
             markPendingMessageFailed(tempId: tempMessage.id)
             errorMessage = error.errorDescription
@@ -226,6 +228,7 @@ final class ChatConversationViewModel {
             )
             resolvePendingMessage(tempId: tempMessage.id, with: message)
             errorMessage = nil
+            Analytics.capture("message_sent", ["type": "voice"])
         } catch let error as APIError {
             markPendingMessageFailed(tempId: tempMessage.id)
             errorMessage = error.errorDescription

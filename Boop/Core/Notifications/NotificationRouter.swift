@@ -55,6 +55,7 @@ final class NotificationRouter {
 
     /// Programmatically open a match's conversation (e.g. right after a new match).
     func openChat(matchId: String) {
+        Analytics.capture("match_chat_opened")
         selectedTab = 2
         pendingDestination = .chat(matchId: matchId)
     }
