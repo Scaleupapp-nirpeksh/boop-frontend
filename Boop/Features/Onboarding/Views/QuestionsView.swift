@@ -65,6 +65,26 @@ struct QuestionsView: View {
                         .clipShape(Capsule())
                 }
 
+                // Progress toward the 15 answers that unlock the full profile + best matches
+                if viewModel.answeredCount < 15 {
+                    VStack(alignment: .leading, spacing: 4) {
+                        GeometryReader { proxy in
+                            ZStack(alignment: .leading) {
+                                Capsule().fill(BoopColors.surfaceSecondary)
+                                Capsule()
+                                    .fill(BoopColors.secondaryGradient)
+                                    .frame(width: proxy.size.width * CGFloat(min(viewModel.answeredCount, 15)) / 15.0)
+                            }
+                        }
+                        .frame(height: 6)
+                        .animation(.easeInOut(duration: 0.3), value: viewModel.answeredCount)
+
+                        Text("\(viewModel.answeredCount) of 15 to unlock your full profile & best matches")
+                            .font(BoopTypography.caption)
+                            .foregroundStyle(BoopColors.textMuted)
+                    }
+                }
+
                 // Dimension badge
                 Text(question.dimensionDisplayName)
                     .font(BoopTypography.caption)
