@@ -90,6 +90,9 @@ struct ChatInboxView: View {
                 Task { await viewModel.loadInbox() }
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .init("boop.blockedUser"))) { _ in
+            Task { await viewModel.loadInbox() }
+        }
     }
 
     private var filteredConversations: [ConversationInfo] {
@@ -226,6 +229,7 @@ struct ChatConversationView: View {
     @State private var expandedImageURL: String?
     @State private var showReportSheet = false
     @State private var showBlockConfirm = false
+    @State private var showBlockError = false
 
     init(conversation: ConversationInfo) {
         self.conversation = conversation
@@ -416,6 +420,11 @@ struct ChatConversationView: View {
         } message: {
             Text("They won't be able to message you, this match will be removed, and they won't appear in Discover. They won't be notified.")
         }
+        .alert("Couldn't block this user", isPresented: $showBlockError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Please check your connection and try again.")
+        }
         .searchable(text: $searchText, prompt: "Search messages")
         .task {
             voiceRecorderState.minDuration = 1
@@ -512,9 +521,10 @@ struct ChatConversationView: View {
         do {
             try await APIClient.shared.requestVoid(.blockUser(userId: userId))
             Haptics.success()
+            NotificationCenter.default.post(name: .init("boop.blockedUser"), object: nil)
             dismiss()
         } catch {
-            // Block failed — leave the conversation open; user can retry from the menu
+            showBlockError = true
         }
     }
 

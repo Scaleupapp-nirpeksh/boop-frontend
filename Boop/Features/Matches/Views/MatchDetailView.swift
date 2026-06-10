@@ -8,6 +8,7 @@ struct MatchDetailView: View {
     @State private var audioPlayer = RemoteAudioPlayer()
     @State private var showReportSheet = false
     @State private var showBlockConfirm = false
+    @State private var showBlockError = false
 
     init(matchId: String) {
         self.matchId = matchId
@@ -140,6 +141,11 @@ struct MatchDetailView: View {
             }
         } message: {
             Text("They won't be able to message you, this match will be removed, and they won't appear in Discover. They won't be notified.")
+        }
+        .alert("Couldn't block this user", isPresented: $showBlockError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Please check your connection and try again.")
         }
         .task {
             await viewModel.load()
@@ -777,9 +783,10 @@ struct MatchDetailView: View {
         do {
             try await APIClient.shared.requestVoid(.blockUser(userId: userId))
             Haptics.success()
+            NotificationCenter.default.post(name: .init("boop.blockedUser"), object: nil)
             dismiss()
         } catch {
-            // Block failed — keep the view open; user can retry
+            showBlockError = true
         }
     }
 }

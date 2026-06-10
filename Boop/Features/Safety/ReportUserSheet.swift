@@ -180,6 +180,8 @@ struct ReportUserSheet: View {
                 )
             )
             submitted = true
+        } catch let error as APIError {
+            errorMessage = error.errorDescription ?? "Couldn't submit the report. Please try again."
         } catch {
             errorMessage = "Couldn't submit the report. Please try again."
         }

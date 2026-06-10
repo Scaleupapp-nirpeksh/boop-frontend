@@ -76,6 +76,9 @@ struct HomeView: View {
         .onReceive(NotificationCenter.default.publisher(for: .realtimeMatchRevealed)) { _ in
             Task { await viewModel.refresh() }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .init("boop.blockedUser"))) { _ in
+            Task { await viewModel.refresh() }
+        }
     }
 
     // MARK: - Header
