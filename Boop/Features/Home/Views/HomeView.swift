@@ -22,8 +22,8 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
-                    if !viewModel.activeMatches.isEmpty {
-                        YourPeopleRow(matches: viewModel.activeMatches)
+                    if !secondaryMatches.isEmpty {
+                        YourPeopleRow(matches: secondaryMatches)
                     }
 
                     DailyQuestionBand(newCount: viewModel.newQuestionsCount) {
@@ -99,7 +99,7 @@ struct HomeView: View {
     private var greetingHeader: some View {
         HStack(alignment: .center) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("good evening")
+                Text(timeOfDayGreeting)
                     .font(.nunito(.medium, size: 13))
                     .foregroundStyle(BoopColors.textSecondary)
                 Text(AuthManager.shared.currentUser?.firstName ?? "you")
@@ -135,13 +135,30 @@ struct HomeView: View {
                     }
                 }
             }
-            .accessibilityLabel("Notifications")
+            .accessibilityLabel(notificationVM.unreadCount > 0
+                ? "Notifications, \(notificationVM.unreadCount) unread"
+                : "Notifications")
         }
         .padding(.horizontal, BoopSpacing.xl)
     }
 
     private var topStreak: Int? {
         viewModel.activeMatches.compactMap { $0.streak?.current }.max()
+    }
+
+    private var timeOfDayGreeting: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12:  return "good morning"
+        case 12..<17: return "good afternoon"
+        default:      return "good evening"
+        }
+    }
+
+    /// Active matches minus the hero (which already has its own card above).
+    private var secondaryMatches: [MatchInfo] {
+        guard let hero = heroMatch else { return viewModel.activeMatches }
+        return viewModel.activeMatches.filter { $0.matchId != hero.matchId }
     }
 
     private var emptyDiscoverPrompt: some View {
@@ -242,44 +259,6 @@ struct HomeView: View {
                 }
             }
         }
-    }
-
-    // MARK: - Seasonal Banner
-
-    private func seasonalBanner(_ season: ActiveSeason) -> some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            HStack(spacing: BoopSpacing.sm) {
-                Text(season.emoji)
-                    .font(.system(size: 28))
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(season.title)
-                        .font(BoopTypography.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(BoopColors.textPrimary)
-
-                    Text(season.subtitle)
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textSecondary)
-                }
-
-                Spacer()
-
-                Text("Live")
-                    .font(BoopTypography.caption)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, BoopSpacing.xs)
-                    .padding(.vertical, 4)
-                    .background(season.tint)
-                    .clipShape(Capsule())
-            }
-        }
-        .overlay(
-            RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                .stroke(season.tint.opacity(0.3), lineWidth: 1)
-        )
-        .padding(.horizontal, BoopSpacing.xl)
     }
 
 }
