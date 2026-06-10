@@ -21,6 +21,5 @@ struct GoneQuietCard: View {
         }
         .padding(BoopSpacing.lg)
         .boopCard(radius: BoopRadius.xxl)
-        .padding(.horizontal, BoopSpacing.xl)
     }
 }

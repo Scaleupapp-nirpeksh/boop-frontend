@@ -218,7 +218,6 @@ struct MatchDetailView: View {
                 onBoop: { Task { await viewModel.sendBoop() } },
                 onLetGo: { showLetGoConfirm = true }
             )
-            .padding(.horizontal, -BoopSpacing.xl)
         }
     }
 
