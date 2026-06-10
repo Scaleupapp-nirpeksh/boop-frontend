@@ -3,8 +3,11 @@ import SwiftUI
 struct MatchDetailView: View {
     let matchId: String
 
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel: MatchDetailViewModel
     @State private var audioPlayer = RemoteAudioPlayer()
+    @State private var showReportSheet = false
+    @State private var showBlockConfirm = false
 
     init(matchId: String) {
         self.matchId = matchId
@@ -101,6 +104,43 @@ struct MatchDetailView: View {
         }
         .navigationTitle(viewModel.detail?.otherUser?.firstName ?? "Match")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        showReportSheet = true
+                    } label: {
+                        Label("Report", systemImage: "flag")
+                    }
+                    Button(role: .destructive) {
+                        showBlockConfirm = true
+                    } label: {
+                        Label("Block", systemImage: "hand.raised")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .accessibilityLabel("Match options")
+            }
+        }
+        .sheet(isPresented: $showReportSheet) {
+            ReportUserSheet(
+                userId: viewModel.detail?.otherUser?.userId ?? "",
+                userName: viewModel.detail?.otherUser?.firstName ?? "this user",
+                contentType: "profile"
+            )
+        }
+        .confirmationDialog(
+            "Block \(viewModel.detail?.otherUser?.firstName ?? "this user")?",
+            isPresented: $showBlockConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Block", role: .destructive) {
+                Task { await blockOtherUser() }
+            }
+        } message: {
+            Text("They won't be able to message you, this match will be removed, and they won't appear in Discover. They won't be notified.")
+        }
         .task {
             await viewModel.load()
         }
@@ -729,6 +769,17 @@ struct MatchDetailView: View {
         case "revealed", "dating": return BoopColors.success
         case "reveal_ready": return BoopColors.accent
         default: return BoopColors.primary
+        }
+    }
+
+    private func blockOtherUser() async {
+        guard let userId = viewModel.detail?.otherUser?.userId else { return }
+        do {
+            try await APIClient.shared.requestVoid(.blockUser(userId: userId))
+            Haptics.success()
+            dismiss()
+        } catch {
+            // Block failed — keep the view open; user can retry
         }
     }
 }
