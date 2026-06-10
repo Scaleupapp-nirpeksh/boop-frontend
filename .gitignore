@@ -56,3 +56,4 @@ assets/splash-icon.png
 # IDE
 .vscode/
 .idea/
+.superpowers/
