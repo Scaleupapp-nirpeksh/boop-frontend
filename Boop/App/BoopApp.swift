@@ -14,7 +14,7 @@ struct BoopApp: App {
         WindowGroup {
             RootView()
                 .environment(appState)
-                .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme ?? nil)
+                .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme)
         }
     }
 }

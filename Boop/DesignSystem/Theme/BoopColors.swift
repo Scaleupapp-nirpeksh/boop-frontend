@@ -19,7 +19,7 @@ enum BoopColors {
     // MARK: - Text (adaptive)
     static let textPrimary = Color.dynamic(light: Color(hex: "2A1A2E"), dark: Color(hex: "F4ECF2"))
     static let textSecondary = Color.dynamic(light: Color(hex: "6B5B70"), dark: Color(hex: "B3A4BC"))
-    static let textMuted = Color.dynamic(light: Color(hex: "9B8FA5"), dark: Color(hex: "6E6076"))
+    static let textMuted = Color.dynamic(light: Color(hex: "9B8FA5"), dark: Color(hex: "8A7A93"))
     static let textOnPrimary = Color.white
 
     // MARK: - Semantic
@@ -67,7 +67,7 @@ enum BoopColors {
     static let primaryGradient = brandGradient   // repoint legacy name (BoopButton uses this)
 
     static let secondaryGradient = LinearGradient(
-        colors: [secondary, Color(hex: "7EDDD6")],
+        colors: [brandViolet, Color(hex: "C97DF5")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
