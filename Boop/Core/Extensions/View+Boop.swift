@@ -7,7 +7,7 @@ extension View {
                 .fill(BoopColors.surfaceElevated)
                 .overlay(
                     RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .stroke(Color.white.opacity(0.8), lineWidth: 1)
+                        .stroke(BoopColors.border, lineWidth: 1)
                 )
                 .shadow(
                     color: shadow ? Color.black.opacity(0.08) : .clear,
@@ -34,32 +34,25 @@ extension View {
 struct BoopAmbientBackground: View {
     var body: some View {
         ZStack {
-            BoopColors.sunriseGradient.ignoresSafeArea()
+            BoopColors.background.ignoresSafeArea()
 
             Circle()
-                .fill(BoopColors.primary.opacity(0.12))
+                .fill(BoopColors.brand.opacity(0.16))
                 .frame(width: 260, height: 260)
-                .blur(radius: 30)
+                .blur(radius: 40)
                 .offset(x: -120, y: -260)
 
             Circle()
-                .fill(BoopColors.secondary.opacity(0.12))
+                .fill(BoopColors.brandViolet.opacity(0.16))
                 .frame(width: 240, height: 240)
-                .blur(radius: 26)
+                .blur(radius: 36)
                 .offset(x: 140, y: -160)
 
             Circle()
-                .fill(BoopColors.accent.opacity(0.08))
+                .fill(BoopColors.accent.opacity(0.10))
                 .frame(width: 220, height: 220)
-                .blur(radius: 28)
+                .blur(radius: 38)
                 .offset(x: 110, y: 320)
-
-            RoundedRectangle(cornerRadius: 44, style: .continuous)
-                .fill(Color.white.opacity(0.12))
-                .frame(width: 180, height: 180)
-                .rotationEffect(.degrees(18))
-                .blur(radius: 2)
-                .offset(x: -150, y: 240)
         }
     }
 }

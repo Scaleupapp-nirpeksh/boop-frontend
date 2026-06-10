@@ -9,6 +9,7 @@ struct ProfileView: View {
     @State private var showDeleteConfirm = false
     @State private var showDeleteError = false
     @State private var isDeleting = false
+    @AppStorage("appTheme") private var appTheme = AppTheme.system.rawValue
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -523,6 +524,20 @@ struct ProfileView: View {
                 .padding(BoopSpacing.md)
                 .boopCard(radius: BoopRadius.xl)
             }
+
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                Text("Appearance")
+                    .font(.nunito(.bold, size: 13))
+                    .foregroundStyle(BoopColors.textSecondary)
+                Picker("Appearance", selection: $appTheme) {
+                    ForEach(AppTheme.allCases) { theme in
+                        Text(theme.label).tag(theme.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, BoopSpacing.xs)
 
             BoopButton(title: "Log Out", variant: .outline) {
                 AuthManager.shared.logout()
