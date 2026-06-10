@@ -21,7 +21,7 @@ enum BoopColors {
     // MARK: - Text
     static let textPrimary = Color.dynamic(light: Color(hex: "1B1B18"), dark: Color(hex: "F4ECF2"))
     static let textSecondary = Color.dynamic(light: Color(hex: "6B6358"), dark: Color.white.opacity(0.62))
-    static let textMuted = Color.dynamic(light: Color(hex: "A8A095"), dark: Color.white.opacity(0.40))
+    static let textMuted = Color.dynamic(light: Color(hex: "8A7F72"), dark: Color.white.opacity(0.40))
     static let textOnPrimary = Color.white
 
     // MARK: - Semantic
