@@ -232,6 +232,7 @@ struct ChatConversationView: View {
     @State private var showBlockConfirm = false
     @State private var showBlockError = false
     @State private var showComfortDetail = false
+    @State private var showGames = false
 
     init(conversation: ConversationInfo) {
         self.conversation = conversation
@@ -258,6 +259,39 @@ struct ChatConversationView: View {
                 .ignoresSafeArea()
         } else {
             BoopColors.chatBackground.ignoresSafeArea()
+        }
+    }
+
+    @ViewBuilder
+    private var fogNudgeChips: some View {
+        if let comfort = viewModel.comfortScore,
+           comfort < 70,
+           conversation.matchStage != "revealed",
+           conversation.matchStage != "dating" {
+            HStack(spacing: BoopSpacing.xs) {
+                nudgeChip(icon: "mic.fill", label: "Voice note") {
+                    isVoiceSheetPresented = true
+                }
+                nudgeChip(icon: "gamecontroller.fill", label: "Play a game") {
+                    showGames = true
+                }
+            }
+            .padding(.horizontal, BoopSpacing.md)
+            .padding(.top, BoopSpacing.xs)
+        }
+    }
+
+    private func nudgeChip(icon: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: { Haptics.light(); action() }) {
+            HStack(spacing: 4) {
+                Image(systemName: icon).font(.system(size: 10, weight: .bold))
+                Text(label).font(.nunito(.bold, size: 11))
+            }
+            .foregroundStyle(BoopColors.brandViolet)
+            .padding(.horizontal, BoopSpacing.sm)
+            .padding(.vertical, 6)
+            .background(BoopColors.backgroundMint)
+            .clipShape(Capsule())
         }
     }
 
@@ -355,6 +389,12 @@ struct ChatConversationView: View {
             )
         }
         .sheet(isPresented: $showComfortDetail) {
+            if let matchId = conversation.matchId {
+                NavigationStack { MatchDetailView(matchId: matchId) }
+                    .presentationDragIndicator(.visible)
+            }
+        }
+        .sheet(isPresented: $showGames) {
             if let matchId = conversation.matchId {
                 NavigationStack { MatchDetailView(matchId: matchId) }
                     .presentationDragIndicator(.visible)
@@ -563,6 +603,8 @@ struct ChatConversationView: View {
                 .padding(.horizontal, BoopSpacing.md)
                 .padding(.bottom, BoopSpacing.xs)
             }
+
+            fogNudgeChips
 
             composer
         }
