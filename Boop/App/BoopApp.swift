@@ -4,6 +4,7 @@ import SwiftUI
 struct BoopApp: App {
     @UIApplicationDelegateAdaptor(BoopAppDelegate.self) private var appDelegate
     @State private var appState = AppState()
+    @AppStorage("appTheme") private var appTheme = AppTheme.system.rawValue
 
     init() {
         Analytics.bootstrap()
@@ -13,7 +14,7 @@ struct BoopApp: App {
         WindowGroup {
             RootView()
                 .environment(appState)
-                .preferredColorScheme(.light)
+                .preferredColorScheme(AppTheme(rawValue: appTheme)?.colorScheme ?? nil)
         }
     }
 }

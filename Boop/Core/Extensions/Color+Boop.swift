@@ -25,3 +25,12 @@ extension Color {
         )
     }
 }
+
+extension Color {
+    /// Resolves to `light` or `dark` based on the active interface style at render time.
+    static func dynamic(light: Color, dark: Color) -> Color {
+        Color(UIColor { traits in
+            traits.userInterfaceStyle == .dark ? UIColor(dark) : UIColor(light)
+        })
+    }
+}

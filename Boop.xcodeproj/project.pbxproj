@@ -98,6 +98,7 @@
 		9FE242B2AF0D1A60218E2C76 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABCAC6C867129184B5CD20C /* LocationView.swift */; };
 		A08D887B5D254DBC22440254 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */; };
 		A1765A779E5D1C6FEEAD0FAE /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43316338D42AFAB25864FBF /* SplashView.swift */; };
+		A49C9686485DCB40673CDB0E /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413048E1F6DF74842CEDBBCD /* AppTheme.swift */; };
 		A5D674A4EF62B1C65172414D /* NotificationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E222CBF6A7D59940EE3EC24 /* NotificationModels.swift */; };
 		A859A125CD7781E794D42A12 /* MultipartFormData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5709D716BFF7F7B24781043 /* MultipartFormData.swift */; };
 		AB981E3490A3A9C9B9C6D71A /* CompatibilityDeepDiveViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD65CE737D3A17A9BDCD083A /* CompatibilityDeepDiveViewModel.swift */; };
@@ -205,6 +206,7 @@
 		3D2AC274A2B9A32809D753A5 /* BadgesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BadgesView.swift; sourceTree = "<group>"; };
 		3E8FE0178447D54BB0C9921A /* RealtimeStatusBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RealtimeStatusBanner.swift; sourceTree = "<group>"; };
 		40AB0A3C49A151B2D0D4E031 /* MatchDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchDetailView.swift; sourceTree = "<group>"; };
+		413048E1F6DF74842CEDBBCD /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		42637E9AEB521AA32FA07307 /* Color+Boop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Boop.swift"; sourceTree = "<group>"; };
 		43FD0C7F2FCD06C212A5A55C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		4458765922C0561C5F6DB931 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
@@ -648,6 +650,7 @@
 		B4238B9B4BEEBEFF160D0741 /* Theme */ = {
 			isa = PBXGroup;
 			children = (
+				413048E1F6DF74842CEDBBCD /* AppTheme.swift */,
 				D3126161737819FFC16DC8B2 /* BoopColors.swift */,
 				B9286016098F0CA6A3223628 /* BoopSpacing.swift */,
 				F80A1DED043505DEC12A173B /* BoopTypography.swift */,
@@ -1083,6 +1086,7 @@
 				1DDCB49365CF9F52D3113629 /* ActiveSeason.swift in Sources */,
 				A08D887B5D254DBC22440254 /* Analytics.swift in Sources */,
 				63444116FC97B98A96D29A41 /* AppState.swift in Sources */,
+				A49C9686485DCB40673CDB0E /* AppTheme.swift in Sources */,
 				CDCC247BBA4B191F90723A39 /* AuthManager.swift in Sources */,
 				0A431C971F44D965C99BADEA /* AuthViewModel.swift in Sources */,
 				3EE49078A03DF245297C3441 /* BadgesView.swift in Sources */,

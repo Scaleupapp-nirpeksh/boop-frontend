@@ -1,23 +1,25 @@
 import SwiftUI
 
 enum BoopColors {
-    // MARK: - Brand
-    static let primary = Color(hex: "FF6B6B")        // Warm Coral
-    static let secondary = Color(hex: "4ECDC4")       // Mint Teal
-    static let accent = Color(hex: "FFD93D")          // Sunny Yellow
+    // MARK: - Brand (Electric Heart)
+    static let brand = Color.dynamic(light: Color(hex: "FF4D6D"), dark: Color(hex: "FF5C7A"))      // coral
+    static let brandViolet = Color.dynamic(light: Color(hex: "A23DE8"), dark: Color(hex: "B65CF0")) // violet
+    static let primary = brand          // repoint legacy name
+    static let secondary = brandViolet  // repoint legacy name (was mint)
+    static let accent = Color.dynamic(light: Color(hex: "FF8A5C"), dark: Color(hex: "FFA06E"))      // warm ember
 
-    // MARK: - Backgrounds
-    static let background = Color(hex: "FFF9F5")      // Warm White
-    static let backgroundBlush = Color(hex: "FFF1EB")
-    static let backgroundMint = Color(hex: "EDFBF8")
-    static let surface = Color.white
-    static let surfaceSecondary = Color(hex: "F8F4F0")
-    static let surfaceElevated = Color(hex: "FFFCFA")
+    // MARK: - Backgrounds (adaptive)
+    static let background = Color.dynamic(light: Color(hex: "FFFBF7"), dark: Color(hex: "120A16"))
+    static let backgroundBlush = Color.dynamic(light: Color(hex: "FFF1EB"), dark: Color(hex: "1A0F1E"))
+    static let backgroundMint = Color.dynamic(light: Color(hex: "F3E8F0"), dark: Color(hex: "1A0F22"))
+    static let surface = Color.dynamic(light: .white, dark: Color(hex: "1C1124"))
+    static let surfaceSecondary = Color.dynamic(light: Color(hex: "F8F4F0"), dark: Color(hex: "241630"))
+    static let surfaceElevated = Color.dynamic(light: Color(hex: "FFFCFA"), dark: Color(hex: "241630"))
 
-    // MARK: - Text
-    static let textPrimary = Color(hex: "2D3436")
-    static let textSecondary = Color(hex: "636E72")
-    static let textMuted = Color(hex: "B2BEC3")
+    // MARK: - Text (adaptive)
+    static let textPrimary = Color.dynamic(light: Color(hex: "2A1A2E"), dark: Color(hex: "F4ECF2"))
+    static let textSecondary = Color.dynamic(light: Color(hex: "6B5B70"), dark: Color(hex: "B3A4BC"))
+    static let textMuted = Color.dynamic(light: Color(hex: "9B8FA5"), dark: Color(hex: "6E6076"))
     static let textOnPrimary = Color.white
 
     // MARK: - Semantic
@@ -30,8 +32,8 @@ enum BoopColors {
     static let cardDarkAlt = Color(hex: "182433")
     static let cardDarkAccent = Color(hex: "1F2637")
     static let cardDarkProfile = Color(hex: "1D2638")
-    static let chatBackground = Color(hex: "F6F2EE")
-    static let chatBubbleReceived = Color(hex: "232B39")
+    static let chatBackground = Color.dynamic(light: Color(hex: "F6F2EE"), dark: Color(hex: "160C1C"))
+    static let chatBubbleReceived = Color.dynamic(light: .white, dark: Color(hex: "241630"))
     static let overlayLight = Color.white.opacity(0.12)
     static let overlayMedium = Color.white.opacity(0.3)
 
@@ -53,15 +55,16 @@ enum BoopColors {
     static let goldenAccent = Color(hex: "D4A017")
 
     // MARK: - Borders
-    static let border = Color(hex: "DFE6E9")
+    static let border = Color.dynamic(light: Color(hex: "EEE6EE"), dark: Color(hex: "2E2238"))
     static let borderFocus = primary
 
     // MARK: - Gradients
-    static let primaryGradient = LinearGradient(
-        colors: [primary, Color(hex: "FF8E8E")],
+    static let brandGradient = LinearGradient(
+        colors: [brand, brandViolet],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
+    static let primaryGradient = brandGradient   // repoint legacy name (BoopButton uses this)
 
     static let secondaryGradient = LinearGradient(
         colors: [secondary, Color(hex: "7EDDD6")],
