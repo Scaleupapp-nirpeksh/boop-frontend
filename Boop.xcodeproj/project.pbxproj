@@ -17,6 +17,7 @@
 		0D48A5653A451E340598B113 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 617F21A799BDE07195956D7F /* APIClient.swift */; };
 		0ED62E647F96BBF55E3BDB88 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F183D8B7EE7BC4F1F51BBA8 /* MainTabView.swift */; };
 		11C22129887F201357BBF605 /* GameViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72E936D968CF16447DCBDFC /* GameViewModels.swift */; };
+		1302EEC78AB972601B02E2E0 /* ReportUserSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761F75B614C6CEE8A63E75C0 /* ReportUserSheet.swift */; };
 		1356366A91DBDFDCDCE14B9F /* PersonalityReportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14429E4B65C1855A00EA177 /* PersonalityReportViewModel.swift */; };
 		140CE73E0BBA56F8E3E4BF11 /* DiscoverModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D1F4541F0F7E61F6E9A1798 /* DiscoverModels.swift */; };
 		18C29AAEFB8CEE9ED80FD817 /* BoopWidgetProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3731FD32990C51A357B4EE4F /* BoopWidgetProvider.swift */; };
@@ -225,6 +226,7 @@
 		6D0730889E4C49397EC39E1C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		7302B7D5CC763EA7A9D242E2 /* BoopClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopClipApp.swift; sourceTree = "<group>"; };
 		748EAEB592E9EA3924D2541E /* DiscoverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverViewModel.swift; sourceTree = "<group>"; };
+		761F75B614C6CEE8A63E75C0 /* ReportUserSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportUserSheet.swift; sourceTree = "<group>"; };
 		7971E41E088CC2C9F83E616D /* Nunito-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-SemiBold.ttf"; sourceTree = "<group>"; };
 		7D28CFE574E0E98548E7307B /* BoopOTPField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopOTPField.swift; sourceTree = "<group>"; };
 		7E2B73C88182D6B38824872B /* GameModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameModels.swift; sourceTree = "<group>"; };
@@ -528,6 +530,14 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		75659D7A1365E20D310AFB79 /* Safety */ = {
+			isa = PBXGroup;
+			children = (
+				761F75B614C6CEE8A63E75C0 /* ReportUserSheet.swift */,
+			);
+			path = Safety;
+			sourceTree = "<group>";
+		};
 		76157A2D92A1403DA6CD2B11 /* Matches */ = {
 			isa = PBXGroup;
 			children = (
@@ -702,6 +712,7 @@
 				FD555E8A0492F722C6BFE7F4 /* Onboarding */,
 				20BF1C480930E0B5EA37D770 /* Profile */,
 				D712776B3ED98675E3AEC4DB /* Questions */,
+				75659D7A1365E20D310AFB79 /* Safety */,
 				8D402456EC09402270E25CFA /* Splash */,
 			);
 			path = Features;
@@ -1161,6 +1172,7 @@
 				DC18BB836B17AD8426FD440F /* RealtimeStatusBanner.swift in Sources */,
 				5A5ACEFC2AD08F4E1655D671 /* RelationshipInsightsView.swift in Sources */,
 				F4298253C11897848365328E /* RemoteAudioPlayer.swift in Sources */,
+				1302EEC78AB972601B02E2E0 /* ReportUserSheet.swift in Sources */,
 				3978197C5E8EA2A14F5C85EB /* RootView.swift in Sources */,
 				91AE9C9DAF46C422D9EE1241 /* SafetyModels.swift in Sources */,
 				341991B1E283A3D2DEFB9E71 /* ScoreProgressView.swift in Sources */,
