@@ -9,6 +9,7 @@ struct MatchDetailView: View {
     @State private var showReportSheet = false
     @State private var showBlockConfirm = false
     @State private var showBlockError = false
+    @State private var showClearing = false
 
     init(matchId: String) {
         self.matchId = matchId
@@ -146,6 +147,21 @@ struct MatchDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text("Please check your connection and try again.")
+        }
+        .fullScreenCover(isPresented: $showClearing) {
+            TheClearingView(
+                name: viewModel.detail?.otherUser?.firstName ?? "Your match",
+                photoURL: viewModel.detail?.otherUser?.photos?.profilePhotoUrl,
+                days: viewModel.detail?.streak?.longest ?? viewModel.detail?.streak?.current ?? 0,
+                games: gamesCountForRecap,
+                voiceNotes: voiceCountForRecap,
+                onDone: {
+                    showClearing = false
+                    if let matchId = viewModel.detail?.matchId {
+                        NotificationRouter.shared.openChat(matchId: matchId)
+                    }
+                }
+            )
         }
         .task {
             await viewModel.load()
@@ -404,7 +420,12 @@ struct MatchDetailView: View {
                 HStack(spacing: BoopSpacing.sm) {
                     if viewModel.canRequestReveal {
                         BoopButton(title: viewModel.revealButtonTitle, variant: .secondary, isLoading: viewModel.isWorking, fullWidth: false) {
-                            Task { await viewModel.requestReveal() }
+                            Task {
+                                await viewModel.requestReveal()
+                                if viewModel.detail?.stage == "revealed" {
+                                    showClearing = true
+                                }
+                            }
                         }
                     } else if viewModel.isAwaitingOtherReveal {
                         Text("Reveal request sent")
@@ -738,6 +759,16 @@ struct MatchDetailView: View {
         .padding(BoopSpacing.md)
         .background(Color.white.opacity(0.8))
         .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
+    }
+
+    private var gamesCountForRecap: Int {
+        let detail = viewModel.comfort?.breakdown["gamesCompleted"]?.detail ?? ""
+        return Int(detail.prefix(while: \.isNumber)) ?? 0
+    }
+
+    private var voiceCountForRecap: Int {
+        let detail = viewModel.comfort?.breakdown["voiceEngagement"]?.detail ?? ""
+        return Int(detail.prefix(while: \.isNumber)) ?? 0
     }
 
     private var displayPhotoURL: String? {
