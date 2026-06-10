@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// The single most charged item on Home: the connection closest to reveal,
-/// rendered as a near-clear portrait with a headline and one tap target.
+/// rendered as a near-clear portrait fading into the ground with a headline.
 struct MomentHeroCard: View {
     let match: MatchInfo
 
@@ -12,41 +12,44 @@ struct MomentHeroCard: View {
         if match.stage == "revealed" || match.stage == "dating" {
             return "You've revealed — keep it going"
         }
-        if pointsToReveal == 0 { return "You're ready to reveal 👀" }
+        if pointsToReveal == 0 { return "You're ready to reveal" }
         return "\(pointsToReveal) points from seeing each other"
     }
 
     var body: some View {
-        BlurredPortrait(
+        CinematicHeader(
             urlString: match.heroPhotoURL,
             blurRadius: FogBlur.radius(forComfort: match.comfortScore, stage: match.stage),
-            shape: .roundedRect(BoopRadius.xxl)
+            height: 220
         ) {
-            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                Spacer()
-                Text(headline.uppercased())
-                    .font(.nunito(.bold, size: 11))
-                    .foregroundStyle(Color(hex: "FFD6DD"))
-                Text(match.displayName)
-                    .font(.nunito(.extraBold, size: 26))
-                    .foregroundStyle(.white)
-                HStack(spacing: BoopSpacing.xs) {
-                    if let streak = match.streak?.current, streak > 0 {
-                        Text("🔥 \(streak)")
-                            .font(.nunito(.bold, size: 12))
-                            .foregroundStyle(.white)
+            EyebrowLabel(text: headline, color: BoopColors.textSecondary)
+            AccentRule()
+            Text(match.displayName)
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+            HStack(spacing: BoopSpacing.sm) {
+                if let streak = match.streak?.current, streak > 0 {
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame")
+                            .font(.system(size: 12, weight: .thin))
+                        Text("\(streak)")
+                            .font(BoopTypography.cineCaption)
+                            .tracking(1)
                     }
-                    if match.otherUser.isOnline == true {
-                        Text("● online")
-                            .font(.nunito(.semiBold, size: 11))
-                            .foregroundStyle(BoopColors.success)
+                    .foregroundStyle(BoopColors.textSecondary)
+                }
+                if match.otherUser.isOnline == true {
+                    HStack(spacing: 4) {
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 6, weight: .thin))
+                        Text("ONLINE")
+                            .font(BoopTypography.cineCaption)
+                            .tracking(1.5)
                     }
+                    .foregroundStyle(BoopColors.success)
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(BoopSpacing.lg)
         }
-        .frame(height: 200)
-        .shadow(color: BoopColors.brand.opacity(0.25), radius: 18, y: 10)
+        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous))
     }
 }

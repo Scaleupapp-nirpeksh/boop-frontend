@@ -98,40 +98,39 @@ struct HomeView: View {
 
     private var greetingHeader: some View {
         HStack(alignment: .center) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(timeOfDayGreeting)
-                    .font(.nunito(.medium, size: 13))
-                    .foregroundStyle(BoopColors.textSecondary)
+            VStack(alignment: .leading, spacing: 4) {
+                EyebrowLabel(text: timeOfDayGreeting)
                 Text(AuthManager.shared.currentUser?.firstName ?? "you")
-                    .font(.nunito(.extraBold, size: 26))
+                    .font(BoopTypography.cineDisplay)
                     .foregroundStyle(BoopColors.textPrimary)
             }
             Spacer()
             if let streak = topStreak, streak > 0 {
-                Text("🔥 \(streak)")
-                    .font(.nunito(.bold, size: 13))
-                    .foregroundStyle(BoopColors.brand)
-                    .padding(.horizontal, BoopSpacing.sm)
-                    .padding(.vertical, 6)
-                    .background(BoopColors.backgroundBlush)
-                    .clipShape(Capsule())
+                HStack(spacing: 4) {
+                    Image(systemName: "flame")
+                        .font(.system(size: 12, weight: .thin))
+                    Text("\(streak)")
+                        .font(BoopTypography.cineCaption)
+                        .tracking(1)
+                }
+                .foregroundStyle(BoopColors.accentColor)
+                .padding(.trailing, BoopSpacing.xs)
             }
             NavigationLink(value: NotificationRoute()) {
                 ZStack(alignment: .topTrailing) {
-                    Image(systemName: "bell.fill")
-                        .font(.system(size: 18, weight: .semibold))
+                    Image(systemName: "bell")
+                        .font(.system(size: 17, weight: .thin))
                         .foregroundStyle(BoopColors.textPrimary)
                         .frame(width: 44, height: 44)
                         .background(BoopColors.surface)
                         .clipShape(Circle())
+                        .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
                     if notificationVM.unreadCount > 0 {
-                        Text(notificationVM.unreadCount > 99 ? "99+" : "\(notificationVM.unreadCount)")
-                            .font(.system(size: 10, weight: .bold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(BoopColors.brand)
-                            .clipShape(Capsule())
-                            .offset(x: 4, y: -2)
+                        Circle()
+                            .fill(BoopColors.accentColor)
+                            .frame(width: 8, height: 8)
+                            .overlay(Circle().stroke(BoopColors.ground, lineWidth: 1.5))
+                            .offset(x: -2, y: 2)
                     }
                 }
             }
@@ -163,52 +162,36 @@ struct HomeView: View {
 
     private var emptyDiscoverPrompt: some View {
         VStack(spacing: BoopSpacing.sm) {
-            Text("✨").font(.system(size: 36))
+            Image(systemName: "sparkle")
+                .font(.system(size: 28, weight: .thin))
+                .foregroundStyle(BoopColors.accentColor)
             Text("Find your first connection")
-                .font(.nunito(.bold, size: 16))
+                .font(BoopTypography.cineHeadline)
                 .foregroundStyle(BoopColors.textPrimary)
             Text("Head to Discover to meet someone whose answers match yours.")
-                .font(.nunito(.regular, size: 13))
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
                 .multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
         .padding(BoopSpacing.xl)
-        .boopCard(radius: BoopRadius.xxl)
+        .boopCard(radius: BoopRadius.xxl, shadow: false)
         .padding(.horizontal, BoopSpacing.xl)
     }
 
     // MARK: - Activity (incoming + outgoing pending likes, compact)
 
     private var activitySection: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text("Activity")
-                .font(BoopTypography.headline)
-                .foregroundStyle(BoopColors.textPrimary)
+        VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+            EyebrowLabel(text: "Activity")
                 .padding(.horizontal, BoopSpacing.xl)
 
             if !viewModel.incomingPendingLikes.isEmpty {
-                VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(BoopColors.primary)
-                            .frame(width: 8, height: 8)
-                        Text("Liked You")
-                            .font(BoopTypography.callout)
-                            .fontWeight(.medium)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        Text("\(viewModel.incomingPendingLikes.count)")
-                            .font(BoopTypography.caption)
-                            .fontWeight(.bold)
-                            .foregroundStyle(BoopColors.primary)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(BoopColors.primary.opacity(0.1))
-                            .clipShape(Capsule())
-                    }
-                    .padding(.horizontal, BoopSpacing.xl)
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    activityGroupHeader(title: "Liked you", count: viewModel.incomingPendingLikes.count)
+                        .padding(.horizontal, BoopSpacing.xl)
 
-                    VStack(spacing: 1) {
+                    VStack(spacing: 0) {
                         ForEach(viewModel.incomingPendingLikes) { profile in
                             PendingRow(
                                 profile: profile,
@@ -219,32 +202,15 @@ struct HomeView: View {
                         }
                     }
                     .padding(.horizontal, BoopSpacing.xl)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
                 }
             }
 
             if !viewModel.outgoingPendingLikes.isEmpty {
-                VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(BoopColors.accent)
-                            .frame(width: 8, height: 8)
-                        Text("Waiting On Them")
-                            .font(BoopTypography.callout)
-                            .fontWeight(.medium)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        Text("\(viewModel.outgoingPendingLikes.count)")
-                            .font(BoopTypography.caption)
-                            .fontWeight(.bold)
-                            .foregroundStyle(BoopColors.accent)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(BoopColors.accent.opacity(0.12))
-                            .clipShape(Capsule())
-                    }
-                    .padding(.horizontal, BoopSpacing.xl)
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    activityGroupHeader(title: "Waiting on them", count: viewModel.outgoingPendingLikes.count)
+                        .padding(.horizontal, BoopSpacing.xl)
 
-                    VStack(spacing: 1) {
+                    VStack(spacing: 0) {
                         ForEach(viewModel.outgoingPendingLikes) { profile in
                             PendingRow(
                                 profile: profile,
@@ -255,9 +221,20 @@ struct HomeView: View {
                         }
                     }
                     .padding(.horizontal, BoopSpacing.xl)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
                 }
             }
+        }
+    }
+
+    private func activityGroupHeader(title: String, count: Int) -> some View {
+        HStack(spacing: BoopSpacing.xs) {
+            Text(title.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(1.5)
+                .foregroundStyle(BoopColors.textSecondary)
+            Text("\(count)")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.accentColor)
         }
     }
 
@@ -280,55 +257,50 @@ private struct PendingRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+
             HStack(spacing: BoopSpacing.sm) {
-                // Avatar
+                // Avatar — thin-stroked initial
                 Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [BoopColors.primary.opacity(0.15), BoopColors.secondary.opacity(0.15)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(BoopColors.surface)
                     .frame(width: 44, height: 44)
+                    .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
                     .overlay(
                         Text(String(profile.firstName.prefix(1)))
-                            .font(.nunito(.semiBold, size: 17))
-                            .foregroundStyle(BoopColors.primary)
+                            .font(BoopTypography.cineHeadline)
+                            .foregroundStyle(BoopColors.textPrimary)
                     )
 
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: BoopSpacing.xs) {
                         Text(displayName)
-                            .font(BoopTypography.callout)
-                            .fontWeight(.medium)
+                            .font(BoopTypography.cineBody)
                             .foregroundStyle(BoopColors.textPrimary)
                             .lineLimit(1)
 
                         // Note indicator
                         if mode == .incoming, profile.note != nil {
-                            Image(systemName: profile.note?.type == "voice" ? "mic.fill" : "envelope.fill")
-                                .font(.system(size: 10))
-                                .foregroundStyle(BoopColors.secondary)
+                            Image(systemName: profile.note?.type == "voice" ? "mic" : "envelope")
+                                .font(.system(size: 10, weight: .thin))
+                                .foregroundStyle(BoopColors.accentColor)
                         }
                     }
 
                     HStack(spacing: BoopSpacing.xs) {
                         if let city = profile.city {
                             Text(city)
-                                .font(BoopTypography.caption)
+                                .font(BoopTypography.cineCaption)
                                 .foregroundStyle(BoopColors.textSecondary)
                                 .lineLimit(1)
                         }
                         if let score = profile.compatibilityScore {
                             HStack(spacing: 2) {
-                                Image(systemName: "sparkles")
-                                    .font(.system(size: 9))
+                                Image(systemName: "sparkle")
+                                    .font(.system(size: 9, weight: .thin))
                                 Text("\(score)%")
-                                    .font(BoopTypography.caption)
-                                    .fontWeight(.medium)
+                                    .font(BoopTypography.cineCaption)
                             }
-                            .foregroundStyle(BoopColors.primary)
+                            .foregroundStyle(BoopColors.accentColor)
                         }
                     }
                 }
@@ -342,46 +314,42 @@ private struct PendingRow: View {
                                 withAnimation(.easeInOut(duration: 0.2)) { showNote.toggle() }
                             } label: {
                                 Image(systemName: "text.bubble")
-                                    .font(.system(size: 13, weight: .semibold))
-                                    .foregroundStyle(BoopColors.secondary)
+                                    .font(.system(size: 13, weight: .thin))
+                                    .foregroundStyle(BoopColors.textSecondary)
                                     .frame(width: 34, height: 34)
-                                    .background(BoopColors.secondary.opacity(0.1))
-                                    .clipShape(Circle())
+                                    .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
                             }
                         }
 
                         Button(action: { Haptics.light(); onPass?() }) {
                             Image(systemName: "xmark")
-                                .font(.system(size: 13, weight: .semibold))
+                                .font(.system(size: 13, weight: .thin))
                                 .foregroundStyle(BoopColors.textMuted)
                                 .frame(width: 34, height: 34)
-                                .background(BoopColors.surfaceSecondary)
-                                .clipShape(Circle())
+                                .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
                         }
                         .accessibilityLabel("Pass")
 
                         Button(action: { Haptics.medium(); onLike?() }) {
-                            Image(systemName: "heart.fill")
-                                .font(.system(size: 13, weight: .semibold))
-                                .foregroundStyle(.white)
+                            Image(systemName: "heart")
+                                .font(.system(size: 13, weight: .thin))
+                                .foregroundStyle(BoopColors.accentColor)
                                 .frame(width: 34, height: 34)
-                                .background(BoopColors.primaryGradient)
-                                .clipShape(Circle())
+                                .overlay(Circle().stroke(BoopColors.accentColor, lineWidth: 1))
                         }
                         .accessibilityLabel("Like")
                     }
                 } else {
                     HStack(spacing: 4) {
-                        Circle()
-                            .fill(BoopColors.accent)
-                            .frame(width: 6, height: 6)
-                        Text("Pending")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.accent)
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 5, weight: .thin))
+                        Text("PENDING")
+                            .font(BoopTypography.cineCaption)
+                            .tracking(1.5)
                     }
+                    .foregroundStyle(BoopColors.textMuted)
                 }
             }
-            .padding(.horizontal, BoopSpacing.md)
             .padding(.vertical, BoopSpacing.sm)
 
             // Expandable note preview
@@ -389,27 +357,25 @@ private struct PendingRow: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 4) {
                         Image(systemName: note.type == "voice" ? "waveform" : "quote.opening")
-                            .font(.system(size: 10))
-                            .foregroundStyle(BoopColors.secondary)
+                            .font(.system(size: 10, weight: .thin))
+                            .foregroundStyle(BoopColors.accentColor)
                         Text(note.type == "voice" ? "Voice note (\(Int(note.duration ?? 0))s)" : "Their note")
-                            .font(BoopTypography.caption)
-                            .fontWeight(.medium)
-                            .foregroundStyle(BoopColors.secondary)
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textSecondary)
                     }
 
                     if note.type == "text" {
                         Text(note.content)
-                            .font(BoopTypography.footnote)
+                            .font(BoopTypography.cineBodyLight)
                             .foregroundStyle(BoopColors.textPrimary)
                             .italic()
                     }
                 }
-                .padding(.horizontal, BoopSpacing.lg)
+                .padding(.leading, 56)
                 .padding(.bottom, BoopSpacing.sm)
                 .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
-        .background(BoopColors.surface)
     }
 
     private var displayName: String {

@@ -7,29 +7,31 @@ struct DailyQuestionBand: View {
 
     var body: some View {
         Button(action: { Haptics.light(); onTap() }) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("TODAY'S QUESTIONS")
-                    .font(.nunito(.bold, size: 11))
-                    .foregroundStyle(.white.opacity(0.85))
+            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                EyebrowLabel(text: "Today's questions")
                 Text(newCount > 0
                      ? "\(newCount) new unlocked — answer to grow your profile"
                      : "Answer today's questions to deepen your matches")
-                    .font(.nunito(.bold, size: 16))
-                    .foregroundStyle(.white)
+                    .font(BoopTypography.cineHeadline)
+                    .foregroundStyle(BoopColors.textPrimary)
                     .multilineTextAlignment(.leading)
-                HStack(spacing: 4) {
-                    Text("Open").font(.nunito(.semiBold, size: 12))
-                    Image(systemName: "arrow.right").font(.system(size: 11, weight: .bold))
+                    .fixedSize(horizontal: false, vertical: true)
+                AccentRule()
+                HStack(spacing: 6) {
+                    Text("OPEN")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .thin))
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(BoopColors.accentColor)
                 .padding(.top, 2)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(BoopSpacing.lg)
-            .background(BoopColors.brandGradient)
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous))
-            .shadow(color: BoopColors.brand.opacity(0.3), radius: 14, y: 8)
+            .boopCard(radius: BoopRadius.xxl)
         }
+        .buttonStyle(.plain)
         .padding(.horizontal, BoopSpacing.xl)
     }
 }

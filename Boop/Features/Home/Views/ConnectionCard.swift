@@ -1,50 +1,29 @@
 import SwiftUI
 
+/// A single connection rendered as a cinematic hairline row: a fogged portrait,
+/// the name, stage as an eyebrow, and thin-symbol metadata.
 struct ConnectionCard: View {
     let match: MatchInfo
 
     var body: some View {
         HStack(spacing: BoopSpacing.md) {
-            // Avatar
+            // Fogged portrait avatar (sharpens by comfort, like the rest of Home)
             ZStack(alignment: .bottomTrailing) {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: stageGradientColors.map { $0.opacity(0.18) },
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 56, height: 56)
-                    .overlay(
-                        Text(String(match.otherUser.firstName.prefix(1)))
-                            .font(.nunito(.bold, size: 22))
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: stageGradientColors,
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                    )
-                    .overlay(
-                        Circle()
-                            .stroke(
-                                LinearGradient(
-                                    colors: stageGradientColors,
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 2
-                            )
-                    )
+                BlurredPortrait(
+                    urlString: match.heroPhotoURL,
+                    blurRadius: FogBlur.radius(forComfort: match.comfortScore, stage: match.stage),
+                    shape: .circle,
+                    scrim: false
+                )
+                .frame(width: 56, height: 56)
+                .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
 
                 if match.otherUser.isOnline == true {
                     Circle()
                         .fill(BoopColors.success)
-                        .frame(width: 14, height: 14)
-                        .overlay(Circle().stroke(BoopColors.surface, lineWidth: 2.5))
-                        .offset(x: 2, y: 2)
+                        .frame(width: 11, height: 11)
+                        .overlay(Circle().stroke(BoopColors.ground, lineWidth: 1.5))
+                        .offset(x: 1, y: 1)
                 }
             }
 
@@ -52,28 +31,17 @@ struct ConnectionCard: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(displayName)
-                        .font(BoopTypography.callout)
-                        .fontWeight(.semibold)
+                        .font(BoopTypography.cineHeadline)
                         .foregroundStyle(BoopColors.textPrimary)
 
                     Spacer()
 
-                    // Stage badge
-                    Text(match.stageLabel)
-                        .font(BoopTypography.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(stageGradientColors.first ?? BoopColors.secondary)
-                        .padding(.horizontal, BoopSpacing.xs)
-                        .padding(.vertical, 3)
-                        .background(
-                            (stageGradientColors.first ?? BoopColors.secondary).opacity(0.1)
-                        )
-                        .clipShape(Capsule())
+                    EyebrowLabel(text: match.stageLabel, color: BoopColors.accentColor)
                 }
 
                 if let city = match.otherUser.city {
                     Text(city)
-                        .font(BoopTypography.caption)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.textSecondary)
                 }
 
@@ -81,86 +49,54 @@ struct ConnectionCard: View {
                     // Compatibility
                     if let score = match.compatibilityScore {
                         HStack(spacing: 4) {
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 10))
+                            Image(systemName: "sparkle")
+                                .font(.system(size: 10, weight: .thin))
                             Text("\(score)%")
-                                .font(BoopTypography.caption)
-                                .fontWeight(.semibold)
+                                .font(BoopTypography.cineCaption)
+                                .tracking(0.5)
                         }
-                        .foregroundStyle(BoopColors.primary)
+                        .foregroundStyle(BoopColors.accentColor)
                     }
 
                     // Comfort bar
                     if let comfort = match.comfortScore {
                         HStack(spacing: 6) {
-                            comfortBar(value: comfort)
+                            HairlineProgress(progress: Double(comfort) / 100.0)
+                                .frame(width: 60)
                             Text("\(comfort)/100")
-                                .font(BoopTypography.caption)
+                                .font(BoopTypography.cineCaption)
                                 .foregroundStyle(BoopColors.textMuted)
                         }
                     }
 
                     // Streak flame
                     if let streak = match.streak?.current, streak > 0 {
-                        HStack(spacing: 2) {
-                            Text("🔥")
-                                .font(.system(size: 10))
+                        HStack(spacing: 3) {
+                            Image(systemName: "flame")
+                                .font(.system(size: 10, weight: .thin))
                             Text("\(streak)")
-                                .font(BoopTypography.caption)
-                                .fontWeight(.bold)
-                                .foregroundStyle(BoopColors.primary)
+                                .font(BoopTypography.cineCaption)
+                                .tracking(0.5)
                         }
+                        .foregroundStyle(BoopColors.accentColor)
                     }
 
                     Spacer()
 
                     // Day count
                     Text("Day \(match.daysSinceMatch)")
-                        .font(BoopTypography.caption)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.textMuted)
                 }
             }
 
             // Chevron
             Image(systemName: "chevron.right")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 12, weight: .thin))
                 .foregroundStyle(BoopColors.textMuted)
         }
         .padding(BoopSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                .fill(BoopColors.surface)
-                .shadow(color: Color.black.opacity(0.06), radius: 8, y: 3)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                .stroke(stageGradientColors.first?.opacity(0.1) ?? .clear, lineWidth: 1)
-        )
-    }
-
-    private func comfortBar(value: Int) -> some View {
-        GeometryReader { _ in
-            ZStack(alignment: .leading) {
-                Capsule()
-                    .fill(BoopColors.border.opacity(0.4))
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(
-                        LinearGradient(
-                            colors: comfortGradient(for: value),
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(width: max(4, CGFloat(value) / 100.0 * 60))
-            }
-        }
-        .frame(width: 60, height: 6)
-    }
-
-    private func comfortGradient(for value: Int) -> [Color] {
-        if value >= 70 { return [BoopColors.success, BoopColors.secondary] }
-        if value >= 40 { return [BoopColors.secondary, BoopColors.accent] }
-        return [BoopColors.accent, BoopColors.primary]
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
     private var displayName: String {
@@ -168,13 +104,5 @@ struct ConnectionCard: View {
             return "\(match.otherUser.firstName), \(age)"
         }
         return match.otherUser.firstName
-    }
-
-    private var stageGradientColors: [Color] {
-        switch match.stage {
-        case "revealed", "dating": return [BoopColors.success, BoopColors.secondary]
-        case "reveal_ready": return [BoopColors.accent, BoopColors.primary]
-        default: return [BoopColors.primary, BoopColors.secondary]
-        }
     }
 }
