@@ -24,6 +24,7 @@
 		1C1745AF661D78CA4CA28230 /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31231CBB8AC80BF9CE6A23FC /* DiscoverView.swift */; };
 		1DDCB49365CF9F52D3113629 /* ActiveSeason.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01F123959B3C01F38439B6FE /* ActiveSeason.swift */; };
 		1FA5D7865D63B150720FE0AF /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FD0C7F2FCD06C212A5A55C /* HomeView.swift */; };
+		2301FD5C9BEE541B7DB209D6 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 7B7546AA5E006645BC968DA9 /* PostHog */; };
 		23D232FC37D1DBD068EC313F /* BoopWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = B07D1F25864C22B7C94F5A48 /* BoopWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		23D80D7ED1C41AE364186CBE /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = E498951D5D24ADC10A070A7D /* User.swift */; };
 		26CC62792C4B2CC166D58C36 /* PhotoUploadViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1E7FEF73ECD3705345993F8 /* PhotoUploadViewModel.swift */; };
@@ -89,8 +90,8 @@
 		92EACB51F46F866825B1EF93 /* RealtimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E9845734EACD34E9FCF27A /* RealtimeService.swift */; };
 		938CE48C77C05910A4312F00 /* BoopSegmentedPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E368B0543C4920A665B80274 /* BoopSegmentedPicker.swift */; };
 		9572FE51CB188211A059780F /* OnboardingViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9574B0F10FEF2D9E6173B6E0 /* OnboardingViewModel.swift */; };
-		97FD4A042474F5783A959938 /* PostHog in Frameworks */ = {isa = PBXBuildFile; productRef = 7B7546AA5E006645BC968DA9 /* PostHog */; };
-		98C8CA72017A503839A8A330 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DE1C25360541F960A402FCFF /* SocketIO */; };
+		97FD4A042474F5783A959938 /* SocketIO in Frameworks */ = {isa = PBXBuildFile; productRef = DE1C25360541F960A402FCFF /* SocketIO */; };
+		98C8CA72017A503839A8A330 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 6C505D6E256116325B16381E /* FirebaseCrashlytics */; };
 		9CB117AD3206799A6191A33B /* BoopPhoneInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = EA8BD2A5881D210A06A5888D /* BoopPhoneInput.swift */; };
 		9FE242B2AF0D1A60218E2C76 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABCAC6C867129184B5CD20C /* LocationView.swift */; };
 		A08D887B5D254DBC22440254 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */; };
@@ -301,8 +302,9 @@
 			files = (
 				5BA3A0029CD7B8EA3304AC7B /* FirebaseCore in Frameworks */,
 				659475DD7119B0A267A45B73 /* FirebaseMessaging in Frameworks */,
-				98C8CA72017A503839A8A330 /* SocketIO in Frameworks */,
-				97FD4A042474F5783A959938 /* PostHog in Frameworks */,
+				98C8CA72017A503839A8A330 /* FirebaseCrashlytics in Frameworks */,
+				97FD4A042474F5783A959938 /* SocketIO in Frameworks */,
+				2301FD5C9BEE541B7DB209D6 /* PostHog in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -890,6 +892,7 @@
 				70545B44BD6C495CCF4CE230 /* Resources */,
 				ACC7E85D76C0DA8B2DDCA8AE /* Frameworks */,
 				5EABD3B77F28B7B632D0F4EA /* Embed Foundation Extensions */,
+				B4C22633BE4304D896F89A8E /* Crashlytics dSYM Upload */,
 			);
 			buildRules = (
 			);
@@ -900,6 +903,7 @@
 			packageProductDependencies = (
 				E345BE01BCA03ABF2B8BA957 /* FirebaseCore */,
 				A0320628EA8A85E8FC47C493 /* FirebaseMessaging */,
+				6C505D6E256116325B16381E /* FirebaseCrashlytics */,
 				DE1C25360541F960A402FCFF /* SocketIO */,
 				7B7546AA5E006645BC968DA9 /* PostHog */,
 			);
@@ -1008,6 +1012,30 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		B4C22633BE4304D896F89A8E /* Crashlytics dSYM Upload */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+			);
+			name = "Crashlytics dSYM Upload";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		557A956F59345DEF1F112D1B /* Sources */ = {
@@ -1274,6 +1302,7 @@
 				CODE_SIGN_ENTITLEMENTS = Boop/Resources/Boop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Boop/Resources/Preview Content\"";
 				INFOPLIST_FILE = Boop/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1378,6 +1407,7 @@
 				CODE_SIGN_ENTITLEMENTS = Boop/Resources/Boop.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"Boop/Resources/Preview Content\"";
 				INFOPLIST_FILE = Boop/Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1459,6 +1489,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		6C505D6E256116325B16381E /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABD5348C3F3363D6CC75059 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
 		7B7546AA5E006645BC968DA9 /* PostHog */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 3C482B3CE08841B40560CB0F /* XCRemoteSwiftPackageReference "posthog-ios" */;

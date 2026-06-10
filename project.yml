@@ -45,6 +45,8 @@ targets:
         product: FirebaseCore
       - package: Firebase
         product: FirebaseMessaging
+      - package: Firebase
+        product: FirebaseCrashlytics
       - package: SocketIO
         product: SocketIO
       - package: PostHog
@@ -67,6 +69,14 @@ targets:
         TARGETED_DEVICE_FAMILY: "1"
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         DEVELOPMENT_ASSET_PATHS: "\"Boop/Resources/Preview Content\""
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+    postBuildScripts:
+      - name: Crashlytics dSYM Upload
+        script: "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\""
+        inputFiles:
+          - ${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${TARGET_NAME}
+          - $(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist
+        basedOnDependencyAnalysis: false
     info:
       path: Boop/Resources/Info.plist
       properties:
