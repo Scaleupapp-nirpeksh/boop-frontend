@@ -211,6 +211,22 @@ struct MatchInfo: Codable, Identifiable {
     }
 }
 
+extension MatchInfo {
+    /// Best available portrait for the current stage: clear if revealed, else
+    /// blurred, else silhouette. BlurredPortrait adds the comfort-based fog on top.
+    var heroPhotoURL: String? {
+        if stage == "revealed" || stage == "dating" {
+            return otherUser.photos.profilePhotoUrl ?? otherUser.photos.blurredUrl
+        }
+        return otherUser.photos.blurredUrl ?? otherUser.photos.silhouetteUrl ?? otherUser.photos.profilePhotoUrl
+    }
+
+    var displayName: String {
+        if let age = otherUser.age { return "\(otherUser.firstName), \(age)" }
+        return otherUser.firstName
+    }
+}
+
 struct MatchOtherUser: Codable {
     let userId: String
     let firstName: String

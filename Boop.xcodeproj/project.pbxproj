@@ -17,6 +17,7 @@
 		0D1E61339BF08098AD99A3FB /* ChatInboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F2C79B8AC91FC57243E7EB /* ChatInboxView.swift */; };
 		0D48A5653A451E340598B113 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 617F21A799BDE07195956D7F /* APIClient.swift */; };
 		0ED62E647F96BBF55E3BDB88 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F183D8B7EE7BC4F1F51BBA8 /* MainTabView.swift */; };
+		108024B0D41CE5B33E78C496 /* MomentHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915A69A9EC48C0A5A7785779 /* MomentHeroCard.swift */; };
 		11C22129887F201357BBF605 /* GameViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72E936D968CF16447DCBDFC /* GameViewModels.swift */; };
 		1302EEC78AB972601B02E2E0 /* ReportUserSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761F75B614C6CEE8A63E75C0 /* ReportUserSheet.swift */; };
 		1356366A91DBDFDCDCE14B9F /* PersonalityReportViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D14429E4B65C1855A00EA177 /* PersonalityReportViewModel.swift */; };
@@ -79,6 +80,7 @@
 		7335DE0E207D66C769CFF39E /* BoopLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 923A062151B5E1F46501C54F /* BoopLoadingView.swift */; };
 		757F8ABB38CFD1DD1E8FA385 /* MyAnswersViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E97706FC8E64AA6E6A8F1F1B /* MyAnswersViewModel.swift */; };
 		767142F6ABF72025B3559462 /* Nunito-ExtraBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = F45F291A1D7C182F182A5B80 /* Nunito-ExtraBold.ttf */; };
+		77135409F8DB43198F2BE674 /* YourPeopleRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FF3E78C3474F11952624621 /* YourPeopleRow.swift */; };
 		7A254C1FC7B77985DB0CB1EC /* MatchDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C306A96BE48B481D3F89EA7 /* MatchDetailViewModel.swift */; };
 		7A5F66AE2B965A3F91828314 /* QuestionsProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80D36B41C425F685447A092E /* QuestionsProgressView.swift */; };
 		7EE1A9DA23D844BAC0E32251 /* ChatMediaGalleryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BDBB9C9375A98B8793E07B6 /* ChatMediaGalleryViewModel.swift */; };
@@ -179,6 +181,7 @@
 		1484D2802E0DA77E1061B0C5 /* SafetyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafetyModels.swift; sourceTree = "<group>"; };
 		1648564DEFDB100FCD82EE97 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		1F39826327683D7E5EF87BC5 /* BoopCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopCard.swift; sourceTree = "<group>"; };
+		1FF3E78C3474F11952624621 /* YourPeopleRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YourPeopleRow.swift; sourceTree = "<group>"; };
 		218D490AF95F946C1C381CE5 /* APIModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIModels.swift; sourceTree = "<group>"; };
 		21A9F07E87F33B74A2C52C05 /* Boop.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Boop.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		264CD80F522C46751F4FF55F /* ProfilePreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePreviewView.swift; sourceTree = "<group>"; };
@@ -251,6 +254,7 @@
 		8E84C1F0E43B1D750F5ED09E /* VoiceReRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceReRecordView.swift; sourceTree = "<group>"; };
 		8EF23B3EDF50A557CDCE95D4 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
 		90CDB18CF9840A88C133EDAB /* FogBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FogBlur.swift; sourceTree = "<group>"; };
+		915A69A9EC48C0A5A7785779 /* MomentHeroCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MomentHeroCard.swift; sourceTree = "<group>"; };
 		923A062151B5E1F46501C54F /* BoopLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopLoadingView.swift; sourceTree = "<group>"; };
 		93CC44B9B2F3700C4DD249EC /* BoopWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopWidget.swift; sourceTree = "<group>"; };
 		9574B0F10FEF2D9E6173B6E0 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
@@ -453,7 +457,9 @@
 				8ABD35B948632E31FF8A83A6 /* ConnectionCard.swift */,
 				43FD0C7F2FCD06C212A5A55C /* HomeView.swift */,
 				DAF6DF29BBEFCFF786D4603A /* MatchCelebrationView.swift */,
+				915A69A9EC48C0A5A7785779 /* MomentHeroCard.swift */,
 				9BBD1CB51D868E2B6EEE3EAA /* QuestionsFullView.swift */,
+				1FF3E78C3474F11952624621 /* YourPeopleRow.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -1152,6 +1158,7 @@
 				DEA8CED8312B53A75D314043 /* MatchCelebrationView.swift in Sources */,
 				72267B829CB87A8AE5E44A58 /* MatchDetailView.swift in Sources */,
 				7A254C1FC7B77985DB0CB1EC /* MatchDetailViewModel.swift in Sources */,
+				108024B0D41CE5B33E78C496 /* MomentHeroCard.swift in Sources */,
 				A859A125CD7781E794D42A12 /* MultipartFormData.swift in Sources */,
 				E89DFA765AD6EB6D1D19D373 /* MyAnswersView.swift in Sources */,
 				757F8ABB38CFD1DD1E8FA385 /* MyAnswersViewModel.swift in Sources */,
@@ -1197,6 +1204,7 @@
 				643C8C7D67517CF574787411 /* VoiceIntroViewModel.swift in Sources */,
 				B8D4D0D528ED8FD977D2108B /* VoiceReRecordView.swift in Sources */,
 				B5C6443423626ABA0D6EE615 /* WelcomeView.swift in Sources */,
+				77135409F8DB43198F2BE674 /* YourPeopleRow.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
