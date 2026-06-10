@@ -218,6 +218,7 @@ struct ChatConversationView: View {
     let conversation: ConversationInfo
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var colorScheme
     @State private var viewModel: ChatConversationViewModel
     @State private var audioPlayer = RemoteAudioPlayer()
     @State private var remoteTypingUserId: String?
@@ -237,23 +238,239 @@ struct ChatConversationView: View {
         _viewModel = State(initialValue: ChatConversationViewModel(conversation: conversation))
     }
 
-    private var fogBlurRadius: CGFloat {
-        FogBlur.radius(forComfort: viewModel.comfortScore, stage: conversation.matchStage)
+    private var fogBlurRadius: CGFloat? {
+        let stage = conversation.matchStage
+        if stage == "revealed" || stage == "dating" { return nil }
+        return FogBlur.radius(forComfort: viewModel.comfortScore, stage: stage)
+    }
+
+    private var scrimOpacity: Double { colorScheme == .dark ? 0.82 : 0.90 }
+
+    @ViewBuilder
+    private var fogBackground: some View {
+        if let photo = conversation.otherUser.photo, let radius = fogBlurRadius {
+            BoopRemoteImage(urlString: photo) { Color.clear }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .clipped()
+                .blur(radius: radius, opaque: true)
+                .animation(.easeInOut(duration: 0.6), value: radius)
+                .overlay(BoopColors.chatBackground.opacity(scrimOpacity))
+                .ignoresSafeArea()
+        } else {
+            BoopColors.chatBackground.ignoresSafeArea()
+        }
     }
 
     var body: some View {
         ZStack {
-            if let photo = conversation.otherUser.photo {
-                BoopRemoteImage(urlString: photo) { Color.clear }
-                    .blur(radius: fogBlurRadius)
-                    .animation(.easeInOut(duration: 0.6), value: fogBlurRadius)
-                    .overlay(BoopColors.chatBackground.opacity(0.82))
-                    .ignoresSafeArea()
-            } else {
-                BoopColors.chatBackground.ignoresSafeArea()
+            fogBackground
+
+            conversationContent
+        }
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .principal) {
+                HStack(spacing: BoopSpacing.sm) {
+                    ZStack(alignment: .bottomTrailing) {
+                        AsyncImage(url: URL(string: conversation.otherUser.photo ?? "")) { image in
+                            image.resizable().scaledToFill()
+                        } placeholder: {
+                            Circle()
+                                .fill(BoopColors.secondary.opacity(0.12))
+                                .overlay(
+                                    Text(String((conversation.otherUser.firstName ?? "?").prefix(1)))
+                                        .font(BoopTypography.caption)
+                                        .foregroundStyle(BoopColors.secondary)
+                                )
+                        }
+                        .frame(width: 36, height: 36)
+                        .clipShape(Circle())
+
+                        if conversation.otherUser.isOnline == true {
+                            Circle()
+                                .fill(BoopColors.success)
+                                .frame(width: 10, height: 10)
+                                .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                        }
+                    }
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text(conversation.otherUser.firstName ?? "Chat")
+                            .font(BoopTypography.headline)
+                            .foregroundStyle(BoopColors.textPrimary)
+                        Text(conversation.otherUser.isOnline == true ? "Online" : "Offline")
+                            .font(BoopTypography.caption)
+                            .foregroundStyle(conversation.otherUser.isOnline == true ? BoopColors.success : BoopColors.textMuted)
+
+                        if let comfort = viewModel.comfortScore,
+                           conversation.matchId != nil,
+                           conversation.matchStage != "revealed",
+                           conversation.matchStage != "dating" {
+                            Button { showComfortDetail = true } label: {
+                                Text("the fog is lifting · \(comfort)/70")
+                                    .font(.nunito(.semiBold, size: 11))
+                                    .foregroundStyle(BoopColors.brand)
+                            }
+                        }
+                    }
+                }
             }
 
-            VStack(spacing: 0) {
+            ToolbarItem(placement: .topBarTrailing) {
+                NavigationLink {
+                    ChatMediaGalleryView(
+                        conversationId: conversation.conversationId,
+                        otherUserName: conversation.otherUser.firstName ?? "Chat"
+                    )
+                } label: {
+                    Image(systemName: "photo.stack")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(BoopColors.textSecondary)
+                }
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        showReportSheet = true
+                    } label: {
+                        Label("Report", systemImage: "flag")
+                    }
+                    Button(role: .destructive) {
+                        showBlockConfirm = true
+                    } label: {
+                        Label("Block", systemImage: "hand.raised")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .accessibilityLabel("Conversation options")
+            }
+        }
+        .sheet(isPresented: $showReportSheet) {
+            ReportUserSheet(
+                userId: conversation.otherUser.userId,
+                userName: conversation.otherUser.firstName ?? "this user",
+                contentType: "message"
+            )
+        }
+        .sheet(isPresented: $showComfortDetail) {
+            if let matchId = conversation.matchId {
+                NavigationStack { MatchDetailView(matchId: matchId) }
+                    .presentationDragIndicator(.visible)
+            }
+        }
+        .confirmationDialog(
+            "Block \(conversation.otherUser.firstName ?? "this user")?",
+            isPresented: $showBlockConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Block", role: .destructive) {
+                Task { await blockOtherUser() }
+            }
+        } message: {
+            Text("They won't be able to message you, this match will be removed, and they won't appear in Discover. They won't be notified.")
+        }
+        .alert("Couldn't block this user", isPresented: $showBlockError) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Please check your connection and try again.")
+        }
+        .searchable(text: $searchText, prompt: "Search messages")
+        .task {
+            voiceRecorderState.minDuration = 1
+            voiceRecorderState.maxDuration = 120
+            Task { await viewModel.loadComfort() }
+            await viewModel.loadMessages()
+        }
+        .onDisappear {
+            RealtimeService.shared.emitTypingStop(conversationId: conversation.conversationId)
+        }
+        .onChange(of: selectedMediaItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    await viewModel.sendImage(image)
+                }
+                selectedMediaItem = nil
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeMessageNew)) { notification in
+            guard let payload = notification.userInfo?["payload"] as? ChatMessage else { return }
+            viewModel.upsertIncomingMessage(payload)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeMessageReaction)) { notification in
+            guard let payload = notification.userInfo?["payload"] as? MessageReactionEvent else { return }
+            viewModel.applyReactionEvent(payload)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeMessageRead)) { notification in
+            guard let payload = notification.userInfo?["payload"] as? MessageReadEvent else { return }
+            viewModel.applyReadEvent(payload)
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeTypingStart)) { notification in
+            guard let payload = notification.userInfo?["payload"] as? TypingEvent,
+                  payload.conversationId == conversation.conversationId else { return }
+            remoteTypingUserId = payload.userId
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeTypingStop)) { notification in
+            guard let payload = notification.userInfo?["payload"] as? TypingEvent,
+                  payload.conversationId == conversation.conversationId else { return }
+            if remoteTypingUserId == payload.userId {
+                remoteTypingUserId = nil
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .realtimeStatusChanged)) { _ in
+            if RealtimeService.shared.connectionState == .connected {
+                Task { await viewModel.loadMessages() }
+            }
+        }
+        .sheet(isPresented: $isVoiceSheetPresented) {
+            NavigationStack {
+                VStack(spacing: BoopSpacing.lg) {
+                    BoopVoiceRecorder(state: voiceRecorderState)
+
+                    if let data = voiceRecorderState.getRecordingData() {
+                        BoopButton(
+                            title: "Send voice note",
+                            isLoading: viewModel.isSending,
+                            isDisabled: !voiceRecorderState.hasRecording
+                        ) {
+                            Task {
+                                await viewModel.sendVoice(data: data, duration: voiceRecorderState.duration)
+                                voiceRecorderState.deleteRecording()
+                                isVoiceSheetPresented = false
+                            }
+                        }
+                    }
+                }
+                .padding(BoopSpacing.xl)
+                .boopBackground()
+                .navigationTitle("Voice Note")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") {
+                            voiceRecorderState.deleteRecording()
+                            isVoiceSheetPresented = false
+                        }
+                    }
+                }
+            }
+        }
+        .fullScreenCover(isPresented: Binding(
+            get: { expandedImageURL != nil },
+            set: { if !$0 { expandedImageURL = nil } }
+        )) {
+            if let urlString = expandedImageURL {
+                ImageViewerView(imageURL: urlString)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var conversationContent: some View {
+        VStack(spacing: 0) {
             if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 HStack {
                     Text("\(filteredMessages.count) result\(filteredMessages.count == 1 ? "" : "s")")
@@ -348,204 +565,6 @@ struct ChatConversationView: View {
             }
 
             composer
-            }
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                HStack(spacing: BoopSpacing.sm) {
-                    ZStack(alignment: .bottomTrailing) {
-                        AsyncImage(url: URL(string: conversation.otherUser.photo ?? "")) { image in
-                            image.resizable().scaledToFill()
-                        } placeholder: {
-                            Circle()
-                                .fill(BoopColors.secondary.opacity(0.12))
-                                .overlay(
-                                    Text(String((conversation.otherUser.firstName ?? "?").prefix(1)))
-                                        .font(BoopTypography.caption)
-                                        .foregroundStyle(BoopColors.secondary)
-                                )
-                        }
-                        .frame(width: 36, height: 36)
-                        .clipShape(Circle())
-
-                        if conversation.otherUser.isOnline == true {
-                            Circle()
-                                .fill(BoopColors.success)
-                                .frame(width: 10, height: 10)
-                                .overlay(Circle().stroke(.white, lineWidth: 1.5))
-                        }
-                    }
-
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(conversation.otherUser.firstName ?? "Chat")
-                            .font(BoopTypography.headline)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        Text(conversation.otherUser.isOnline == true ? "Online" : "Offline")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(conversation.otherUser.isOnline == true ? BoopColors.success : BoopColors.textMuted)
-
-                        if let comfort = viewModel.comfortScore,
-                           conversation.matchStage != "revealed",
-                           conversation.matchStage != "dating" {
-                            Button { showComfortDetail = true } label: {
-                                Text("the fog is lifting · \(comfort)/70")
-                                    .font(.nunito(.semiBold, size: 11))
-                                    .foregroundStyle(BoopColors.brand)
-                            }
-                        }
-                    }
-                }
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink {
-                    ChatMediaGalleryView(
-                        conversationId: conversation.conversationId,
-                        otherUserName: conversation.otherUser.firstName ?? "Chat"
-                    )
-                } label: {
-                    Image(systemName: "photo.stack")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(BoopColors.textSecondary)
-                }
-            }
-
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu {
-                    Button {
-                        showReportSheet = true
-                    } label: {
-                        Label("Report", systemImage: "flag")
-                    }
-                    Button(role: .destructive) {
-                        showBlockConfirm = true
-                    } label: {
-                        Label("Block", systemImage: "hand.raised")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
-                }
-                .accessibilityLabel("Conversation options")
-            }
-        }
-        .sheet(isPresented: $showReportSheet) {
-            ReportUserSheet(
-                userId: conversation.otherUser.userId,
-                userName: conversation.otherUser.firstName ?? "this user",
-                contentType: "message"
-            )
-        }
-        .sheet(isPresented: $showComfortDetail) {
-            if let matchId = conversation.matchId {
-                NavigationStack { MatchDetailView(matchId: matchId) }
-            }
-        }
-        .confirmationDialog(
-            "Block \(conversation.otherUser.firstName ?? "this user")?",
-            isPresented: $showBlockConfirm,
-            titleVisibility: .visible
-        ) {
-            Button("Block", role: .destructive) {
-                Task { await blockOtherUser() }
-            }
-        } message: {
-            Text("They won't be able to message you, this match will be removed, and they won't appear in Discover. They won't be notified.")
-        }
-        .alert("Couldn't block this user", isPresented: $showBlockError) {
-            Button("OK", role: .cancel) {}
-        } message: {
-            Text("Please check your connection and try again.")
-        }
-        .searchable(text: $searchText, prompt: "Search messages")
-        .task {
-            voiceRecorderState.minDuration = 1
-            voiceRecorderState.maxDuration = 120
-            await viewModel.loadComfort()
-            await viewModel.loadMessages()
-        }
-        .onDisappear {
-            RealtimeService.shared.emitTypingStop(conversationId: conversation.conversationId)
-        }
-        .onChange(of: selectedMediaItem) { _, item in
-            guard let item else { return }
-            Task {
-                if let data = try? await item.loadTransferable(type: Data.self),
-                   let image = UIImage(data: data) {
-                    await viewModel.sendImage(image)
-                }
-                selectedMediaItem = nil
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .realtimeMessageNew)) { notification in
-            guard let payload = notification.userInfo?["payload"] as? ChatMessage else { return }
-            viewModel.upsertIncomingMessage(payload)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .realtimeMessageReaction)) { notification in
-            guard let payload = notification.userInfo?["payload"] as? MessageReactionEvent else { return }
-            viewModel.applyReactionEvent(payload)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .realtimeMessageRead)) { notification in
-            guard let payload = notification.userInfo?["payload"] as? MessageReadEvent else { return }
-            viewModel.applyReadEvent(payload)
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .realtimeTypingStart)) { notification in
-            guard let payload = notification.userInfo?["payload"] as? TypingEvent,
-                  payload.conversationId == conversation.conversationId else { return }
-            remoteTypingUserId = payload.userId
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .realtimeTypingStop)) { notification in
-            guard let payload = notification.userInfo?["payload"] as? TypingEvent,
-                  payload.conversationId == conversation.conversationId else { return }
-            if remoteTypingUserId == payload.userId {
-                remoteTypingUserId = nil
-            }
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .realtimeStatusChanged)) { _ in
-            if RealtimeService.shared.connectionState == .connected {
-                Task { await viewModel.loadMessages() }
-            }
-        }
-        .sheet(isPresented: $isVoiceSheetPresented) {
-            NavigationStack {
-                VStack(spacing: BoopSpacing.lg) {
-                    BoopVoiceRecorder(state: voiceRecorderState)
-
-                    if let data = voiceRecorderState.getRecordingData() {
-                        BoopButton(
-                            title: "Send voice note",
-                            isLoading: viewModel.isSending,
-                            isDisabled: !voiceRecorderState.hasRecording
-                        ) {
-                            Task {
-                                await viewModel.sendVoice(data: data, duration: voiceRecorderState.duration)
-                                voiceRecorderState.deleteRecording()
-                                isVoiceSheetPresented = false
-                            }
-                        }
-                    }
-                }
-                .padding(BoopSpacing.xl)
-                .boopBackground()
-                .navigationTitle("Voice Note")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Close") {
-                            voiceRecorderState.deleteRecording()
-                            isVoiceSheetPresented = false
-                        }
-                    }
-                }
-            }
-        }
-        .fullScreenCover(isPresented: Binding(
-            get: { expandedImageURL != nil },
-            set: { if !$0 { expandedImageURL = nil } }
-        )) {
-            if let urlString = expandedImageURL {
-                ImageViewerView(imageURL: urlString)
-            }
         }
     }
 
@@ -758,8 +777,13 @@ private struct ChatMessageBubble: View {
                     }
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.sm)
-                    .background(bubbleBackground)
+                    .background {
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .fill(bubbleBackground)
+                    }
                     .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    // Subtle shadow so white received bubbles stay visible on bright fog in light mode.
+                    .shadow(color: isCurrentUser ? .clear : Color.black.opacity(0.06), radius: 4, x: 0, y: 1)
                     .contextMenu {
                         // Full 8-emoji reaction picker
                         Section("React") {
