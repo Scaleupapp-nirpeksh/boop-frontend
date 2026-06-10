@@ -266,6 +266,7 @@ struct ChatConversationView: View {
     private var fogNudgeChips: some View {
         if let comfort = viewModel.comfortScore,
            comfort < 70,
+           conversation.matchId != nil,
            conversation.matchStage != "revealed",
            conversation.matchStage != "dating" {
             HStack(spacing: BoopSpacing.xs) {
