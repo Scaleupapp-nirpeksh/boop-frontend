@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		04FC7281E12C9287FA60E072 /* OnboardingIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 864429D41708E46F3741698C /* OnboardingIntroView.swift */; };
 		05B5732C7B0EFF21B41CE60C /* BoopLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0606CC5A6407FD08137E3B9B /* BoopLogo.swift */; };
+		06D3B7766D1C9B04E1B93F4E /* BlurredPortrait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34EB1C2003C6FA6B86DC7EFD /* BlurredPortrait.swift */; };
 		086CDD0B4259FBB1A2562C18 /* BoopToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD9EF89443D1BBB96EB6DE6 /* BoopToast.swift */; };
 		0950BF0A22643698D4F8E299 /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DF5B70630F5C2F54E7FF54 /* GameViews.swift */; };
 		0A431C971F44D965C99BADEA /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB396920630F58CB0C2DD99D /* AuthViewModel.swift */; };
@@ -126,6 +127,7 @@
 		D7FFC02C1A7AA1D3091EC5BC /* NotificationInboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 305E515B0BE01E9348E62DAA /* NotificationInboxViewModel.swift */; };
 		DC18BB836B17AD8426FD440F /* RealtimeStatusBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8FE0178447D54BB0C9921A /* RealtimeStatusBanner.swift */; };
 		DCCB1220FA993275FEE87604 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6D0730889E4C49397EC39E1C /* GoogleService-Info.plist */; };
+		DD88BDAAAEE75B29D72C49EC /* FogBlur.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CDB18CF9840A88C133EDAB /* FogBlur.swift */; };
 		DEA8CED8312B53A75D314043 /* MatchCelebrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF6DF29BBEFCFF786D4603A /* MatchCelebrationView.swift */; };
 		E2DEDACC6C98B0964AA697F2 /* NotificationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC085C7EA7700FB1901AB96 /* NotificationRouter.swift */; };
 		E89DFA765AD6EB6D1D19D373 /* MyAnswersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B8FB04C6022F27E19C3850D1 /* MyAnswersView.swift */; };
@@ -195,6 +197,7 @@
 		319D2B52463511A9ACCFA873 /* Question.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Question.swift; sourceTree = "<group>"; };
 		31DF5B70630F5C2F54E7FF54 /* GameViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViews.swift; sourceTree = "<group>"; };
 		348E4ACEAD9A97924C7918CD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		34EB1C2003C6FA6B86DC7EFD /* BlurredPortrait.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurredPortrait.swift; sourceTree = "<group>"; };
 		35AA7E4EF715EF9C62CF905E /* Nunito-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Regular.ttf"; sourceTree = "<group>"; };
 		3731FD32990C51A357B4EE4F /* BoopWidgetProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopWidgetProvider.swift; sourceTree = "<group>"; };
 		37E6B0BE93D375F8CB6CDC54 /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
@@ -247,6 +250,7 @@
 		8CC99E8776943489E86A7FA0 /* Nunito-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Bold.ttf"; sourceTree = "<group>"; };
 		8E84C1F0E43B1D750F5ED09E /* VoiceReRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceReRecordView.swift; sourceTree = "<group>"; };
 		8EF23B3EDF50A557CDCE95D4 /* OnboardingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingContainerView.swift; sourceTree = "<group>"; };
+		90CDB18CF9840A88C133EDAB /* FogBlur.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FogBlur.swift; sourceTree = "<group>"; };
 		923A062151B5E1F46501C54F /* BoopLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopLoadingView.swift; sourceTree = "<group>"; };
 		93CC44B9B2F3700C4DD249EC /* BoopWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopWidget.swift; sourceTree = "<group>"; };
 		9574B0F10FEF2D9E6173B6E0 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
@@ -362,6 +366,7 @@
 		141394AF913C0A03CCB611DC /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				34EB1C2003C6FA6B86DC7EFD /* BlurredPortrait.swift */,
 				26D64AE4CFDA067C50BEBA55 /* BoopButton.swift */,
 				1F39826327683D7E5EF87BC5 /* BoopCard.swift */,
 				2FA9F5EEBF8CF7D98A0B2C7D /* BoopDatePicker.swift */,
@@ -375,6 +380,7 @@
 				132CAFE422EF6ACBEB9C7048 /* BoopTextField.swift */,
 				9FD9EF89443D1BBB96EB6DE6 /* BoopToast.swift */,
 				894D0C09E20C3C291A0909EB /* BoopVoiceRecorder.swift */,
+				90CDB18CF9840A88C133EDAB /* FogBlur.swift */,
 				3E8FE0178447D54BB0C9921A /* RealtimeStatusBanner.swift */,
 				0450374F212748FF68D5E0B7 /* SkeletonView.swift */,
 			);
@@ -1093,6 +1099,7 @@
 				3C52AE17EA6BE25CF1F2495C /* BadgesViewModel.swift in Sources */,
 				BB97631AD9283C0097065F9F /* BasicInfoView.swift in Sources */,
 				D083B9B0B692B069908D435C /* BioView.swift in Sources */,
+				06D3B7766D1C9B04E1B93F4E /* BlurredPortrait.swift in Sources */,
 				CCB52AD25863617AEF10B183 /* BoopApp.swift in Sources */,
 				61B07C0B60F7447CE49C4DAF /* BoopButton.swift in Sources */,
 				6D8A4CAD23721B8BF9FF1AF8 /* BoopCard.swift in Sources */,
@@ -1128,6 +1135,7 @@
 				140CE73E0BBA56F8E3E4BF11 /* DiscoverModels.swift in Sources */,
 				1C1745AF661D78CA4CA28230 /* DiscoverView.swift in Sources */,
 				8898615D32DA44830750F512 /* DiscoverViewModel.swift in Sources */,
+				DD88BDAAAEE75B29D72C49EC /* FogBlur.swift in Sources */,
 				C11EFE488E9A8880D0F05FAC /* Font+Boop.swift in Sources */,
 				87D8BBA0DADB445A317AB4F1 /* GameHistoryView.swift in Sources */,
 				82B8D9B9B5A2B35D33C88AAA /* GameModels.swift in Sources */,
