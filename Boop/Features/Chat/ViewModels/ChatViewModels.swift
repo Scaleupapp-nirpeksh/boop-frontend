@@ -55,8 +55,22 @@ final class ChatConversationViewModel {
     var isLoadingStarters = false
     var hasLoadedStarters = false
 
+    // Comfort score (drives "The Fog" background density)
+    var comfortScore: Int?
+
     init(conversation: ConversationInfo) {
         self.conversation = conversation
+    }
+
+    @MainActor
+    func loadComfort() async {
+        guard let matchId = conversation.matchId else { return }
+        do {
+            let response: ComfortScoreResponse = try await APIClient.shared.request(.getComfortScore(matchId: matchId))
+            comfortScore = response.score
+        } catch {
+            // Non-critical — the fog just stays at its current density.
+        }
     }
 
     @MainActor

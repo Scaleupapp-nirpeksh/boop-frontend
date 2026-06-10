@@ -230,14 +230,30 @@ struct ChatConversationView: View {
     @State private var showReportSheet = false
     @State private var showBlockConfirm = false
     @State private var showBlockError = false
+    @State private var showComfortDetail = false
 
     init(conversation: ConversationInfo) {
         self.conversation = conversation
         _viewModel = State(initialValue: ChatConversationViewModel(conversation: conversation))
     }
 
+    private var fogBlurRadius: CGFloat {
+        FogBlur.radius(forComfort: viewModel.comfortScore, stage: conversation.matchStage)
+    }
+
     var body: some View {
-        VStack(spacing: 0) {
+        ZStack {
+            if let photo = conversation.otherUser.photo {
+                BoopRemoteImage(urlString: photo) { Color.clear }
+                    .blur(radius: fogBlurRadius)
+                    .animation(.easeInOut(duration: 0.6), value: fogBlurRadius)
+                    .overlay(BoopColors.chatBackground.opacity(0.82))
+                    .ignoresSafeArea()
+            } else {
+                BoopColors.chatBackground.ignoresSafeArea()
+            }
+
+            VStack(spacing: 0) {
             if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 HStack {
                     Text("\(filteredMessages.count) result\(filteredMessages.count == 1 ? "" : "s")")
@@ -308,7 +324,7 @@ struct ChatConversationView: View {
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.md)
                 }
-                .background(BoopColors.chatBackground)
+                .background(Color.clear)
                 .onChange(of: viewModel.messages.count) { _, _ in
                     if let last = viewModel.messages.last {
                         withAnimation(.easeOut(duration: 0.2)) {
@@ -332,6 +348,7 @@ struct ChatConversationView: View {
             }
 
             composer
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -367,6 +384,16 @@ struct ChatConversationView: View {
                         Text(conversation.otherUser.isOnline == true ? "Online" : "Offline")
                             .font(BoopTypography.caption)
                             .foregroundStyle(conversation.otherUser.isOnline == true ? BoopColors.success : BoopColors.textMuted)
+
+                        if let comfort = viewModel.comfortScore,
+                           conversation.matchStage != "revealed",
+                           conversation.matchStage != "dating" {
+                            Button { showComfortDetail = true } label: {
+                                Text("the fog is lifting · \(comfort)/70")
+                                    .font(.nunito(.semiBold, size: 11))
+                                    .foregroundStyle(BoopColors.brand)
+                            }
+                        }
                     }
                 }
             }
@@ -409,6 +436,11 @@ struct ChatConversationView: View {
                 contentType: "message"
             )
         }
+        .sheet(isPresented: $showComfortDetail) {
+            if let matchId = conversation.matchId {
+                NavigationStack { MatchDetailView(matchId: matchId) }
+            }
+        }
         .confirmationDialog(
             "Block \(conversation.otherUser.firstName ?? "this user")?",
             isPresented: $showBlockConfirm,
@@ -429,6 +461,7 @@ struct ChatConversationView: View {
         .task {
             voiceRecorderState.minDuration = 1
             voiceRecorderState.maxDuration = 120
+            await viewModel.loadComfort()
             await viewModel.loadMessages()
         }
         .onDisappear {
