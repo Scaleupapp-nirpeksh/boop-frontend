@@ -13,7 +13,7 @@ struct BoopCard<Content: View>: View {
                     .fill(BoopColors.surfaceElevated)
                     .overlay(
                         RoundedRectangle(cornerRadius: radius, style: .continuous)
-                            .stroke(Color.white.opacity(0.8), lineWidth: 1)
+                            .stroke(BoopColors.border, lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.08), radius: 18, x: 0, y: 10)
             }

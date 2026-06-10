@@ -689,7 +689,7 @@ struct ChatConversationView: View {
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(BoopColors.textPrimary)
                         .frame(width: 40, height: 40)
-                        .background(Color.white)
+                        .background(BoopColors.surface)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Send photo")
@@ -698,7 +698,7 @@ struct ChatConversationView: View {
                     .font(BoopTypography.body)
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.sm)
-                    .background(.white)
+                    .background(BoopColors.surface)
                     .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
                     .onChange(of: viewModel.draft) { _, newValue in
                         let hasText = !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -718,7 +718,7 @@ struct ChatConversationView: View {
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(BoopColors.textPrimary)
                         .frame(width: 40, height: 40)
-                        .background(Color.white)
+                        .background(BoopColors.surface)
                         .clipShape(Circle())
                 }
                 .accessibilityLabel("Record voice note")
@@ -744,7 +744,7 @@ struct ChatConversationView: View {
         .padding(.horizontal, BoopSpacing.md)
         .padding(.top, BoopSpacing.sm)
         .padding(.bottom, BoopSpacing.md)
-        .background(Color.white.shadow(color: .black.opacity(0.05), radius: 12, y: -4))
+        .background(BoopColors.surface.shadow(color: .black.opacity(0.05), radius: 12, y: -4))
     }
 }
 
