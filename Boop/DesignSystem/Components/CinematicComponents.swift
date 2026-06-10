@@ -73,8 +73,8 @@ struct VoiceLine: View {
     var body: some View {
         HStack(spacing: BoopSpacing.sm) {
             Button(action: onTap) {
-                Image(systemName: isPlaying ? "pause" : "play.fill")
-                    .font(.system(size: 12, weight: .thin))
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                    .font(.system(size: 11, weight: .regular))
                     .foregroundStyle(BoopColors.textPrimary)
                     .frame(width: 36, height: 36)
                     .overlay(Circle().stroke(BoopColors.textPrimary.opacity(0.5), lineWidth: 1))
