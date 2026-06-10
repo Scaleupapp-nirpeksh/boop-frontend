@@ -11,6 +11,7 @@
 		05B5732C7B0EFF21B41CE60C /* BoopLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0606CC5A6407FD08137E3B9B /* BoopLogo.swift */; };
 		06D3B7766D1C9B04E1B93F4E /* BlurredPortrait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34EB1C2003C6FA6B86DC7EFD /* BlurredPortrait.swift */; };
 		086CDD0B4259FBB1A2562C18 /* BoopToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD9EF89443D1BBB96EB6DE6 /* BoopToast.swift */; };
+		088E322E7453FB902A8419F8 /* GoneQuietCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7A0803A805D3BAC3F37F0B /* GoneQuietCard.swift */; };
 		0950BF0A22643698D4F8E299 /* GameViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31DF5B70630F5C2F54E7FF54 /* GameViews.swift */; };
 		0A431C971F44D965C99BADEA /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB396920630F58CB0C2DD99D /* AuthViewModel.swift */; };
 		0AC868C094C006BC56C523C9 /* APIModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 218D490AF95F946C1C381CE5 /* APIModels.swift */; };
@@ -303,6 +304,7 @@
 		EA8BD2A5881D210A06A5888D /* BoopPhoneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopPhoneInput.swift; sourceTree = "<group>"; };
 		EB0906A0A2C8E499A39AFB55 /* PhoneInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneInputView.swift; sourceTree = "<group>"; };
 		EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
+		EC7A0803A805D3BAC3F37F0B /* GoneQuietCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoneQuietCard.swift; sourceTree = "<group>"; };
 		EF40A424CE2A2723294A4A05 /* APIEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIEndpoint.swift; sourceTree = "<group>"; };
 		F4012798854623C6A1B6B050 /* CompatibilityDeepDiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityDeepDiveView.swift; sourceTree = "<group>"; };
 		F45F291A1D7C182F182A5B80 /* Nunito-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-ExtraBold.ttf"; sourceTree = "<group>"; };
@@ -542,6 +544,7 @@
 			children = (
 				F4012798854623C6A1B6B050 /* CompatibilityDeepDiveView.swift */,
 				A7A8A9661141D72563FDA5BD /* DatePlanView.swift */,
+				EC7A0803A805D3BAC3F37F0B /* GoneQuietCard.swift */,
 				40AB0A3C49A151B2D0D4E031 /* MatchDetailView.swift */,
 				9C54AE3DF0970CDFB31C7B95 /* RelationshipInsightsView.swift */,
 				B283A6EF2B73A48BC3A6BB8B /* ScoreProgressView.swift */,
@@ -1154,6 +1157,7 @@
 				82B8D9B9B5A2B35D33C88AAA /* GameModels.swift in Sources */,
 				11C22129887F201357BBF605 /* GameViewModels.swift in Sources */,
 				0950BF0A22643698D4F8E299 /* GameViews.swift in Sources */,
+				088E322E7453FB902A8419F8 /* GoneQuietCard.swift in Sources */,
 				C3FB7E69F1BEC6BE14A970D5 /* Haptics.swift in Sources */,
 				1FA5D7865D63B150720FE0AF /* HomeView.swift in Sources */,
 				45CC2B5510A5B79ABD6C4675 /* HomeViewModel.swift in Sources */,

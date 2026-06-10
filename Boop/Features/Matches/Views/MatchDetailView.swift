@@ -10,6 +10,7 @@ struct MatchDetailView: View {
     @State private var showBlockConfirm = false
     @State private var showBlockError = false
     @State private var showClearing = false
+    @State private var showLetGoConfirm = false
 
     init(matchId: String) {
         self.matchId = matchId
@@ -21,6 +22,7 @@ struct MatchDetailView: View {
             VStack(spacing: BoopSpacing.lg) {
                 heroCard
                 RealtimeStatusBanner()
+                goneQuietSection
                 boopAndStreakRow
                 scoreRow
                 if !viewModel.topInsights.isEmpty || viewModel.growthInsight != nil {
@@ -148,6 +150,18 @@ struct MatchDetailView: View {
         } message: {
             Text("Please check your connection and try again.")
         }
+        .confirmationDialog("Let this connection go?", isPresented: $showLetGoConfirm, titleVisibility: .visible) {
+            Button("Let it go", role: .destructive) {
+                Task {
+                    await viewModel.archive()
+                    NotificationCenter.default.post(name: .init("boop.blockedUser"), object: nil)
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This archives the conversation and frees a spot in Discover for someone new.")
+        }
         .fullScreenCover(isPresented: $showClearing) {
             TheClearingView(
                 name: viewModel.detail?.otherUser?.firstName ?? "Your match",
@@ -185,6 +199,26 @@ struct MatchDetailView: View {
             guard let payload = notification.userInfo?["payload"] as? BoopSocketEvent,
                   payload.matchId == matchId else { return }
             Task { await viewModel.load() }
+        }
+    }
+
+    private var isStalled: Bool {
+        guard let d = viewModel.detail else { return false }
+        let active = d.stage != "revealed" && d.stage != "dating" && d.stage != "archived"
+        let coldStreak = (d.streak?.current ?? 0) == 0
+        let lowComfort = (d.comfortScore ?? 0) < 70
+        return active && coldStreak && lowComfort
+    }
+
+    @ViewBuilder
+    private var goneQuietSection: some View {
+        if isStalled {
+            GoneQuietCard(
+                name: viewModel.detail?.otherUser?.firstName ?? "This match",
+                onBoop: { Task { await viewModel.sendBoop() } },
+                onLetGo: { showLetGoConfirm = true }
+            )
+            .padding(.horizontal, -BoopSpacing.xl)
         }
     }
 
