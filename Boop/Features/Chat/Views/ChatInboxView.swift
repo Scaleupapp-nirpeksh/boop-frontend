@@ -214,6 +214,7 @@ private struct ChatInboxRow: View {
 struct ChatConversationView: View {
     let conversation: ConversationInfo
 
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel: ChatConversationViewModel
     @State private var audioPlayer = RemoteAudioPlayer()
     @State private var remoteTypingUserId: String?
@@ -223,6 +224,8 @@ struct ChatConversationView: View {
     @State private var voiceRecorderState = VoiceRecorderState()
     @State private var searchText = ""
     @State private var expandedImageURL: String?
+    @State private var showReportSheet = false
+    @State private var showBlockConfirm = false
 
     init(conversation: ConversationInfo) {
         self.conversation = conversation
@@ -376,6 +379,42 @@ struct ChatConversationView: View {
                         .foregroundStyle(BoopColors.textSecondary)
                 }
             }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        showReportSheet = true
+                    } label: {
+                        Label("Report", systemImage: "flag")
+                    }
+                    Button(role: .destructive) {
+                        showBlockConfirm = true
+                    } label: {
+                        Label("Block", systemImage: "hand.raised")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+                .accessibilityLabel("Conversation options")
+            }
+        }
+        .sheet(isPresented: $showReportSheet) {
+            ReportUserSheet(
+                userId: conversation.otherUser.userId,
+                userName: conversation.otherUser.firstName ?? "this user",
+                contentType: "message"
+            )
+        }
+        .confirmationDialog(
+            "Block \(conversation.otherUser.firstName ?? "this user")?",
+            isPresented: $showBlockConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Block", role: .destructive) {
+                Task { await blockOtherUser() }
+            }
+        } message: {
+            Text("They won't be able to message you, this match will be removed, and they won't appear in Discover. They won't be notified.")
         }
         .searchable(text: $searchText, prompt: "Search messages")
         .task {
@@ -465,6 +504,17 @@ struct ChatConversationView: View {
             if let urlString = expandedImageURL {
                 ImageViewerView(imageURL: urlString)
             }
+        }
+    }
+
+    private func blockOtherUser() async {
+        let userId = conversation.otherUser.userId
+        do {
+            try await APIClient.shared.requestVoid(.blockUser(userId: userId))
+            Haptics.success()
+            dismiss()
+        } catch {
+            // Block failed — leave the conversation open; user can retry from the menu
         }
     }
 
