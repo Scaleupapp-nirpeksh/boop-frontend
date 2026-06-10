@@ -91,6 +91,13 @@ enum APIEndpoint {
     case addReaction(messageId: String, emoji: String)
     case removeReaction(messageId: String)
 
+    // Safety
+    case blockUser(userId: String)
+    case unblockUser(userId: String)
+    case getBlockedUsers
+    case reportUser(ReportUserRequest)
+    case deleteAccount
+
     var path: String {
         switch self {
         case .sendOTP: return "/auth/send-otp"
@@ -169,6 +176,11 @@ enum APIEndpoint {
         case .markConversationRead(let conversationId): return "/messages/conversations/\(conversationId)/read"
         case .addReaction(let messageId, _): return "/messages/\(messageId)/reactions"
         case .removeReaction(let messageId): return "/messages/\(messageId)/reactions"
+        case .blockUser: return "/safety/block"
+        case .unblockUser(let userId): return "/safety/block/\(userId)"
+        case .getBlockedUsers: return "/safety/blocked"
+        case .reportUser: return "/safety/report"
+        case .deleteAccount: return "/profile"
         }
     }
 
@@ -180,7 +192,8 @@ enum APIEndpoint {
              .setGameReady,
              .proposeDatePlan, .setSafetyContact, .toggleLocationSharing, .submitCheckIn,
              .uploadConversationMedia,
-             .sendMessage, .addReaction:
+             .sendMessage, .addReaction,
+             .blockUser, .reportUser:
             return .POST
         case .me, .getProfile, .getQuestions, .getQuestionsProgress, .getQuestionHistory, .getPersonalityAnalysis,
              .getBadges,
@@ -189,7 +202,8 @@ enum APIEndpoint {
              .getGame, .getGamesForMatch,
              .getScoreHistory, .getRelationshipInsights, .getConversationStarters, .getCompatibilityDeepDive,
              .getNotifications, .getUnreadNotificationCount,
-             .getConversations, .getMessages, .getConversationMedia:
+             .getConversations, .getMessages, .getConversationMedia,
+             .getBlockedUsers:
             return .GET
         case .updateBasicInfo, .reorderPhotos, .updateFCMToken, .updateNotificationPreferences:
             return .PUT
@@ -197,7 +211,8 @@ enum APIEndpoint {
              .cancelGame, .markConversationRead,
              .markNotificationRead, .markAllNotificationsRead:
             return .PATCH
-        case .deletePhoto, .removeReaction, .deleteNotification, .cancelDatePlan:
+        case .deletePhoto, .removeReaction, .deleteNotification, .cancelDatePlan,
+             .unblockUser, .deleteAccount:
             return .DELETE
         }
     }
@@ -235,6 +250,8 @@ enum APIEndpoint {
         case .setSafetyContact(_, let name, let phone): return SafetyContactRequest(name: name, phone: phone)
         case .toggleLocationSharing(_, let enabled): return ["enabled": enabled]
         case .submitCheckIn(_, let status): return ["status": status]
+        case .blockUser(let userId): return ["userId": userId]
+        case .reportUser(let req): return req
         default: return nil
         }
     }
