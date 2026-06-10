@@ -60,6 +60,7 @@
 		3EE49078A03DF245297C3441 /* BadgesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3D2AC274A2B9A32809D753A5 /* BadgesView.swift */; };
 		41ECD3ABC0A890E7326FB37D /* VoiceIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D436A6FB3C25F4E0F3F9CB9A /* VoiceIntroView.swift */; };
 		45CC2B5510A5B79ABD6C4675 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA3E5BFFB4A1AD93DFE61665 /* HomeViewModel.swift */; };
+		469301EB0FB81E4CEA536047 /* DailyQuestionBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D15B1DF68187B8D5043B486 /* DailyQuestionBand.swift */; };
 		47FBA73005A732CCEDB18823 /* BoopOTPField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D28CFE574E0E98548E7307B /* BoopOTPField.swift */; };
 		4AACBDB75A4F65103E56837C /* ChatViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5425D364859FF6F53635BBC5 /* ChatViewModels.swift */; };
 		503673077A96B16243A34C7D /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9969DF4B5D3BCB5F87F5F0FD /* APIError.swift */; };
@@ -227,6 +228,7 @@
 		54F2C79B8AC91FC57243E7EB /* ChatInboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatInboxView.swift; sourceTree = "<group>"; };
 		55764FEA4CE82211D2A89672 /* DatePlanViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePlanViewModel.swift; sourceTree = "<group>"; };
 		57139ABD53872F8E60B3EC82 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		5D15B1DF68187B8D5043B486 /* DailyQuestionBand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyQuestionBand.swift; sourceTree = "<group>"; };
 		617F21A799BDE07195956D7F /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 		62207F99BBB7A440846C28FA /* PhotoUploadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoUploadView.swift; sourceTree = "<group>"; };
 		6553E19A0034FF2B0A6B0760 /* Nunito-Italic[wght].ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Italic[wght].ttf"; sourceTree = "<group>"; };
@@ -455,6 +457,7 @@
 			children = (
 				BB7F0E94EA9ED5042DE56FBC /* CandidateCardView.swift */,
 				8ABD35B948632E31FF8A83A6 /* ConnectionCard.swift */,
+				5D15B1DF68187B8D5043B486 /* DailyQuestionBand.swift */,
 				43FD0C7F2FCD06C212A5A55C /* HomeView.swift */,
 				DAF6DF29BBEFCFF786D4603A /* MatchCelebrationView.swift */,
 				915A69A9EC48C0A5A7785779 /* MomentHeroCard.swift */,
@@ -1135,6 +1138,7 @@
 				822AB92F1223B551AB9BBAE5 /* ConnectNoteSheet.swift in Sources */,
 				CA1FD6B822DD43BC93B69A8F /* ConnectionCard.swift in Sources */,
 				F090D5D535BA96C51E9843B8 /* ConversationStartersCard.swift in Sources */,
+				469301EB0FB81E4CEA536047 /* DailyQuestionBand.swift in Sources */,
 				BCA17B2FBEFDDE53983BA231 /* Date+Boop.swift in Sources */,
 				39059AAA00201F98AFF8CF41 /* DatePlanView.swift in Sources */,
 				2B311C746E07F5E22CC3DD9E /* DatePlanViewModel.swift in Sources */,

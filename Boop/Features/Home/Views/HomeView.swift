@@ -10,27 +10,35 @@ struct HomeView: View {
         ZStack {
             ScrollView {
                 VStack(spacing: BoopSpacing.xl) {
-                    header
+                    greetingHeader
 
-                    if let season = ActiveSeason.current {
-                        seasonalBanner(season)
+                    if let hero = heroMatch {
+                        NavigationLink {
+                            MatchDetailView(matchId: hero.matchId)
+                        } label: {
+                            MomentHeroCard(match: hero)
+                                .padding(.horizontal, BoopSpacing.xl)
+                        }
+                        .buttonStyle(.plain)
                     }
 
-                    if viewModel.newQuestionsCount > 0 {
-                        newQuestionsBanner
+                    if !viewModel.activeMatches.isEmpty {
+                        YourPeopleRow(matches: viewModel.activeMatches)
                     }
 
-                    connectionsSection
+                    DailyQuestionBand(newCount: viewModel.newQuestionsCount) {
+                        viewModel.showQuestionsSheet = true
+                    }
 
                     if !viewModel.incomingPendingLikes.isEmpty || !viewModel.outgoingPendingLikes.isEmpty {
                         activitySection
+                    } else if viewModel.activeMatches.isEmpty {
+                        emptyDiscoverPrompt
                     }
                 }
                 .padding(.vertical, BoopSpacing.lg)
             }
-            .refreshable {
-                await viewModel.refresh()
-            }
+            .refreshable { await viewModel.refresh() }
 
             if viewModel.showMatchCelebration {
                 MatchCelebrationView(
@@ -81,200 +89,76 @@ struct HomeView: View {
         }
     }
 
-    // MARK: - Header
+    // MARK: - Greeting Header
 
-    private var header: some View {
-        ZStack(alignment: .topTrailing) {
-            RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [BoopColors.cardDark, BoopColors.cardDarkMidBlue, BoopColors.cardDarkOcean],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                        .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                )
-                .shadow(color: Color.black.opacity(0.14), radius: 22, y: 14)
-
-            Circle()
-                .fill(BoopColors.secondary.opacity(0.18))
-                .frame(width: 160, height: 160)
-                .blur(radius: 10)
-                .offset(x: 30, y: -24)
-
-            Circle()
-                .fill(BoopColors.primary.opacity(0.2))
-                .frame(width: 140, height: 140)
-                .blur(radius: 12)
-                .offset(x: -170, y: -40)
-
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("boop")
-                            .font(.nunito(.extraBold, size: 28))
-                            .foregroundStyle(Color.white.opacity(0.92))
-
-                        Text("Welcome back, \(AuthManager.shared.currentUser?.firstName ?? "you")")
-                            .font(BoopTypography.title3)
-                            .foregroundStyle(.white)
-
-                        Text(dailySummary)
-                            .font(BoopTypography.body)
-                            .foregroundStyle(Color.white.opacity(0.72))
-                    }
-
-                    Spacer()
-
-                    NavigationLink(value: NotificationRoute()) {
-                        ZStack(alignment: .topTrailing) {
-                            Circle()
-                                .fill(Color.white.opacity(0.12))
-                                .frame(width: 44, height: 44)
-                                .overlay(
-                                    Image(systemName: "bell.fill")
-                                        .font(.system(size: 18, weight: .semibold))
-                                        .foregroundStyle(.white)
-                                )
-
-                            if notificationVM.unreadCount > 0 {
-                                Text(notificationVM.unreadCount > 99 ? "99+" : "\(notificationVM.unreadCount)")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, 5)
-                                    .padding(.vertical, 1)
-                                    .background(BoopColors.primary)
-                                    .clipShape(Capsule())
-                                    .offset(x: 4, y: -2)
-                            }
-                        }
-                    }
-                    .accessibilityLabel("Notifications\(notificationVM.unreadCount > 0 ? ", \(notificationVM.unreadCount) unread" : "")")
-                }
-
-                HStack(spacing: BoopSpacing.sm) {
-                    statCard(value: "\(viewModel.activeMatches.count)", label: "Connections", tint: BoopColors.secondary)
-                    statCard(value: "\(viewModel.incomingPendingLikes.count)", label: "Liked you", tint: BoopColors.primary)
-                    statCard(value: "\(viewModel.newQuestionsCount)", label: "New prompts", tint: BoopColors.accent)
-                }
-
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(Color.white.opacity(0.7))
-                }
-            }
-            .padding(BoopSpacing.lg)
-        }
-        .padding(.horizontal, BoopSpacing.xl)
+    /// The connection closest to the reveal — the hero of the feed.
+    private var heroMatch: MatchInfo? {
+        viewModel.activeMatches.max(by: { ($0.comfortScore ?? 0) < ($1.comfortScore ?? 0) })
     }
 
-    // MARK: - Questions Banner
-
-    private var newQuestionsBanner: some View {
-        Button {
-            viewModel.showQuestionsSheet = true
-        } label: {
-            BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                    Circle()
-                        .fill(BoopColors.goldenAccent.opacity(0.18))
-                        .frame(width: 44, height: 44)
-                        .overlay(
-                            Image(systemName: "sparkles")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(BoopColors.goldenAccent)
-                        )
-
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(viewModel.newQuestionsCount) new question\(viewModel.newQuestionsCount == 1 ? "" : "s") unlocked")
-                            .font(BoopTypography.callout)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(BoopColors.textPrimary)
-
-                        Text("Answer them to improve your profile.")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textPrimary.opacity(0.68))
-                    }
-
-                    Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(BoopColors.textMuted)
-                }
+    private var greetingHeader: some View {
+        HStack(alignment: .center) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("good evening")
+                    .font(.nunito(.medium, size: 13))
+                    .foregroundStyle(BoopColors.textSecondary)
+                Text(AuthManager.shared.currentUser?.firstName ?? "you")
+                    .font(.nunito(.extraBold, size: 26))
+                    .foregroundStyle(BoopColors.textPrimary)
             }
-            .background(
-                RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                    .fill(BoopColors.surfaceGoldenBanner)
-            )
-        }
-        .padding(.horizontal, BoopSpacing.xl)
-    }
-
-    // MARK: - Connections (full-width cards, vertical)
-
-    private var connectionsSection: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Your Connections")
-                        .font(BoopTypography.headline)
+            Spacer()
+            if let streak = topStreak, streak > 0 {
+                Text("🔥 \(streak)")
+                    .font(.nunito(.bold, size: 13))
+                    .foregroundStyle(BoopColors.brand)
+                    .padding(.horizontal, BoopSpacing.sm)
+                    .padding(.vertical, 6)
+                    .background(BoopColors.backgroundBlush)
+                    .clipShape(Capsule())
+            }
+            NavigationLink(value: NotificationRoute()) {
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: "bell.fill")
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(BoopColors.textPrimary)
-                    Text("People you've matched with")
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.textSecondary)
-                }
-                Spacer()
-                if !viewModel.activeMatches.isEmpty {
-                    Text("\(viewModel.activeMatches.count)")
-                        .font(BoopTypography.caption)
-                        .fontWeight(.bold)
-                        .foregroundStyle(BoopColors.secondary)
-                        .padding(.horizontal, BoopSpacing.xs)
-                        .padding(.vertical, 3)
-                        .background(BoopColors.secondary.opacity(0.12))
-                        .clipShape(Capsule())
-                }
-            }
-            .padding(.horizontal, BoopSpacing.xl)
-
-            if viewModel.activeMatches.isEmpty {
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    VStack(spacing: BoopSpacing.sm) {
-                        Image(systemName: "person.2.circle")
-                            .font(.system(size: 36))
-                            .foregroundStyle(BoopColors.secondary.opacity(0.5))
-
-                        Text("No connections yet")
-                            .font(BoopTypography.callout)
-                            .foregroundStyle(BoopColors.textPrimary)
-
-                        Text("Head to Discover to find your first connection.")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textSecondary)
-                            .multilineTextAlignment(.center)
-                    }
-                    .frame(maxWidth: .infinity)
-                }
-                .padding(.horizontal, BoopSpacing.xl)
-            } else {
-                VStack(spacing: BoopSpacing.xs) {
-                    ForEach(viewModel.activeMatches) { match in
-                        NavigationLink {
-                            MatchDetailView(matchId: match.matchId)
-                        } label: {
-                            ConnectionCard(match: match)
-                        }
-                        .buttonStyle(.plain)
+                        .frame(width: 44, height: 44)
+                        .background(BoopColors.surface)
+                        .clipShape(Circle())
+                    if notificationVM.unreadCount > 0 {
+                        Text(notificationVM.unreadCount > 99 ? "99+" : "\(notificationVM.unreadCount)")
+                            .font(.system(size: 10, weight: .bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 5).padding(.vertical, 1)
+                            .background(BoopColors.brand)
+                            .clipShape(Capsule())
+                            .offset(x: 4, y: -2)
                     }
                 }
-                .padding(.horizontal, BoopSpacing.xl)
             }
+            .accessibilityLabel("Notifications")
         }
+        .padding(.horizontal, BoopSpacing.xl)
+    }
+
+    private var topStreak: Int? {
+        viewModel.activeMatches.compactMap { $0.streak?.current }.max()
+    }
+
+    private var emptyDiscoverPrompt: some View {
+        VStack(spacing: BoopSpacing.sm) {
+            Text("✨").font(.system(size: 36))
+            Text("Find your first connection")
+                .font(.nunito(.bold, size: 16))
+                .foregroundStyle(BoopColors.textPrimary)
+            Text("Head to Discover to meet someone whose answers match yours.")
+                .font(.nunito(.regular, size: 13))
+                .foregroundStyle(BoopColors.textSecondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(BoopSpacing.xl)
+        .boopCard(radius: BoopRadius.xxl)
+        .padding(.horizontal, BoopSpacing.xl)
     }
 
     // MARK: - Activity (incoming + outgoing pending likes, compact)
@@ -398,36 +282,6 @@ struct HomeView: View {
         .padding(.horizontal, BoopSpacing.xl)
     }
 
-    // MARK: - Helpers
-
-    private var dailySummary: String {
-        if !viewModel.incomingPendingLikes.isEmpty {
-            return "\(viewModel.incomingPendingLikes.count) people liked you."
-        }
-        if viewModel.newQuestionsCount > 0 {
-            return "You have fresh prompts waiting."
-        }
-        if !viewModel.activeMatches.isEmpty {
-            return "\(viewModel.activeMatches.count) active connections."
-        }
-        return "Head to Discover to find your next match."
-    }
-
-    private func statCard(value: String, label: String, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(BoopTypography.title3)
-                .foregroundStyle(tint)
-
-            Text(label)
-                .font(BoopTypography.caption)
-                .foregroundStyle(Color.white.opacity(0.65))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BoopSpacing.md)
-        .background(Color.white.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
-    }
 }
 
 // MARK: - Pending Row (compact inline item with note support)
