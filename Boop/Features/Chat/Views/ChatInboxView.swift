@@ -397,7 +397,7 @@ struct ChatConversationView: View {
         }
         .sheet(isPresented: $showGames) {
             if let matchId = conversation.matchId {
-                NavigationStack { MatchDetailView(matchId: matchId) }
+                NavigationStack { MatchGamesView(matchId: matchId) }
                     .presentationDragIndicator(.visible)
             }
         }
