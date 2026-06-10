@@ -6,6 +6,9 @@ struct ProfileView: View {
     @State private var audioPlayer = RemoteAudioPlayer()
     @State private var selectedPhotoItems: [PhotosPickerItem] = []
     @State private var draggedPhotoId: String?
+    @State private var showDeleteConfirm = false
+    @State private var showDeleteError = false
+    @State private var isDeleting = false
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -524,7 +527,39 @@ struct ProfileView: View {
             BoopButton(title: "Log Out", variant: .outline) {
                 AuthManager.shared.logout()
             }
+
+            BoopButton(
+                title: isDeleting ? "Deleting…" : "Delete Account",
+                variant: .outline,
+                isDisabled: isDeleting
+            ) {
+                showDeleteConfirm = true
+            }
+            .alert("Delete your account?", isPresented: $showDeleteConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete Forever", role: .destructive) {
+                    Task { await deleteAccount() }
+                }
+            } message: {
+                Text("This permanently deletes your profile, photos, voice intro, answers, matches, and conversations. This cannot be undone.")
+            }
+            .alert("Couldn't delete your account", isPresented: $showDeleteError) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text("Please check your connection and try again.")
+            }
         }
+    }
+
+    private func deleteAccount() async {
+        isDeleting = true
+        do {
+            try await APIClient.shared.requestVoid(.deleteAccount)
+            AuthManager.shared.logout()
+        } catch {
+            showDeleteError = true
+        }
+        isDeleting = false
     }
 
     private var displayName: String {
