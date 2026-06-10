@@ -115,6 +115,7 @@
 		BABCEFF076D4AB34D7C5E9C1 /* BoopTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 132CAFE422EF6ACBEB9C7048 /* BoopTextField.swift */; };
 		BB97631AD9283C0097065F9F /* BasicInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AAD0E6FB6BAF8739B306E71 /* BasicInfoView.swift */; };
 		BCA17B2FBEFDDE53983BA231 /* Date+Boop.swift in Sources */ = {isa = PBXBuildFile; fileRef = F776D60494C2E973E7537B03 /* Date+Boop.swift */; };
+		BF294D516D76E3EEBE73275D /* CinematicComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A41924F14E14AAFB912108F8 /* CinematicComponents.swift */; };
 		BF2E07D0EE8421EE92B9AFA1 /* PhoneInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB0906A0A2C8E499A39AFB55 /* PhoneInputView.swift */; };
 		C11EFE488E9A8880D0F05FAC /* Font+Boop.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03995C1D17FC41D3B6E90B3E /* Font+Boop.swift */; };
 		C23E2438E91B1BDBB2FC7B7D /* Nunito-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 35AA7E4EF715EF9C62CF905E /* Nunito-Regular.ttf */; };
@@ -271,6 +272,7 @@
 		9E222CBF6A7D59940EE3EC24 /* NotificationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationModels.swift; sourceTree = "<group>"; };
 		9FD9EF89443D1BBB96EB6DE6 /* BoopToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopToast.swift; sourceTree = "<group>"; };
 		A28BD38D498697A15879B8EB /* APIResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIResponse.swift; sourceTree = "<group>"; };
+		A41924F14E14AAFB912108F8 /* CinematicComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CinematicComponents.swift; sourceTree = "<group>"; };
 		A7A8A9661141D72563FDA5BD /* DatePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePlanView.swift; sourceTree = "<group>"; };
 		AA8265325BEB7E7C4496563E /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		AB86FAE3A127ED7BFE0B78B2 /* GameHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameHistoryView.swift; sourceTree = "<group>"; };
@@ -390,6 +392,7 @@
 				132CAFE422EF6ACBEB9C7048 /* BoopTextField.swift */,
 				9FD9EF89443D1BBB96EB6DE6 /* BoopToast.swift */,
 				894D0C09E20C3C291A0909EB /* BoopVoiceRecorder.swift */,
+				A41924F14E14AAFB912108F8 /* CinematicComponents.swift */,
 				90CDB18CF9840A88C133EDAB /* FogBlur.swift */,
 				3E8FE0178447D54BB0C9921A /* RealtimeStatusBanner.swift */,
 				0450374F212748FF68D5E0B7 /* SkeletonView.swift */,
@@ -1138,6 +1141,7 @@
 				EDAEA0907804C4F6C4CF5AB6 /* ChatMediaGalleryView.swift in Sources */,
 				7EE1A9DA23D844BAC0E32251 /* ChatMediaGalleryViewModel.swift in Sources */,
 				4AACBDB75A4F65103E56837C /* ChatViewModels.swift in Sources */,
+				BF294D516D76E3EEBE73275D /* CinematicComponents.swift in Sources */,
 				FAE5210D17083D6C3E3AB370 /* Color+Boop.swift in Sources */,
 				30B3E0052B41EC677AB1DA30 /* CompatibilityDeepDiveView.swift in Sources */,
 				AB981E3490A3A9C9B9C6D71A /* CompatibilityDeepDiveViewModel.swift in Sources */,

@@ -27,17 +27,18 @@ struct BoopButton: View {
                         .scaleEffect(0.9)
                 }
                 Text(title)
-                    .font(BoopTypography.headline)
+                    .font(.system(size: 15, weight: .semibold))
+                    .tracking(0.5)
             }
             .frame(maxWidth: fullWidth ? .infinity : nil)
             .frame(height: 52)
             .padding(.horizontal, BoopSpacing.xl)
             .foregroundStyle(foregroundColor)
             .background(backgroundView)
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
             .overlay(overlayView)
             .shadow(
-                color: variant == .primary ? BoopColors.primary.opacity(0.3) : .clear,
+                color: variant == .primary ? BoopColors.accentColor.opacity(0.25) : .clear,
                 radius: 8,
                 x: 0,
                 y: 4
@@ -52,28 +53,34 @@ struct BoopButton: View {
     private var backgroundView: some View {
         switch variant {
         case .primary:
-            BoopColors.primaryGradient
-        case .secondary:
-            BoopColors.secondaryGradient
-        case .outline, .ghost:
+            BoopColors.accentColor
+        case .secondary, .outline, .ghost:
             Color.clear
         }
     }
 
     @ViewBuilder
     private var overlayView: some View {
-        if variant == .outline {
-            RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                .stroke(BoopColors.primary, lineWidth: 2)
+        switch variant {
+        case .secondary:
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        case .outline:
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.accentColor, lineWidth: 1)
+        case .primary, .ghost:
+            EmptyView()
         }
     }
 
     private var foregroundColor: Color {
         switch variant {
-        case .primary, .secondary:
+        case .primary:
             return .white
+        case .secondary:
+            return BoopColors.textPrimary
         case .outline:
-            return BoopColors.primary
+            return BoopColors.accentColor
         case .ghost:
             return BoopColors.textSecondary
         }

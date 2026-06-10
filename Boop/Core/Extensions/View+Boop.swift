@@ -4,16 +4,16 @@ extension View {
     func boopCard(radius: CGFloat = BoopRadius.lg, shadow: Bool = true) -> some View {
         self.background {
             RoundedRectangle(cornerRadius: radius, style: .continuous)
-                .fill(BoopColors.surfaceElevated)
+                .fill(BoopColors.surface)
                 .overlay(
                     RoundedRectangle(cornerRadius: radius, style: .continuous)
-                        .stroke(BoopColors.border, lineWidth: 1)
+                        .stroke(BoopColors.hairline, lineWidth: 1)
                 )
                 .shadow(
-                    color: shadow ? Color.black.opacity(0.08) : .clear,
-                    radius: 18,
+                    color: shadow ? Color.black.opacity(0.2) : .clear,
+                    radius: 12,
                     x: 0,
-                    y: 10
+                    y: 6
                 )
         }
     }
@@ -33,26 +33,14 @@ extension View {
 
 struct BoopAmbientBackground: View {
     var body: some View {
-        ZStack {
-            BoopColors.background.ignoresSafeArea()
+        ZStack(alignment: .topTrailing) {
+            BoopColors.ground.ignoresSafeArea()
 
             Circle()
-                .fill(BoopColors.brand.opacity(0.16))
+                .fill(BoopColors.accentColor.opacity(0.05))
                 .frame(width: 260, height: 260)
-                .blur(radius: 40)
-                .offset(x: -120, y: -260)
-
-            Circle()
-                .fill(BoopColors.brandViolet.opacity(0.16))
-                .frame(width: 240, height: 240)
-                .blur(radius: 36)
-                .offset(x: 140, y: -160)
-
-            Circle()
-                .fill(BoopColors.accent.opacity(0.10))
-                .frame(width: 220, height: 220)
-                .blur(radius: 38)
-                .offset(x: 110, y: 320)
+                .blur(radius: 60)
+                .offset(x: 80, y: -120)
         }
     }
 }
