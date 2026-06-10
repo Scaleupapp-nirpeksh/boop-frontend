@@ -83,6 +83,9 @@ targets:
         CFBundleDisplayName: UnMutee
         CFBundleShortVersionString: "1.0.0"
         CFBundleVersion: "11"
+        # App uses only standard HTTPS/TLS — exempt encryption. Auto-answers
+        # the App Store Connect export-compliance question for every build.
+        ITSAppUsesNonExemptEncryption: false
         UILaunchScreen:
           UIColorName: ""
           UIImageName: ""
