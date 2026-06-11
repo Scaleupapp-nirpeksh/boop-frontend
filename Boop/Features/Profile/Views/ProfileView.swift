@@ -13,16 +13,15 @@ struct ProfileView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                heroCard
-                statsCard
-                aboutCard
-                photosCard
-                voiceCard
-                actionsCard
+            VStack(alignment: .leading, spacing: BoopSpacing.xl) {
+                heroSection
+                statsSection
+                photosSection
+                voiceSection
+                meSection
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.bottom, BoopSpacing.xl)
         }
         .boopBackground()
         .navigationTitle("Me")
@@ -52,298 +51,237 @@ struct ProfileView: View {
         }
     }
 
-    private var heroCard: some View {
-        ZStack(alignment: .bottomLeading) {
-            RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                .fill(
-                    LinearGradient(
-                        colors: [BoopColors.cardDarkProfile, BoopColors.cardDarkDeepBlue, Color(hex: "356D70")],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(height: 240)
+    // MARK: - Hero
 
-            if let photoURL = viewModel.user?.photos?.profilePhoto?.url {
-                BoopRemoteImage(urlString: photoURL) {
-                    Rectangle().fill(Color.white.opacity(0.08))
-                }
-                .frame(height: 240)
-                .clipped()
-                .opacity(0.34)
-            }
-
-            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                Text(profileStatusText.uppercased())
-                    .font(BoopTypography.caption)
-                    .fontWeight(.bold)
-                    .kerning(1.1)
-                    .foregroundStyle(Color.white.opacity(0.7))
-
-                Text(displayName)
-                    .font(BoopTypography.title1)
-                    .foregroundStyle(.white)
-
-                Text(viewModel.user?.location?.city ?? "Location pending")
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(Color.white.opacity(0.76))
-
-                HStack(spacing: BoopSpacing.xs) {
-                    profileChip(label: voiceStatusText, tint: BoopColors.secondary)
-                    profileChip(label: "\(viewModel.user?.photos?.totalPhotos ?? 0) photos", tint: BoopColors.primary)
-                    profileChip(label: "\(viewModel.user?.questionsAnswered ?? 0) answers", tint: BoopColors.accent)
-                }
-
-                if let badges = viewModel.user?.badges, !badges.isEmpty {
-                    HStack(spacing: BoopSpacing.xs) {
-                        ForEach(Array(badges.prefix(4)), id: \.key) { badge in
-                            Text(badgeEmoji(for: badge.key))
-                                .font(.system(size: 16))
-                                .frame(width: 28, height: 28)
-                                .background(Color.white.opacity(0.15))
-                                .clipShape(Circle())
-                        }
-                        if badges.count > 4 {
-                            Text("+\(badges.count - 4)")
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 4)
-                                .background(Color.white.opacity(0.15))
-                                .clipShape(Capsule())
-                        }
-                    }
-                }
-            }
-            .padding(BoopSpacing.lg)
+    private var heroSection: some View {
+        CinematicHeader(
+            urlString: viewModel.user?.photos?.profilePhoto?.url,
+            blurRadius: 0,
+            height: 280
+        ) {
+            AccentRule()
+            Text(displayName)
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text(heroSubtitle)
+                .font(BoopTypography.cineCaption)
+                .tracking(1.5)
+                .foregroundStyle(BoopColors.textSecondary)
         }
         .overlay(alignment: .topTrailing) {
             NavigationLink {
                 ProfileEditView(viewModel: viewModel)
             } label: {
-                Text("Edit")
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, BoopSpacing.sm)
-                    .padding(.vertical, BoopSpacing.xs)
-                    .background(Color.white.opacity(0.14))
-                    .clipShape(Capsule())
-            }
-            .padding(BoopSpacing.md)
-        }
-    }
-
-    private var statsCard: some View {
-        HStack(spacing: BoopSpacing.sm) {
-            statBlock(value: "\(viewModel.user?.questionsAnswered ?? 0)", label: "Answered", tint: BoopColors.accent)
-            statBlock(value: "\(viewModel.user?.photos?.totalPhotos ?? 0)", label: "Photos", tint: BoopColors.primary)
-            statBlock(value: revealReadinessText, label: "Stage", tint: stageColor)
-        }
-    }
-
-    private var aboutCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("Profile")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    NavigationLink("Edit") {
-                        ProfileEditView(viewModel: viewModel)
-                    }
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.primary)
-                }
-
-                profileRow(title: "Looking for", value: viewModel.user?.interestedIn?.displayName ?? "Not set")
-                profileRow(title: "Gender", value: viewModel.user?.gender?.displayName ?? "Not set")
-                profileRow(title: "Bio", value: viewModel.user?.bio?.text?.isEmpty == false ? viewModel.user?.bio?.text ?? "" : "Add a short bio")
-
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.error)
-                }
-            }
-        }
-    }
-
-    private var photosCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                Text("Photos")
-                    .font(BoopTypography.headline)
+                Image(systemName: "square.and.pencil")
+                    .font(.system(size: 16, weight: .thin))
                     .foregroundStyle(BoopColors.textPrimary)
+                    .frame(width: 40, height: 40)
+                    .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
+                    .background(Circle().fill(BoopColors.ground.opacity(0.4)))
+            }
+            .padding(.top, BoopSpacing.md)
+        }
+        .padding(.horizontal, -BoopSpacing.xl)
+    }
 
-                Text("Choose a strong main photo and tune the order others will see.")
-                    .font(BoopTypography.caption)
+    // MARK: - Stats
+
+    private var statsSection: some View {
+        HStack(spacing: BoopSpacing.lg) {
+            statColumn(
+                value: "\(viewModel.user?.questionsAnswered ?? 0)",
+                label: "Answers"
+            )
+            Rectangle()
+                .fill(BoopColors.hairline)
+                .frame(width: 1, height: 44)
+            statColumn(
+                value: "\(viewModel.user?.badges?.count ?? 0)",
+                label: "Badges"
+            )
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func statColumn(value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+            EyebrowLabel(text: label)
+            Text(value)
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
+        }
+    }
+
+    // MARK: - Photos
+
+    private var photosSection: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Your Photos")
+
+            if let items = viewModel.user?.photos?.items, !items.isEmpty {
+                Text("Your main photo leads everywhere. Reorder or swap it any time.")
+                    .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
 
-                if let items = viewModel.user?.photos?.items, !items.isEmpty {
-                    if let mainPhoto = items.first {
-                        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                            Text("Main photo preview")
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.textMuted)
+                addPhotosControl(remaining: max(0, 6 - items.count), disabled: viewModel.isUploadingPhotos || items.count >= 6)
 
-                            ZStack(alignment: .bottomLeading) {
-                                BoopRemoteImage(urlString: mainPhoto.url) {
-                                    RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                                        .fill(BoopColors.surfaceSecondary)
-                                }
-                                .frame(height: 180)
-                                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-
-                                Text("Shown first across the app")
-                                    .font(BoopTypography.caption)
-                                    .foregroundStyle(.white)
-                                    .padding(.horizontal, BoopSpacing.sm)
-                                    .padding(.vertical, BoopSpacing.xs)
-                                    .background(Color.black.opacity(0.28))
-                                    .clipShape(Capsule())
-                                    .padding(BoopSpacing.sm)
-                            }
-                        }
-                    }
-
-                    PhotosPicker(
-                        selection: $selectedPhotoItems,
-                        maxSelectionCount: max(0, 6 - items.count),
-                        matching: .images
-                    ) {
-                        HStack {
-                            Image(systemName: "plus.circle.fill")
-                            Text(viewModel.isUploadingPhotos ? "Uploading..." : "Add photos")
-                        }
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(BoopColors.primary)
-                    }
-                    .disabled(viewModel.isUploadingPhotos || items.count >= 6)
-
-                    LazyVGrid(columns: photoColumns, spacing: BoopSpacing.sm) {
-                        ForEach(Array(items.enumerated()), id: \.offset) { index, item in
-                            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                                ZStack(alignment: .topTrailing) {
-                                    BoopRemoteImage(urlString: item.url) {
-                                        RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous)
-                                            .fill(BoopColors.surfaceSecondary)
-                                    }
-                                    .frame(height: 128)
-                                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
-
-                                    Button {
-                                        Task { await viewModel.deletePhoto(at: index) }
-                                    } label: {
-                                        if viewModel.deletingPhotoIndex == index {
-                                            ProgressView()
-                                                .tint(.white)
-                                                .frame(width: 26, height: 26)
-                                        } else {
-                                            Image(systemName: "trash.fill")
-                                                .font(.system(size: 12, weight: .semibold))
-                                                .foregroundStyle(.white)
-                                                .frame(width: 26, height: 26)
-                                        }
-                                    }
-                                    .background(Color.black.opacity(0.4))
-                                    .clipShape(Circle())
-                                    .padding(BoopSpacing.xs)
-
-                                    if index == 0 {
-                                        VStack {
-                                            Spacer()
-                                            HStack {
-                                                Text("Main")
-                                                    .font(BoopTypography.caption)
-                                                    .foregroundStyle(.white)
-                                                    .padding(.horizontal, BoopSpacing.xs)
-                                                    .padding(.vertical, 4)
-                                                    .background(BoopColors.primary.opacity(0.9))
-                                                    .clipShape(Capsule())
-                                                Spacer()
-                                            }
-                                            .padding(BoopSpacing.xs)
-                                        }
-                                    }
-                                }
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous)
-                                        .stroke(draggedPhotoId == item.id ? BoopColors.primary : .clear, lineWidth: 2)
-                                }
-                                .draggable(item.id) {
-                                    RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous)
-                                        .fill(Color.white)
-                                        .overlay(Text("Move").font(BoopTypography.caption))
-                                        .frame(width: 72, height: 72)
-                                        .onAppear { draggedPhotoId = item.id }
-                                }
-                                .dropDestination(for: String.self) { itemsToDrop, _ in
-                                    guard let sourceId = itemsToDrop.first,
-                                          sourceId != item.id,
-                                          let sourceIndex = items.firstIndex(where: { $0.id == sourceId }),
-                                          let destinationIndex = items.firstIndex(where: { $0.id == item.id }) else {
-                                        draggedPhotoId = nil
-                                        return false
-                                    }
-
-                                    var ids = items.map(\.id)
-                                    let moved = ids.remove(at: sourceIndex)
-                                    ids.insert(moved, at: destinationIndex)
-                                    draggedPhotoId = nil
-                                    Task { await viewModel.reorderPhotos(ids: ids) }
-                                    return true
-                                }
-
-                                HStack(spacing: 6) {
-                                    photoOrderButton(
-                                        systemName: "arrow.left",
-                                        isDisabled: index == 0 || viewModel.isReorderingPhotos
-                                    ) {
-                                        Task { await viewModel.movePhoto(from: index, by: -1) }
-                                    }
-
-                                    photoOrderButton(
-                                        systemName: "arrow.right",
-                                        isDisabled: index == items.count - 1 || viewModel.isReorderingPhotos
-                                    ) {
-                                        Task { await viewModel.movePhoto(from: index, by: 1) }
-                                    }
-
-                                    Button(index == 0 ? "Main photo" : "Set main") {
-                                        Task { await viewModel.setMainPhoto(photoId: item.id) }
-                                    }
-                                    .font(BoopTypography.caption)
-                                    .foregroundStyle(index == 0 ? BoopColors.textMuted : BoopColors.primary)
-                                    .disabled(index == 0 || viewModel.isReorderingPhotos)
-                                }
-                            }
-                        }
-                    }
-
-                    if viewModel.isReorderingPhotos {
-                        ProgressView("Saving photo order...")
-                            .font(BoopTypography.caption)
-                            .tint(BoopColors.primary)
-                    }
-                } else {
-                    VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                        Text("Your uploaded photos will show here.")
-                            .font(BoopTypography.body)
-                            .foregroundStyle(BoopColors.textSecondary)
-
-                        PhotosPicker(
-                            selection: $selectedPhotoItems,
-                            maxSelectionCount: 6,
-                            matching: .images
-                        ) {
-                            Text(viewModel.isUploadingPhotos ? "Uploading..." : "Add photos")
-                                .font(BoopTypography.callout)
-                                .foregroundStyle(BoopColors.primary)
-                        }
-                        .disabled(viewModel.isUploadingPhotos)
+                LazyVGrid(columns: photoColumns, spacing: BoopSpacing.sm) {
+                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                        photoCell(item: item, index: index, total: items.count, items: items)
                     }
                 }
+
+                if viewModel.isReorderingPhotos {
+                    HStack(spacing: BoopSpacing.xs) {
+                        ProgressView().tint(BoopColors.accentColor).scaleEffect(0.8)
+                        Text("Saving photo order")
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textMuted)
+                    }
+                }
+            } else {
+                Text("Your uploaded photos will show here.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+
+                addPhotosControl(remaining: 6, disabled: viewModel.isUploadingPhotos)
+            }
+
+            if let errorMessage = viewModel.errorMessage {
+                Text(errorMessage)
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.error)
+            }
+        }
+    }
+
+    private func addPhotosControl(remaining: Int, disabled: Bool) -> some View {
+        PhotosPicker(
+            selection: $selectedPhotoItems,
+            maxSelectionCount: remaining,
+            matching: .images
+        ) {
+            HStack(spacing: BoopSpacing.xs) {
+                Image(systemName: "plus")
+                    .font(.system(size: 12, weight: .regular))
+                Text(viewModel.isUploadingPhotos ? "UPLOADING" : "ADD PHOTOS")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+            }
+            .foregroundStyle(disabled ? BoopColors.textMuted : BoopColors.accentColor)
+            .padding(.vertical, BoopSpacing.sm)
+            .padding(.horizontal, BoopSpacing.md)
+            .overlay(
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(disabled ? BoopColors.hairline : BoopColors.accentColor.opacity(0.5), lineWidth: 1)
+            )
+        }
+        .disabled(disabled)
+    }
+
+    @ViewBuilder
+    private func photoCell(item: UserPhotos.PhotoItem, index: Int, total: Int, items: [UserPhotos.PhotoItem]) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+            ZStack(alignment: .topTrailing) {
+                BoopRemoteImage(urlString: item.url) {
+                    Rectangle().fill(BoopColors.surfaceSecondary)
+                }
+                .frame(height: 150)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+
+                Button {
+                    Task { await viewModel.deletePhoto(at: index) }
+                } label: {
+                    if viewModel.deletingPhotoIndex == index {
+                        ProgressView()
+                            .tint(.white)
+                            .frame(width: 28, height: 28)
+                    } else {
+                        Image(systemName: "trash")
+                            .font(.system(size: 12, weight: .regular))
+                            .foregroundStyle(.white)
+                            .frame(width: 28, height: 28)
+                    }
+                }
+                .background(Color.black.opacity(0.45))
+                .clipShape(Circle())
+                .padding(BoopSpacing.xs)
+
+                if index == 0 {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Text("MAIN")
+                                .font(BoopTypography.cineLabel)
+                                .tracking(2)
+                                .foregroundStyle(.white)
+                                .padding(.horizontal, BoopSpacing.xs)
+                                .padding(.vertical, 4)
+                                .background(Color.black.opacity(0.5))
+                            Spacer()
+                        }
+                        .padding(BoopSpacing.xs)
+                    }
+                }
+            }
+            .overlay {
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(draggedPhotoId == item.id ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
+            }
+            .draggable(item.id) {
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .fill(BoopColors.surface)
+                    .overlay(
+                        Text("MOVE")
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
+                            .foregroundStyle(BoopColors.textPrimary)
+                    )
+                    .frame(width: 72, height: 72)
+                    .onAppear { draggedPhotoId = item.id }
+            }
+            .dropDestination(for: String.self) { itemsToDrop, _ in
+                guard let sourceId = itemsToDrop.first,
+                      sourceId != item.id,
+                      let sourceIndex = items.firstIndex(where: { $0.id == sourceId }),
+                      let destinationIndex = items.firstIndex(where: { $0.id == item.id }) else {
+                    draggedPhotoId = nil
+                    return false
+                }
+
+                var ids = items.map(\.id)
+                let moved = ids.remove(at: sourceIndex)
+                ids.insert(moved, at: destinationIndex)
+                draggedPhotoId = nil
+                Task { await viewModel.reorderPhotos(ids: ids) }
+                return true
+            }
+
+            HStack(spacing: BoopSpacing.xs) {
+                photoOrderButton(
+                    systemName: "arrow.left",
+                    isDisabled: index == 0 || viewModel.isReorderingPhotos
+                ) {
+                    Task { await viewModel.movePhoto(from: index, by: -1) }
+                }
+
+                photoOrderButton(
+                    systemName: "arrow.right",
+                    isDisabled: index == total - 1 || viewModel.isReorderingPhotos
+                ) {
+                    Task { await viewModel.movePhoto(from: index, by: 1) }
+                }
+
+                Spacer(minLength: 0)
+
+                Button(index == 0 ? "MAIN" : "SET MAIN") {
+                    Task { await viewModel.setMainPhoto(photoId: item.id) }
+                }
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(index == 0 ? BoopColors.textMuted : BoopColors.accentColor)
+                .disabled(index == 0 || viewModel.isReorderingPhotos)
             }
         }
     }
@@ -352,204 +290,120 @@ struct ProfileView: View {
     private func photoOrderButton(systemName: String, isDisabled: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 12, weight: .regular))
                 .foregroundStyle(isDisabled ? BoopColors.textMuted : BoopColors.textPrimary)
-                .frame(width: 28, height: 28)
-                .background(BoopColors.surfaceSecondary)
-                .clipShape(Circle())
+                .frame(width: 30, height: 30)
+                .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
         }
         .disabled(isDisabled)
     }
 
-    private var voiceCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("Voice intro")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Text(voiceStatusText)
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.secondary)
-                        .padding(.horizontal, BoopSpacing.xs)
-                        .padding(.vertical, 4)
-                        .background(BoopColors.secondary.opacity(0.12))
-                        .clipShape(Capsule())
+    // MARK: - Voice intro
+
+    private var voiceSection: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Voice Intro")
+
+            if let audioURL = viewModel.user?.voiceIntro?.audioUrl {
+                VoiceLine(
+                    duration: voiceDurationText,
+                    isPlaying: audioPlayer.currentURL == audioURL && audioPlayer.isPlaying
+                ) {
+                    audioPlayer.togglePlayback(urlString: audioURL)
                 }
 
-                if let audioURL = viewModel.user?.voiceIntro?.audioUrl {
-                    Button {
-                        audioPlayer.togglePlayback(urlString: audioURL)
-                    } label: {
-                        HStack(spacing: BoopSpacing.sm) {
-                            Image(systemName: audioPlayer.currentURL == audioURL && audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                .font(.system(size: 24))
-                                .foregroundStyle(BoopColors.secondary)
-                            Text(audioPlayer.currentURL == audioURL && audioPlayer.isPlaying ? "Pause intro" : "Play intro")
-                                .font(BoopTypography.callout)
-                                .foregroundStyle(BoopColors.textPrimary)
-                            Spacer()
-                            if let duration = viewModel.user?.voiceIntro?.duration {
-                                Text("\(Int(duration))s")
-                                    .font(BoopTypography.caption)
-                                    .foregroundStyle(BoopColors.textMuted)
-                            }
-                        }
-                        .padding(BoopSpacing.md)
-                        .background(BoopColors.secondary.opacity(0.08))
-                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
-                    }
+                NavigationLink {
+                    VoiceReRecordView(viewModel: viewModel)
+                } label: {
+                    Text("RE-RECORD INTRO")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                        .foregroundStyle(BoopColors.accentColor)
+                }
+            } else {
+                Text("Record a short intro to make your profile feel more human.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
 
-                    NavigationLink {
-                        VoiceReRecordView(viewModel: viewModel)
-                    } label: {
-                        HStack(spacing: BoopSpacing.xs) {
-                            Image(systemName: "mic.fill")
-                                .font(.system(size: 14))
-                            Text("Re-record intro")
-                                .font(BoopTypography.footnote)
-                        }
-                        .foregroundStyle(BoopColors.primary)
-                    }
-                } else {
-                    Text("Record a short intro to make your profile feel more human.")
-                        .font(BoopTypography.body)
-                        .foregroundStyle(BoopColors.textSecondary)
-
-                    NavigationLink {
-                        VoiceReRecordView(viewModel: viewModel)
-                    } label: {
-                        HStack(spacing: BoopSpacing.xs) {
-                            Image(systemName: "mic.fill")
-                                .font(.system(size: 14))
-                            Text("Record voice intro")
-                                .font(BoopTypography.footnote)
-                                .fontWeight(.semibold)
-                        }
-                        .foregroundStyle(BoopColors.primary)
-                    }
+                NavigationLink {
+                    VoiceReRecordView(viewModel: viewModel)
+                } label: {
+                    Text("RECORD VOICE INTRO")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                        .foregroundStyle(BoopColors.accentColor)
                 }
             }
         }
     }
 
-    private var actionsCard: some View {
-        VStack(spacing: BoopSpacing.sm) {
-            NavigationLink {
-                ProfileEditView(viewModel: viewModel)
-            } label: {
-                HStack {
-                    Text("Edit profile")
-                    Spacer()
-                    Image(systemName: "chevron.right")
-                }
-                .font(BoopTypography.callout)
-                .foregroundStyle(BoopColors.textPrimary)
-                .padding(BoopSpacing.md)
-                .boopCard(radius: BoopRadius.xl)
-            }
+    // MARK: - Me / settings
+
+    private var meSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            EyebrowLabel(text: "Me")
+                .padding(.bottom, BoopSpacing.xs)
 
             NavigationLink {
-                BadgesView()
+                PersonalityReportView()
             } label: {
-                HStack {
-                    Text("Badges")
-                    Spacer()
-                    if let badges = viewModel.user?.badges, !badges.isEmpty {
-                        Text("\(badges.count) earned")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.primary)
-                    }
-                    Image(systemName: "chevron.right")
-                }
-                .font(BoopTypography.callout)
-                .foregroundStyle(BoopColors.textPrimary)
-                .padding(BoopSpacing.md)
-                .boopCard(radius: BoopRadius.xl)
-            }
-
-            NavigationLink {
-                QuestionsProgressView()
-            } label: {
-                HStack {
-                    Text("Question progress")
-                    Spacer()
-                    Image(systemName: "chart.bar.fill")
-                }
-                .font(BoopTypography.callout)
-                .foregroundStyle(BoopColors.textPrimary)
-                .padding(BoopSpacing.md)
-                .boopCard(radius: BoopRadius.xl)
+                HairlineRow("Personality insights", showChevron: true)
             }
 
             NavigationLink {
                 MyAnswersView()
             } label: {
-                HStack {
-                    Text("My answers")
-                    Spacer()
-                    Image(systemName: "text.book.closed.fill")
-                }
-                .font(BoopTypography.callout)
-                .foregroundStyle(BoopColors.textPrimary)
-                .padding(BoopSpacing.md)
-                .boopCard(radius: BoopRadius.xl)
+                HairlineRow("My answers", showChevron: true)
             }
 
             NavigationLink {
-                PersonalityReportView()
+                BadgesView()
             } label: {
-                HStack {
-                    Text("Personality insights")
-                    Spacer()
-                    Image(systemName: "brain.head.profile.fill")
+                HairlineRow("Badges", showChevron: true) {
+                    if let count = viewModel.user?.badges?.count, count > 0 {
+                        Text("\(count)")
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textMuted)
+                    }
                 }
-                .font(BoopTypography.callout)
-                .foregroundStyle(BoopColors.textPrimary)
-                .padding(BoopSpacing.md)
-                .boopCard(radius: BoopRadius.xl)
+            }
+
+            NavigationLink {
+                QuestionsProgressView()
+            } label: {
+                HairlineRow("Question progress", showChevron: true)
             }
 
             NavigationLink {
                 NotificationSettingsView()
             } label: {
-                HStack {
-                    Text("Notifications")
-                    Spacer()
-                    Image(systemName: "bell.badge.fill")
-                }
-                .font(BoopTypography.callout)
-                .foregroundStyle(BoopColors.textPrimary)
-                .padding(BoopSpacing.md)
-                .boopCard(radius: BoopRadius.xl)
+                HairlineRow("Notifications", showChevron: true)
             }
 
-            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                Text("Appearance")
-                    .font(.nunito(.bold, size: 13))
-                    .foregroundStyle(BoopColors.textSecondary)
-                Picker("Appearance", selection: $appTheme) {
-                    ForEach(AppTheme.allCases) { theme in
-                        Text(theme.label).tag(theme.rawValue)
+            NavigationLink {
+                ProfileEditView(viewModel: viewModel)
+            } label: {
+                HairlineRow("Edit profile", showChevron: true)
+            }
+
+            appearanceRow
+
+            Button {
+                AuthManager.shared.logout()
+            } label: {
+                HairlineRow("Log out")
+            }
+
+            Button {
+                showDeleteConfirm = true
+            } label: {
+                HairlineRow(isDeleting ? "Deleting…" : "Delete account", titleColor: BoopColors.error) {
+                    if isDeleting {
+                        ProgressView().tint(BoopColors.error).scaleEffect(0.8)
                     }
                 }
-                .pickerStyle(.segmented)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, BoopSpacing.xs)
-
-            BoopButton(title: "Log Out", variant: .outline) {
-                AuthManager.shared.logout()
-            }
-
-            BoopButton(
-                title: isDeleting ? "Deleting…" : "Delete Account",
-                variant: .outline,
-                isDisabled: isDeleting
-            ) {
-                showDeleteConfirm = true
-            }
+            .disabled(isDeleting)
             .alert("Delete your account?", isPresented: $showDeleteConfirm) {
                 Button("Cancel", role: .cancel) {}
                 Button("Delete Forever", role: .destructive) {
@@ -566,6 +420,27 @@ struct ProfileView: View {
         }
     }
 
+    private var appearanceRow: some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            HStack(spacing: BoopSpacing.md) {
+                Text("Appearance")
+                    .font(BoopTypography.cineBody)
+                    .foregroundStyle(BoopColors.textPrimary)
+                Spacer(minLength: BoopSpacing.md)
+                Picker("Appearance", selection: $appTheme) {
+                    ForEach(AppTheme.allCases) { theme in
+                        Text(theme.label).tag(theme.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .tint(BoopColors.accentColor)
+                .fixedSize()
+            }
+            .padding(.vertical, BoopSpacing.md)
+        }
+    }
+
     private func deleteAccount() async {
         isDeleting = true
         do {
@@ -577,6 +452,8 @@ struct ProfileView: View {
         isDeleting = false
     }
 
+    // MARK: - Derived copy
+
     private var displayName: String {
         let name = viewModel.user?.firstName ?? "You"
         if let birthDate = viewModel.user?.dateOfBirth {
@@ -586,46 +463,36 @@ struct ProfileView: View {
         return name
     }
 
-    private var voiceStatusText: String {
-        viewModel.user?.voiceIntro?.audioUrl == nil ? "Missing" : "Ready"
+    private var heroSubtitle: String {
+        var parts: [String] = []
+        if let birthDate = viewModel.user?.dateOfBirth {
+            let age = Calendar.current.dateComponents([.year], from: birthDate, to: Date()).year ?? 0
+            if age > 0 { parts.append("\(age)") }
+        }
+        if let city = viewModel.user?.location?.city, !city.isEmpty {
+            parts.append(city)
+        }
+        parts.append(viewModel.user?.voiceIntro?.audioUrl == nil ? profileStatusText : "Voice verified")
+        return parts.joined(separator: "  ·  ").uppercased()
     }
 
-    private var revealReadinessText: String {
-        switch viewModel.user?.profileStage {
-        case .ready:
-            return "Ready"
-        case .questionsPending:
-            return "Questions"
-        case .voicePending:
-            return "Voice"
-        case .incomplete, nil:
-            return "Start"
+    private var voiceDurationText: String {
+        if let duration = viewModel.user?.voiceIntro?.duration {
+            return "\(Int(duration))s"
         }
+        return "Voice intro"
     }
 
     private var profileStatusText: String {
         switch viewModel.user?.profileStage {
         case .ready:
-            return "Profile Ready"
+            return "Profile ready"
         case .questionsPending:
-            return "Questions Pending"
+            return "Questions pending"
         case .voicePending:
-            return "Voice Pending"
+            return "Voice pending"
         case .incomplete, nil:
-            return "In Progress"
-        }
-    }
-
-    private var stageColor: Color {
-        switch viewModel.user?.profileStage {
-        case .ready:
-            return BoopColors.success
-        case .questionsPending:
-            return BoopColors.accent
-        case .voicePending:
-            return BoopColors.secondary
-        case .incomplete, nil:
-            return BoopColors.primary
+            return "In progress"
         }
     }
 
@@ -634,59 +501,6 @@ struct ProfileView: View {
             GridItem(.flexible(), spacing: BoopSpacing.sm),
             GridItem(.flexible(), spacing: BoopSpacing.sm)
         ]
-    }
-
-    private func statBlock(value: String, label: String, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(BoopTypography.title3)
-                .foregroundStyle(tint)
-            Text(label)
-                .font(BoopTypography.caption)
-                .foregroundStyle(BoopColors.textSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BoopSpacing.md)
-        .boopCard(radius: BoopRadius.xl)
-    }
-
-    private func profileRow(title: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(BoopTypography.caption)
-                .foregroundStyle(BoopColors.textMuted)
-            Text(value)
-                .font(BoopTypography.body)
-                .foregroundStyle(BoopColors.textPrimary)
-        }
-    }
-
-    private func badgeEmoji(for key: String) -> String {
-        switch key {
-        case "voice_verified": return "\u{1F399}\u{FE0F}"
-        case "question_pioneer": return "\u{1F331}"
-        case "question_master": return "\u{1F9E0}"
-        case "game_enthusiast": return "\u{1F3AE}"
-        case "game_master": return "\u{1F3C6}"
-        case "streak_keeper": return "\u{1F525}"
-        case "streak_legend": return "\u{26A1}"
-        case "early_adopter": return "\u{1F680}"
-        case "deep_connector": return "\u{1F49E}"
-        case "personality_unlocked": return "\u{2728}"
-        case "first_boop": return "\u{1F495}"
-        case "photo_revealed": return "\u{1F440}"
-        default: return "\u{2B50}"
-        }
-    }
-
-    private func profileChip(label: String, tint: Color) -> some View {
-        Text(label)
-            .font(BoopTypography.caption)
-            .foregroundStyle(.white)
-            .padding(.horizontal, BoopSpacing.xs)
-            .padding(.vertical, 4)
-            .background(tint.opacity(0.3))
-            .clipShape(Capsule())
     }
 }
 
