@@ -8,6 +8,30 @@ struct MainTabView: View {
 
     private var router: NotificationRouter { NotificationRouter.shared }
 
+    init() {
+        Self.configureTabBarAppearance()
+    }
+
+    /// Dark, opaque tab bar: ground background, coral selected, muted unselected.
+    private static func configureTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(BoopColors.ground)
+        appearance.shadowColor = UIColor(BoopColors.hairline)
+
+        let selected = UIColor(BoopColors.accentColor)
+        let normal = UIColor(BoopColors.textMuted)
+
+        let item = appearance.stackedLayoutAppearance
+        item.selected.iconColor = selected
+        item.selected.titleTextAttributes = [.foregroundColor: selected]
+        item.normal.iconColor = normal
+        item.normal.titleTextAttributes = [.foregroundColor: normal]
+
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+
     var body: some View {
         TabView(selection: Binding(
             get: { router.selectedTab },
@@ -26,7 +50,7 @@ struct MainTabView: View {
                     }
             }
                 .tabItem {
-                    Image(systemName: "house.fill")
+                    Image(systemName: "house")
                     Text("Home")
                 }
                 .tag(0)
@@ -47,7 +71,7 @@ struct MainTabView: View {
                     }
             }
                 .tabItem {
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                    Image(systemName: "bubble.left.and.bubble.right")
                     Text("Chat")
                 }
                 .badge(viewModel.unreadChatCount)
@@ -57,12 +81,12 @@ struct MainTabView: View {
                 ProfileView()
             }
                 .tabItem {
-                    Image(systemName: "person.fill")
+                    Image(systemName: "person")
                     Text("Me")
                 }
                 .tag(3)
         }
-        .tint(BoopColors.primary)
+        .tint(BoopColors.accentColor)
         .task {
             await viewModel.loadBadges()
         }

@@ -17,18 +17,21 @@ struct ChatMediaGalleryView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            header
+
             Picker("Media Type", selection: $selectedTab) {
                 Text("Photos").tag(0)
                 Text("Voice Notes").tag(1)
             }
             .pickerStyle(.segmented)
+            .tint(BoopColors.accentColor)
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.md)
+            .padding(.bottom, BoopSpacing.md)
 
             if viewModel.isLoading && viewModel.photos.isEmpty && viewModel.voiceNotes.isEmpty {
                 Spacer()
                 ProgressView()
-                    .tint(BoopColors.primary)
+                    .tint(BoopColors.textMuted)
                 Spacer()
             } else if selectedTab == 0 {
                 photosGrid
@@ -60,17 +63,30 @@ struct ChatMediaGalleryView: View {
         }
     }
 
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            EyebrowLabel(text: "Shared with \(otherUserName)")
+            Text("Media")
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, BoopSpacing.xl)
+        .padding(.top, BoopSpacing.sm)
+        .padding(.bottom, BoopSpacing.md)
+    }
+
     private var photosGrid: some View {
         Group {
             if viewModel.photos.isEmpty {
-                emptyState(icon: "photo.on.rectangle", text: "No photos shared yet")
+                emptyState(text: "No photos shared yet")
             } else {
                 ScrollView {
                     LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 3),
-                        GridItem(.flexible(), spacing: 3),
-                        GridItem(.flexible(), spacing: 3),
-                    ], spacing: 3) {
+                        GridItem(.flexible(), spacing: 2),
+                        GridItem(.flexible(), spacing: 2),
+                        GridItem(.flexible(), spacing: 2),
+                    ], spacing: 2) {
                         ForEach(viewModel.photos) { message in
                             if let mediaUrl = message.content.mediaUrl {
                                 Button {
@@ -82,20 +98,24 @@ struct ChatMediaGalleryView: View {
                                             .scaledToFill()
                                     } placeholder: {
                                         Rectangle()
-                                            .fill(BoopColors.surfaceSecondary)
+                                            .fill(BoopColors.surface)
                                             .overlay(
-                                                ProgressView().tint(BoopColors.secondary)
+                                                ProgressView().tint(BoopColors.textMuted)
                                             )
                                     }
                                     .frame(minHeight: 120)
                                     .clipped()
+                                    .overlay(
+                                        Rectangle()
+                                            .stroke(BoopColors.hairline, lineWidth: 1)
+                                    )
                                 }
                             }
                         }
 
                         if viewModel.hasMorePhotos {
                             ProgressView()
-                                .tint(BoopColors.secondary)
+                                .tint(BoopColors.textMuted)
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .onAppear {
@@ -103,7 +123,8 @@ struct ChatMediaGalleryView: View {
                                 }
                         }
                     }
-                    .padding(.horizontal, 1)
+                    .padding(.horizontal, BoopSpacing.xl)
+                    .padding(.bottom, BoopSpacing.lg)
                 }
             }
         }
@@ -112,77 +133,83 @@ struct ChatMediaGalleryView: View {
     private var voiceList: some View {
         Group {
             if viewModel.voiceNotes.isEmpty {
-                emptyState(icon: "waveform", text: "No voice notes shared yet")
+                emptyState(text: "No voice notes shared yet")
             } else {
                 ScrollView {
-                    LazyVStack(spacing: BoopSpacing.sm) {
+                    LazyVStack(spacing: 0) {
                         ForEach(viewModel.voiceNotes) { message in
                             voiceNoteRow(message: message)
                         }
 
                         if viewModel.hasMoreVoice {
                             ProgressView()
-                                .tint(BoopColors.secondary)
+                                .tint(BoopColors.textMuted)
+                                .padding(BoopSpacing.lg)
                                 .onAppear {
                                     Task { await viewModel.loadMoreVoice() }
                                 }
                         }
                     }
                     .padding(.horizontal, BoopSpacing.xl)
-                    .padding(.vertical, BoopSpacing.md)
+                    .padding(.bottom, BoopSpacing.lg)
                 }
             }
         }
     }
 
     private func voiceNoteRow(message: ChatMessage) -> some View {
-        HStack(spacing: BoopSpacing.md) {
-            Button {
-                audioPlayer.togglePlayback(urlString: message.content.mediaUrl)
-            } label: {
-                Image(systemName: audioPlayer.currentURL == message.content.mediaUrl && audioPlayer.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                    .font(.system(size: 36))
-                    .foregroundStyle(BoopColors.primary)
-            }
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(message.senderId.firstName ?? "Someone")
-                    .font(BoopTypography.callout)
-                    .fontWeight(.medium)
-                    .foregroundStyle(BoopColors.textPrimary)
+            HStack(spacing: BoopSpacing.md) {
+                Button {
+                    audioPlayer.togglePlayback(urlString: message.content.mediaUrl)
+                } label: {
+                    Image(systemName: audioPlayer.currentURL == message.content.mediaUrl && audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(BoopColors.textPrimary)
+                        .frame(width: 38, height: 38)
+                        .overlay(Circle().stroke(BoopColors.textPrimary.opacity(0.5), lineWidth: 1))
+                }
 
-                HStack(spacing: BoopSpacing.sm) {
-                    if let duration = message.content.mediaDuration {
-                        Text("\(Int(duration))s")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(message.senderId.firstName ?? "Someone")
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textPrimary)
 
-                    if let date = message.createdAt {
-                        Text(date.chatTimestamp)
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textMuted)
+                    HStack(spacing: BoopSpacing.sm) {
+                        if let duration = message.content.mediaDuration {
+                            Text("\(Int(duration))s")
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textSecondary)
+                        }
+
+                        if let date = message.createdAt {
+                            Text(date.chatTimestamp)
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textMuted)
+                        }
                     }
                 }
-            }
 
-            Spacer()
+                Spacer()
+            }
+            .padding(.vertical, BoopSpacing.md)
         }
-        .padding(BoopSpacing.md)
-        .boopCard(radius: BoopRadius.xl)
     }
 
-    private func emptyState(icon: String, text: String) -> some View {
-        VStack(spacing: BoopSpacing.md) {
-            Spacer()
-            Image(systemName: icon)
-                .font(.system(size: 40))
-                .foregroundStyle(BoopColors.textMuted)
+    private func emptyState(text: String) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            AccentRule()
             Text(text)
-                .font(BoopTypography.body)
+                .font(BoopTypography.cineHeadline)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text("Photos and voice notes you exchange will collect here.")
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
-            Spacer()
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BoopSpacing.xl)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
     }
 }

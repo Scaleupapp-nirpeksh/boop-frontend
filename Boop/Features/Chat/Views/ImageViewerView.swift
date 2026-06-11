@@ -46,16 +46,15 @@ struct ImageViewerView: View {
                     case .failure:
                         VStack(spacing: BoopSpacing.md) {
                             Image(systemName: "photo.trianglebadge.exclamationmark")
-                                .font(.system(size: 40))
+                                .font(.system(size: 36, weight: .thin))
                                 .foregroundStyle(.white.opacity(0.5))
                             Text("Could not load image")
-                                .font(BoopTypography.body)
+                                .font(BoopTypography.cineBody)
                                 .foregroundStyle(.white.opacity(0.7))
                         }
                     case .empty:
                         ProgressView()
-                            .tint(.white)
-                            .scaleEffect(1.2)
+                            .tint(.white.opacity(0.7))
                     @unknown default:
                         EmptyView()
                     }
@@ -71,39 +70,43 @@ struct ImageViewerView: View {
                         Button {
                             dismiss()
                         } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 28))
-                                .foregroundStyle(.white.opacity(0.8))
+                            Image(systemName: "xmark")
+                                .font(.system(size: 15, weight: .thin))
+                                .foregroundStyle(.white.opacity(0.85))
+                                .frame(width: 38, height: 38)
+                                .overlay(Circle().stroke(.white.opacity(0.3), lineWidth: 1))
                         }
                     }
                     .padding()
 
                     Spacer()
 
-                    HStack(spacing: BoopSpacing.xl) {
+                    HStack(spacing: BoopSpacing.xxl) {
                         if loadedImage != nil {
                             Button {
                                 saveToPhotos()
                             } label: {
-                                VStack(spacing: 4) {
-                                    Image(systemName: showSaveSuccess ? "checkmark.circle.fill" : "square.and.arrow.down")
-                                        .font(.system(size: 22))
-                                    Text(showSaveSuccess ? "Saved" : "Save")
-                                        .font(BoopTypography.caption)
+                                VStack(spacing: 6) {
+                                    Image(systemName: showSaveSuccess ? "checkmark" : "square.and.arrow.down")
+                                        .font(.system(size: 18, weight: .thin))
+                                    Text(showSaveSuccess ? "SAVED" : "SAVE")
+                                        .font(BoopTypography.cineLabel)
+                                        .tracking(1.5)
                                 }
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.white.opacity(0.85))
                             }
 
                             Button {
                                 showShareSheet = true
                             } label: {
-                                VStack(spacing: 4) {
+                                VStack(spacing: 6) {
                                     Image(systemName: "square.and.arrow.up")
-                                        .font(.system(size: 22))
-                                    Text("Share")
-                                        .font(BoopTypography.caption)
+                                        .font(.system(size: 18, weight: .thin))
+                                    Text("SHARE")
+                                        .font(BoopTypography.cineLabel)
+                                        .tracking(1.5)
                                 }
-                                .foregroundStyle(.white)
+                                .foregroundStyle(.white.opacity(0.85))
                             }
                         }
                     }

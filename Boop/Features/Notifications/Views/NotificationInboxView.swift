@@ -21,8 +21,9 @@ struct NotificationInboxView: View {
                     Button("Read All") {
                         Task { await viewModel.markAllAsRead() }
                     }
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.secondary)
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1)
+                    .foregroundStyle(BoopColors.accentColor)
                 }
             }
         }
@@ -48,43 +49,38 @@ struct NotificationInboxView: View {
                     } onDelete: {
                         Task { await viewModel.deleteNotification(notification) }
                     }
-
-                    if notification.id != viewModel.notifications.last?.id {
-                        Divider()
-                            .padding(.leading, 64)
-                    }
                 }
 
                 if viewModel.hasMore {
                     ProgressView()
+                        .tint(BoopColors.textMuted)
                         .padding(BoopSpacing.lg)
                         .task { await viewModel.loadMore() }
                 }
             }
-            .padding(.horizontal, BoopSpacing.md)
+            .padding(.horizontal, BoopSpacing.xl)
+            .padding(.vertical, BoopSpacing.lg)
         }
     }
 
     // MARK: - Empty State
 
     private var emptyState: some View {
-        VStack(spacing: BoopSpacing.md) {
-            Image(systemName: "bell.slash")
-                .font(.system(size: 48))
-                .foregroundStyle(BoopColors.textMuted.opacity(0.5))
-                .symbolEffect(.pulse, options: .repeating)
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            AccentRule()
 
             Text("No notifications yet")
-                .font(BoopTypography.headline)
+                .font(BoopTypography.cineHeadline)
                 .foregroundStyle(BoopColors.textPrimary)
 
-            Text("You'll see matches, messages, and activity here.")
-                .font(BoopTypography.body)
+            Text("Matches, messages, and activity will surface here.")
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
-                .multilineTextAlignment(.center)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BoopSpacing.xl)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        .boopBackground()
     }
 
     // MARK: - Loading
@@ -92,14 +88,12 @@ struct NotificationInboxView: View {
     private var loadingState: some View {
         ScrollView {
             VStack(spacing: 0) {
-                ForEach(0..<6, id: \.self) { i in
+                ForEach(0..<6, id: \.self) { _ in
                     SkeletonNotificationRow()
-                    if i < 5 {
-                        Divider().padding(.leading, 64)
-                    }
                 }
             }
-            .padding(.horizontal, BoopSpacing.md)
+            .padding(.horizontal, BoopSpacing.xl)
+            .padding(.vertical, BoopSpacing.lg)
         }
     }
 
@@ -139,51 +133,47 @@ private struct NotificationRow: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                // Icon
-                ZStack {
-                    Circle()
-                        .fill(iconColor.opacity(0.12))
-                        .frame(width: 42, height: 42)
+            VStack(spacing: 0) {
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
 
+                HStack(alignment: .top, spacing: BoopSpacing.md) {
                     Image(systemName: notification.typeIcon)
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(iconColor)
-                }
+                        .font(.system(size: 16, weight: .thin))
+                        .foregroundStyle(notification.read ? BoopColors.textMuted : BoopColors.accentColor)
+                        .frame(width: 22)
+                        .padding(.top, 2)
 
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack {
-                        Text(notification.title)
-                            .font(BoopTypography.callout)
-                            .fontWeight(notification.read ? .regular : .semibold)
-                            .foregroundStyle(BoopColors.textPrimary)
-                            .lineLimit(1)
+                    VStack(alignment: .leading, spacing: 3) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text(notification.title)
+                                .font(BoopTypography.cineBody)
+                                .foregroundStyle(BoopColors.textPrimary)
+                                .lineLimit(1)
 
-                        Spacer()
+                            Spacer()
 
-                        Text(notification.timeAgo)
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textMuted)
+                            Text(notification.timeAgo)
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textMuted)
+                        }
+
+                        Text(notification.body)
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textSecondary)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
                     }
 
-                    Text(notification.body)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+                    // Unread dot
+                    if !notification.read {
+                        Circle()
+                            .fill(BoopColors.accentColor)
+                            .frame(width: 6, height: 6)
+                            .padding(.top, 6)
+                    }
                 }
-
-                // Unread dot
-                if !notification.read {
-                    Circle()
-                        .fill(BoopColors.primary)
-                        .frame(width: 8, height: 8)
-                        .padding(.top, 6)
-                }
+                .padding(.vertical, BoopSpacing.md)
             }
-            .padding(.vertical, BoopSpacing.sm)
-            .padding(.horizontal, BoopSpacing.xs)
-            .background(notification.read ? Color.clear : BoopColors.primary.opacity(0.03))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
@@ -191,15 +181,6 @@ private struct NotificationRow: View {
             Button(role: .destructive, action: onDelete) {
                 Label("Delete", systemImage: "trash")
             }
-        }
-    }
-
-    private var iconColor: Color {
-        switch notification.typeColor {
-        case "primary": return BoopColors.primary
-        case "secondary": return BoopColors.secondary
-        case "accent": return BoopColors.accent
-        default: return BoopColors.textMuted
         }
     }
 }

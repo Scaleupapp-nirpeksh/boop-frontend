@@ -28,7 +28,7 @@ struct ReportUserSheet: View {
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("Cancel") { dismiss() }
-                        .font(BoopTypography.callout)
+                        .font(BoopTypography.cineBody)
                         .foregroundStyle(BoopColors.textSecondary)
                 }
             }
@@ -39,41 +39,47 @@ struct ReportUserSheet: View {
 
     private var formView: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xl) {
 
                 // Anonymity notice
-                Text("Your report is anonymous — \(userName) won't know you reported them.")
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textSecondary)
-                    .padding(.horizontal, BoopSpacing.md)
-                    .padding(.top, BoopSpacing.xs)
+                VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                    AccentRule()
+                    Text("Your report is anonymous — \(userName) won't know you reported them.")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                }
+                .padding(.horizontal, BoopSpacing.xl)
+                .padding(.top, BoopSpacing.sm)
 
                 // Reason selection
-                VStack(spacing: BoopSpacing.xs) {
-                    ForEach(ReportReason.allCases) { reason in
-                        reasonRow(reason)
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    EyebrowLabel(text: "Reason")
+                        .padding(.horizontal, BoopSpacing.xl)
+
+                    VStack(spacing: 0) {
+                        ForEach(ReportReason.allCases) { reason in
+                            reasonRow(reason)
+                        }
+                        Rectangle().fill(BoopColors.hairline).frame(height: 1)
                     }
                 }
-                .padding(.horizontal, BoopSpacing.md)
 
                 // Optional details field
-                VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                    BoopTextField(
-                        label: "Additional details (optional)",
-                        text: $details,
-                        placeholder: "Tell us more about what happened…",
-                        isMultiline: true,
-                        maxLength: 500
-                    )
-                }
-                .padding(.horizontal, BoopSpacing.md)
+                BoopTextField(
+                    label: "Additional details (optional)",
+                    text: $details,
+                    placeholder: "Tell us more about what happened…",
+                    isMultiline: true,
+                    maxLength: 500
+                )
+                .padding(.horizontal, BoopSpacing.xl)
 
                 // Error message
                 if let errorMessage {
                     Text(errorMessage)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.error)
-                        .padding(.horizontal, BoopSpacing.md)
+                        .padding(.horizontal, BoopSpacing.xl)
                 }
 
                 // Submit button
@@ -85,12 +91,11 @@ struct ReportUserSheet: View {
                 ) {
                     Task { await submit() }
                 }
-                .padding(.horizontal, BoopSpacing.md)
+                .padding(.horizontal, BoopSpacing.xl)
                 .padding(.bottom, BoopSpacing.xl)
             }
-            .padding(.top, BoopSpacing.sm)
         }
-        .background(BoopColors.background.ignoresSafeArea())
+        .boopBackground()
     }
 
     @ViewBuilder
@@ -98,30 +103,28 @@ struct ReportUserSheet: View {
         let isSelected = selectedReason == reason
 
         Button {
+            Haptics.light()
             withAnimation(.easeInOut(duration: 0.15)) {
                 selectedReason = reason
             }
         } label: {
-            HStack(spacing: BoopSpacing.sm) {
-                Text(reason.label)
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(isSelected ? BoopColors.primary : BoopColors.textPrimary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            VStack(spacing: 0) {
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
 
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 20, weight: .regular))
-                    .foregroundStyle(isSelected ? BoopColors.primary : BoopColors.textMuted)
+                HStack(spacing: BoopSpacing.sm) {
+                    Text(reason.label)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(isSelected ? BoopColors.accentColor : BoopColors.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    Image(systemName: isSelected ? "checkmark" : "circle")
+                        .font(.system(size: 14, weight: .thin))
+                        .foregroundStyle(isSelected ? BoopColors.accentColor : BoopColors.textMuted)
+                }
+                .padding(.vertical, BoopSpacing.md)
             }
-            .padding(.horizontal, BoopSpacing.md)
-            .padding(.vertical, BoopSpacing.sm)
-            .boopCard(radius: BoopRadius.md)
-            .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .stroke(
-                        isSelected ? BoopColors.primary.opacity(0.5) : Color.clear,
-                        lineWidth: 1.5
-                    )
-            )
+            .padding(.horizontal, BoopSpacing.xl)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -129,25 +132,23 @@ struct ReportUserSheet: View {
     // MARK: - Confirmation View
 
     private var confirmationView: some View {
-        VStack(spacing: BoopSpacing.xl) {
+        VStack(alignment: .leading, spacing: BoopSpacing.xl) {
             Spacer()
 
-            // Shield icon
-            Image(systemName: "checkmark.shield.fill")
-                .font(.system(size: 64, weight: .regular))
-                .foregroundStyle(BoopColors.success)
+            Image(systemName: "checkmark.shield")
+                .font(.system(size: 56, weight: .thin))
+                .foregroundStyle(BoopColors.accentColor)
 
-            VStack(spacing: BoopSpacing.sm) {
+            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                AccentRule()
+
                 Text("Thanks for letting us know")
-                    .font(BoopTypography.title2)
+                    .font(BoopTypography.cineTitle)
                     .foregroundStyle(BoopColors.textPrimary)
-                    .multilineTextAlignment(.center)
 
                 Text("Our team will review this report. If you'd rather not hear from \(userName) again, you can also block them.")
-                    .font(BoopTypography.body)
+                    .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, BoopSpacing.xl)
             }
 
             Spacer()
@@ -155,10 +156,10 @@ struct ReportUserSheet: View {
             BoopButton(title: "Done", variant: .primary) {
                 dismiss()
             }
-            .padding(.horizontal, BoopSpacing.md)
-            .padding(.bottom, BoopSpacing.xl)
         }
-        .background(BoopColors.background.ignoresSafeArea())
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BoopSpacing.xl)
+        .boopBackground()
     }
 
     // MARK: - Submit
