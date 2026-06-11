@@ -122,32 +122,30 @@ struct QuestionsView: View {
     private var questionHeader: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
             HStack(alignment: .firstTextBaseline) {
-                EyebrowLabel(text: "Question \(String(format: "%02d", viewModel.currentIndex + 1))",
+                // Position-based, consistent with the counter + progress below
+                EyebrowLabel(text: "Question \(String(format: "%02d", position))",
                              color: BoopColors.accentColor)
                 Spacer()
-                Text("\(String(format: "%02d", min(viewModel.answeredCount, target))) / \(String(format: "%02d", target))")
+                Text("\(String(format: "%02d", position)) / \(String(format: "%02d", target))")
                     .font(BoopTypography.cineLabel)
                     .tracking(2)
                     .foregroundStyle(BoopColors.textMuted)
             }
 
-            // Progress toward the onboarding questions that unlock the reveal
-            HairlineProgress(progress: Double(min(viewModel.answeredCount, target)) / Double(target))
-                .animation(.easeInOut(duration: 0.3), value: viewModel.answeredCount)
+            // Progress through the onboarding questions that unlock the reveal
+            HairlineProgress(progress: Double(position) / Double(target))
+                .animation(.easeInOut(duration: 0.3), value: viewModel.currentIndex)
 
-            if viewModel.answeredCount < target {
-                Text("\(viewModel.answeredCount) of \(target) to reveal your type")
-                    .font(BoopTypography.cineCaption)
-                    .foregroundStyle(BoopColors.textMuted)
-            } else {
-                Text(viewModel.progressText.uppercased())
-                    .font(BoopTypography.cineCaption)
-                    .foregroundStyle(BoopColors.textMuted)
-            }
+            Text("Answer \(target) to reveal your type")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textMuted)
         }
     }
 
     private var target: Int { QuestionsViewModel.onboardingTarget }
+
+    /// The question you're currently on (1-based), capped at the target.
+    private var position: Int { min(viewModel.currentIndex + 1, target) }
 
     // MARK: - Prompt (rule + dimension + cinematic question)
 
