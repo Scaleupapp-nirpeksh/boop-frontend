@@ -92,6 +92,7 @@
 		87D8BBA0DADB445A317AB4F1 /* GameHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB86FAE3A127ED7BFE0B78B2 /* GameHistoryView.swift */; };
 		8898615D32DA44830750F512 /* DiscoverViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 748EAEB592E9EA3924D2541E /* DiscoverViewModel.swift */; };
 		893B81D6E5BFFD38516654CE /* NotificationInboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BB3D0F5EA27BEEA5A115707 /* NotificationInboxView.swift */; };
+		8CE357D933F737983C7EA6BA /* PersonalityShareCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC47E8EE0E1F388ECC06AA6F /* PersonalityShareCard.swift */; };
 		91AE9C9DAF46C422D9EE1241 /* SafetyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1484D2802E0DA77E1061B0C5 /* SafetyModels.swift */; };
 		92EACB51F46F866825B1EF93 /* RealtimeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37E9845734EACD34E9FCF27A /* RealtimeService.swift */; };
 		938CE48C77C05910A4312F00 /* BoopSegmentedPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = E368B0543C4920A665B80274 /* BoopSegmentedPicker.swift */; };
@@ -307,6 +308,7 @@
 		EA8BD2A5881D210A06A5888D /* BoopPhoneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopPhoneInput.swift; sourceTree = "<group>"; };
 		EB0906A0A2C8E499A39AFB55 /* PhoneInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneInputView.swift; sourceTree = "<group>"; };
 		EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
+		EC47E8EE0E1F388ECC06AA6F /* PersonalityShareCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalityShareCard.swift; sourceTree = "<group>"; };
 		EC7A0803A805D3BAC3F37F0B /* GoneQuietCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoneQuietCard.swift; sourceTree = "<group>"; };
 		EF40A424CE2A2723294A4A05 /* APIEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIEndpoint.swift; sourceTree = "<group>"; };
 		F1D8BF60D9FE783990B5748D /* ConnectSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectSetupView.swift; sourceTree = "<group>"; };
@@ -701,6 +703,7 @@
 				FD775B06482FDE20FEDF9019 /* NotificationSettingsView.swift */,
 				54AD267AD7FE39AFFCB62941 /* PersonalityRadarChartView.swift */,
 				2D3556A4D38B589F6E8FE53A /* PersonalityReportView.swift */,
+				EC47E8EE0E1F388ECC06AA6F /* PersonalityShareCard.swift */,
 				4458765922C0561C5F6DB931 /* ProfileView.swift */,
 				8E84C1F0E43B1D750F5ED09E /* VoiceReRecordView.swift */,
 			);
@@ -1185,6 +1188,7 @@
 				2E875FA81A1B2CD9FDCC59B4 /* PersonalityRadarChartView.swift in Sources */,
 				3AFEA216B6E35395E14CAE45 /* PersonalityReportView.swift in Sources */,
 				1356366A91DBDFDCDCE14B9F /* PersonalityReportViewModel.swift in Sources */,
+				8CE357D933F737983C7EA6BA /* PersonalityShareCard.swift in Sources */,
 				BF2E07D0EE8421EE92B9AFA1 /* PhoneInputView.swift in Sources */,
 				2771C563A0F05F6DC9B45FD5 /* PhotoUploadView.swift in Sources */,
 				26CC62792C4B2CC166D58C36 /* PhotoUploadViewModel.swift in Sources */,

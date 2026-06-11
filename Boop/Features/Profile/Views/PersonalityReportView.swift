@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PersonalityReportView: View {
     @State private var viewModel = PersonalityReportViewModel()
+    @State private var shareImage: UIImage?
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -27,6 +28,15 @@ struct PersonalityReportView: View {
         .task {
             await viewModel.load()
         }
+        .sheet(item: $shareImage) { image in
+            ShareSheet(items: [image])
+        }
+    }
+
+    // MARK: - Share
+
+    private func shareCard(_ analysis: PersonalityAnalysis) {
+        shareImage = PersonalityShareCardRenderer.render(analysis)
     }
 
     // MARK: - Report Content
@@ -39,15 +49,17 @@ struct PersonalityReportView: View {
             preliminaryNote
         }
 
+        shareButton(analysis)
+
         if !analysis.facets.isEmpty {
             radarSection(analysis.facets)
         }
 
-        summarySection(analysis.summary)
-
         if !analysis.facets.isEmpty {
             facetBreakdownSection(analysis.facets)
         }
+
+        summarySection(analysis.summary)
 
         if let numerology = analysis.numerology {
             numerologySection(numerology)
@@ -56,32 +68,54 @@ struct PersonalityReportView: View {
         milestoneFooter
     }
 
-    // MARK: - Hero (editorial type, no gradient chrome)
+    // MARK: - Share button
+
+    private func shareButton(_ analysis: PersonalityAnalysis) -> some View {
+        BoopButton(title: "Share card", variant: .outline) {
+            shareCard(analysis)
+        }
+    }
+
+    // MARK: - Hero ("Coded & Rare" — type code, archetype name, essence)
 
     private func heroSection(_ analysis: PersonalityAnalysis) -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            // TYPE 0N (left) · N% RARE (right) — omit either side gracefully when nil.
             HStack(alignment: .firstTextBaseline) {
-                EyebrowLabel(text: "Personality type", color: BoopColors.accentColor)
-                Spacer()
-                if viewModel.isPreliminary {
-                    Text("Preliminary")
+                if let number = analysis.archetypeNumber {
+                    Text(String(format: "TYPE %02d", number))
                         .font(BoopTypography.cineLabel)
                         .tracking(2)
                         .foregroundStyle(BoopColors.textMuted)
                 }
+                Spacer()
+                if let rarity = analysis.rarityPercent {
+                    Text("\(rarity)% RARE")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                        .foregroundStyle(BoopColors.accentColor)
+                }
             }
 
-            AccentRule()
-
-            Text(analysis.personalityType)
+            Text(analysis.archetypeName ?? analysis.personalityType)
                 .font(BoopTypography.cineDisplay)
                 .foregroundStyle(BoopColors.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
 
+            AccentRule()
+
+            if let essence = analysis.essence, !essence.isEmpty {
+                Text(essence)
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .lineSpacing(5)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             Text("Based on \(analysis.questionsAnalyzed) answers")
                 .font(BoopTypography.cineCaption)
                 .tracking(1.5)
-                .foregroundStyle(BoopColors.textSecondary)
+                .foregroundStyle(BoopColors.textMuted)
         }
     }
 
@@ -89,7 +123,7 @@ struct PersonalityReportView: View {
 
     private var preliminaryNote: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            EyebrowLabel(text: "Growing your profile")
+            EyebrowLabel(text: "Preliminary — answer more to sharpen your type")
 
             Text("Answer \(viewModel.questionsUntilNext) more for deeper insights.")
                 .font(BoopTypography.cineBodyLight)
