@@ -251,6 +251,7 @@ struct MatchDetailView: View {
                     .padding(.top, BoopSpacing.xs)
                 }
             }
+            .padding(.horizontal, -BoopSpacing.xl)
 
             Text(viewModel.detail?.otherUser?.bio ?? "Keep building the connection. This page brings together comfort, reveal readiness, and the next action.")
                 .font(BoopTypography.cineBodyLight)
