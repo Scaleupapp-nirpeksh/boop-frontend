@@ -329,7 +329,7 @@ struct DatePlanView: View {
             // Venue type picker
             VStack(alignment: .leading, spacing: BoopSpacing.xs) {
                 Text("Type")
-                    .font(BoopTypography.subheadline)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textSecondary)
 
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -352,7 +352,7 @@ struct DatePlanView: View {
             // Date (future-dated; raw picker retains forward range)
             VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
                 Text("Date")
-                    .font(BoopTypography.subheadline)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textSecondary)
                 DatePicker(
                     "",
