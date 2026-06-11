@@ -9,15 +9,15 @@ struct DatePlanView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
                 // Pending plan from other user
                 if let pending = viewModel.pendingPlanForMe {
-                    incomingPlanCard(pending)
+                    incomingPlanSection(pending)
                 }
 
                 // Active confirmed plan
                 if let active = viewModel.activePlan, active.status == "accepted" {
-                    confirmedPlanCard(active)
+                    confirmedPlanSection(active)
                 }
 
                 // Propose new plan
@@ -32,18 +32,20 @@ struct DatePlanView: View {
 
                 if let error = viewModel.errorMessage {
                     Text(error)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
+                        .tracking(0.5)
                         .foregroundStyle(BoopColors.error)
                 }
 
                 if let success = viewModel.successMessage {
                     Text(success)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
+                        .tracking(0.5)
                         .foregroundStyle(BoopColors.success)
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
         .boopBackground()
         .navigationTitle("Date Plans")
@@ -55,200 +57,199 @@ struct DatePlanView: View {
 
     // MARK: - Incoming Plan (needs response)
 
-    private func incomingPlanCard(_ plan: DatePlanItem) -> some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Image(systemName: "heart.circle.fill")
-                        .font(.system(size: 24))
-                        .foregroundStyle(BoopColors.primary)
-                    Text("You have a date invitation!")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
+    private func incomingPlanSection(_ plan: DatePlanItem) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Date invitation", color: BoopColors.accentColor)
+            AccentRule()
+
+            Text("You've been asked on a date")
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            planDetailRows(plan)
+
+            HStack(spacing: BoopSpacing.sm) {
+                BoopButton(title: "Accept", isLoading: viewModel.isSubmitting) {
+                    Task { await viewModel.respondToPlan(plan._id, accept: true) }
                 }
 
-                planDetailRows(plan)
-
-                HStack(spacing: BoopSpacing.sm) {
-                    BoopButton(title: "Accept", isLoading: viewModel.isSubmitting) {
-                        Task { await viewModel.respondToPlan(plan._id, accept: true) }
-                    }
-
-                    BoopButton(title: "Decline", variant: .outline) {
-                        Task { await viewModel.respondToPlan(plan._id, accept: false) }
-                    }
+                BoopButton(title: "Decline", variant: .outline) {
+                    Task { await viewModel.respondToPlan(plan._id, accept: false) }
                 }
             }
+            .padding(.top, BoopSpacing.xs)
         }
-        .overlay(
-            RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                .stroke(BoopColors.primary.opacity(0.3), lineWidth: 1)
-        )
     }
 
     // MARK: - Confirmed Plan (with safety features)
 
-    private func confirmedPlanCard(_ plan: DatePlanItem) -> some View {
-        VStack(spacing: BoopSpacing.md) {
-            BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                    HStack {
-                        Image(systemName: "checkmark.seal.fill")
-                            .font(.system(size: 20))
-                            .foregroundStyle(BoopColors.success)
-                        Text("Date Confirmed")
-                            .font(BoopTypography.headline)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        Spacer()
-                        Button("Cancel") {
-                            Task { await viewModel.cancelPlan(plan._id) }
-                        }
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.error)
+    private func confirmedPlanSection(_ plan: DatePlanItem) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+            VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                HStack(alignment: .firstTextBaseline) {
+                    EyebrowLabel(text: "Date confirmed", color: BoopColors.success)
+                    Spacer()
+                    Button("Cancel") {
+                        Task { await viewModel.cancelPlan(plan._id) }
                     }
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.error)
+                }
 
-                    planDetailRows(plan)
+                AccentRule()
 
-                    Button {
-                        Task { await viewModel.completePlan(plan._id) }
-                    } label: {
-                        HStack {
-                            Image(systemName: "checkmark.circle.fill")
-                            Text("Mark as completed")
-                        }
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(BoopColors.secondary)
+                planDetailRows(plan)
+
+                Button {
+                    Task { await viewModel.completePlan(plan._id) }
+                } label: {
+                    HStack(spacing: BoopSpacing.xs) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: 12, weight: .light))
+                        Text("Mark as completed")
+                            .font(BoopTypography.cineBody)
+                    }
+                    .foregroundStyle(BoopColors.accentColor)
+                }
+                .padding(.top, BoopSpacing.xxs)
+            }
+
+            // Safety section
+            safetySection(plan)
+        }
+    }
+
+    // MARK: - Safety Section
+
+    private func safetySection(_ plan: DatePlanItem) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+            EyebrowLabel(text: "Safety", color: BoopColors.accentColor)
+            AccentRule()
+
+            // Safety contact
+            if let contact = plan.safetyContact, contact.name != nil {
+                HStack(spacing: BoopSpacing.sm) {
+                    Image(systemName: "checkmark.shield")
+                        .font(.system(size: 14, weight: .light))
+                        .foregroundStyle(BoopColors.success)
+                    Text("\(contact.name ?? "") will be notified if needed")
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textSecondary)
+                }
+            } else {
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    Text("Share with a trusted friend")
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textPrimary)
+
+                    BoopTextField(
+                        label: "Contact name",
+                        text: $viewModel.safetyContactName,
+                        placeholder: "Friend's name"
+                    )
+
+                    BoopTextField(
+                        label: "Phone number",
+                        text: $viewModel.safetyContactPhone,
+                        placeholder: "+91..."
+                    )
+
+                    BoopButton(title: "Set Safety Contact", variant: .secondary) {
+                        Task { await viewModel.setSafetyContact(planId: plan._id) }
                     }
                 }
             }
 
-            // Safety section
-            safetyCard(plan)
-        }
-    }
-
-    // MARK: - Safety Card
-
-    private func safetyCard(_ plan: DatePlanItem) -> some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Image(systemName: "shield.checkered")
-                        .font(.system(size: 18))
-                        .foregroundStyle(BoopColors.secondary)
-                    Text("Safety")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                }
-
-                // Safety contact
-                if let contact = plan.safetyContact, contact.name != nil {
-                    HStack {
-                        Image(systemName: "person.badge.shield.checkmark")
-                            .foregroundStyle(BoopColors.success)
-                        Text("\(contact.name ?? "") will be notified if needed")
-                            .font(BoopTypography.footnote)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
-                } else {
-                    VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                        Text("Share with a trusted friend")
-                            .font(BoopTypography.callout)
-                            .foregroundStyle(BoopColors.textPrimary)
-
-                        BoopTextField(
-                            label: "Contact name",
-                            text: $viewModel.safetyContactName,
-                            placeholder: "Friend's name"
-                        )
-
-                        BoopTextField(
-                            label: "Phone number",
-                            text: $viewModel.safetyContactPhone,
-                            placeholder: "+91..."
-                        )
-
-                        BoopButton(title: "Set Safety Contact", variant: .secondary) {
-                            Task { await viewModel.setSafetyContact(planId: plan._id) }
-                        }
-                    }
-                }
-
-                Divider()
-
-                // Check-in buttons
-                Text("During your date")
-                    .font(BoopTypography.callout)
-                    .fontWeight(.medium)
-                    .foregroundStyle(BoopColors.textPrimary)
+            // Check-in
+            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                EyebrowLabel(text: "During your date")
 
                 HStack(spacing: BoopSpacing.sm) {
-                    Button {
+                    checkInButton(
+                        title: "I'm good",
+                        icon: "checkmark",
+                        tint: BoopColors.success
+                    ) {
                         Task { await viewModel.checkIn(planId: plan._id, status: "ok") }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "checkmark.circle.fill")
-                            Text("I'm good")
-                        }
-                        .font(BoopTypography.callout)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, BoopSpacing.sm)
-                        .background(BoopColors.success)
-                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
                     }
 
-                    Button {
+                    checkInButton(
+                        title: "Need help",
+                        icon: "exclamationmark.triangle",
+                        tint: BoopColors.error
+                    ) {
                         Task { await viewModel.checkIn(planId: plan._id, status: "help") }
-                    } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                            Text("Need help")
-                        }
-                        .font(BoopTypography.callout)
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, BoopSpacing.sm)
-                        .background(BoopColors.error)
-                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
                     }
                 }
+            }
 
-                // Recent check-ins
-                if let checkIns = plan.checkIns, !checkIns.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(checkIns.suffix(3)) { checkIn in
-                            HStack(spacing: 6) {
-                                Image(systemName: checkIn.status == "ok" ? "checkmark.circle" : "exclamationmark.triangle")
-                                    .font(.system(size: 12))
+            // Recent check-ins
+            if let checkIns = plan.checkIns, !checkIns.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(checkIns.suffix(3)) { checkIn in
+                        VStack(spacing: 0) {
+                            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                            HStack(spacing: BoopSpacing.sm) {
+                                Image(systemName: checkIn.status == "ok" ? "checkmark" : "exclamationmark.triangle")
+                                    .font(.system(size: 11, weight: .light))
                                     .foregroundStyle(checkIn.status == "ok" ? BoopColors.success : BoopColors.error)
                                 Text(checkIn.status == "ok" ? "Checked in OK" : "Help requested")
-                                    .font(BoopTypography.caption)
+                                    .font(BoopTypography.cineCaption)
                                     .foregroundStyle(BoopColors.textSecondary)
                                 Spacer()
                                 if let ts = checkIn.timestamp {
                                     Text(ts.formatted(.dateTime.hour().minute()))
-                                        .font(BoopTypography.caption)
+                                        .font(BoopTypography.cineCaption)
                                         .foregroundStyle(BoopColors.textMuted)
                                 }
                             }
+                            .padding(.vertical, BoopSpacing.sm)
                         }
                     }
+                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
                 }
             }
         }
+    }
+
+    private func checkInButton(title: String, icon: String, tint: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: BoopSpacing.xs) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .regular))
+                Text(title)
+                    .font(BoopTypography.cineBody)
+            }
+            .foregroundStyle(tint)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, BoopSpacing.sm)
+            .overlay(
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(tint, lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Proposal Section
 
     private var proposalSection: some View {
-        VStack(spacing: BoopSpacing.md) {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
             if !viewModel.showProposalForm {
-                BoopButton(title: "Propose a Date") {
-                    withAnimation { viewModel.showProposalForm = true }
-                    Task { await viewModel.loadSuggestions() }
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    EyebrowLabel(text: "Plan a date", color: BoopColors.accentColor)
+                    AccentRule()
+                    Text("Suggest a time and place to meet")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+
+                    BoopButton(title: "Propose a Date") {
+                        withAnimation { viewModel.showProposalForm = true }
+                        Task { await viewModel.loadSuggestions() }
+                    }
+                    .padding(.top, BoopSpacing.xs)
                 }
             } else {
                 proposalForm
@@ -257,159 +258,178 @@ struct DatePlanView: View {
     }
 
     private var proposalForm: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("Plan a Date")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Button("Cancel") {
-                        withAnimation { viewModel.showProposalForm = false }
-                    }
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textMuted)
+        VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "Plan a date", color: BoopColors.accentColor)
+                Spacer()
+                Button("Cancel") {
+                    withAnimation { viewModel.showProposalForm = false }
                 }
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(BoopColors.textMuted)
+            }
 
-                // AI venue suggestions
-                if viewModel.isLoadingSuggestions {
-                    HStack {
-                        ProgressView()
-                        Text("Getting venue ideas...")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
-                } else if !viewModel.venueSuggestions.isEmpty {
-                    VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                        Text("Suggestions")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textMuted)
+            AccentRule()
 
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: BoopSpacing.xs) {
-                                ForEach(viewModel.venueSuggestions) { suggestion in
-                                    Button {
-                                        viewModel.venueName = suggestion.name
-                                        viewModel.venueType = suggestion.type
-                                    } label: {
-                                        VStack(alignment: .leading, spacing: 4) {
+            // AI venue suggestions
+            if viewModel.isLoadingSuggestions {
+                HStack(spacing: BoopSpacing.sm) {
+                    ProgressView()
+                        .tint(BoopColors.accentColor)
+                    Text("Getting venue ideas")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textSecondary)
+                }
+            } else if !viewModel.venueSuggestions.isEmpty {
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    EyebrowLabel(text: "Suggestions")
+
+                    VStack(spacing: 0) {
+                        ForEach(viewModel.venueSuggestions) { suggestion in
+                            Button {
+                                viewModel.venueName = suggestion.name
+                                viewModel.venueType = suggestion.type
+                            } label: {
+                                VStack(spacing: 0) {
+                                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                                    HStack(alignment: .top, spacing: BoopSpacing.sm) {
+                                        VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
                                             Text(suggestion.name)
-                                                .font(BoopTypography.footnote)
-                                                .fontWeight(.medium)
+                                                .font(BoopTypography.cineBody)
                                                 .foregroundStyle(BoopColors.textPrimary)
                                             Text(suggestion.reason)
-                                                .font(BoopTypography.caption)
+                                                .font(BoopTypography.cineBodyLight)
                                                 .foregroundStyle(BoopColors.textSecondary)
-                                                .lineLimit(2)
+                                                .lineSpacing(2)
+                                                .fixedSize(horizontal: false, vertical: true)
                                         }
-                                        .padding(BoopSpacing.sm)
-                                        .frame(width: 180, alignment: .leading)
-                                        .background(BoopColors.surfaceSecondary)
-                                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
+                                        Spacer(minLength: 0)
+                                        Image(systemName: "plus")
+                                            .font(.system(size: 12, weight: .light))
+                                            .foregroundStyle(BoopColors.accentColor)
                                     }
+                                    .multilineTextAlignment(.leading)
+                                    .padding(.vertical, BoopSpacing.md)
                                 }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                    }
+                }
+            }
+
+            BoopTextField(
+                label: "Venue name",
+                text: $viewModel.venueName,
+                placeholder: "Where would you like to go?"
+            )
+
+            // Venue type picker
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                Text("Type")
+                    .font(BoopTypography.subheadline)
+                    .foregroundStyle(BoopColors.textSecondary)
+
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: BoopSpacing.xs) {
+                        ForEach(DatePlanViewModel.venueTypes, id: \.0) { type, label in
+                            venueTypeChip(label, isSelected: viewModel.venueType == type) {
+                                viewModel.venueType = type
                             }
                         }
                     }
                 }
+            }
 
-                BoopTextField(
-                    label: "Venue name",
-                    text: $viewModel.venueName,
-                    placeholder: "Where would you like to go?"
-                )
+            BoopTextField(
+                label: "Address (optional)",
+                text: $viewModel.address,
+                placeholder: "Address or area"
+            )
 
-                // Venue type picker
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Type")
-                        .font(BoopTypography.subheadline)
-                        .foregroundStyle(BoopColors.textSecondary)
-
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: BoopSpacing.xs) {
-                            ForEach(DatePlanViewModel.venueTypes, id: \.0) { type, label in
-                                Button {
-                                    viewModel.venueType = type
-                                } label: {
-                                    Text(label)
-                                        .font(BoopTypography.footnote)
-                                        .fontWeight(viewModel.venueType == type ? .semibold : .regular)
-                                        .foregroundStyle(viewModel.venueType == type ? .white : BoopColors.textPrimary)
-                                        .padding(.horizontal, BoopSpacing.sm)
-                                        .padding(.vertical, 6)
-                                        .background(viewModel.venueType == type ? BoopColors.primary : BoopColors.surfaceSecondary)
-                                        .clipShape(Capsule())
-                                }
-                            }
-                        }
-                    }
-                }
-
-                BoopTextField(
-                    label: "Address (optional)",
-                    text: $viewModel.address,
-                    placeholder: "Address or area"
-                )
-
+            // Date (future-dated; raw picker retains forward range)
+            VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
+                Text("Date")
+                    .font(BoopTypography.subheadline)
+                    .foregroundStyle(BoopColors.textSecondary)
                 DatePicker(
-                    "Date",
+                    "",
                     selection: $viewModel.proposedDate,
                     in: Date()...,
                     displayedComponents: [.date]
                 )
-                .font(BoopTypography.body)
+                .labelsHidden()
+                .tint(BoopColors.accentColor)
+                .font(BoopTypography.cineBody)
+            }
 
-                BoopTextField(
-                    label: "Time (optional)",
-                    text: $viewModel.proposedTime,
-                    placeholder: "e.g. 7:00 PM"
-                )
+            BoopTextField(
+                label: "Time (optional)",
+                text: $viewModel.proposedTime,
+                placeholder: "e.g. 7:00 PM"
+            )
 
-                BoopTextField(
-                    label: "Notes (optional)",
-                    text: $viewModel.notes,
-                    placeholder: "Anything else to mention?",
-                    isMultiline: true,
-                    maxLength: 500
-                )
+            BoopTextField(
+                label: "Notes (optional)",
+                text: $viewModel.notes,
+                placeholder: "Anything else to mention?",
+                isMultiline: true,
+                maxLength: 500
+            )
 
-                BoopButton(title: "Send Proposal", isLoading: viewModel.isSubmitting) {
-                    Task { await viewModel.proposePlan() }
-                }
+            BoopButton(title: "Send Proposal", isLoading: viewModel.isSubmitting) {
+                Task { await viewModel.proposePlan() }
             }
         }
+    }
+
+    private func venueTypeChip(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(isSelected ? BoopColors.accentColor : BoopColors.textMuted)
+                .padding(.horizontal, BoopSpacing.md)
+                .padding(.vertical, BoopSpacing.sm)
+                .overlay(
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Past Plans
 
     private var pastPlansSection: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text("Past Plans")
-                .font(BoopTypography.headline)
-                .foregroundStyle(BoopColors.textPrimary)
+            EyebrowLabel(text: "Past plans")
 
-            ForEach(viewModel.pastPlans) { plan in
-                BoopCard(padding: BoopSpacing.md, radius: BoopRadius.xl) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(plan.venue.name)
-                                .font(BoopTypography.callout)
-                                .foregroundStyle(BoopColors.textPrimary)
-                            Text(plan.proposedDate.formatted(.dateTime.month(.abbreviated).day()))
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.textSecondary)
+            VStack(spacing: 0) {
+                ForEach(viewModel.pastPlans) { plan in
+                    VStack(spacing: 0) {
+                        Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                        HStack(spacing: BoopSpacing.sm) {
+                            VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
+                                Text(plan.venue.name)
+                                    .font(BoopTypography.cineBody)
+                                    .foregroundStyle(BoopColors.textPrimary)
+                                Text(plan.proposedDate.formatted(.dateTime.month(.abbreviated).day()))
+                                    .font(BoopTypography.cineCaption)
+                                    .foregroundStyle(BoopColors.textSecondary)
+                            }
+                            Spacer()
+                            Text(plan.statusLabel.uppercased())
+                                .font(BoopTypography.cineLabel)
+                                .tracking(2)
+                                .foregroundStyle(statusColor(plan.status))
                         }
-                        Spacer()
-                        Text(plan.statusLabel)
-                            .font(BoopTypography.caption)
-                            .fontWeight(.medium)
-                            .foregroundStyle(statusColor(plan.status))
-                            .padding(.horizontal, BoopSpacing.xs)
-                            .padding(.vertical, 3)
-                            .background(statusColor(plan.status).opacity(0.12))
-                            .clipShape(Capsule())
+                        .padding(.vertical, BoopSpacing.md)
                     }
                 }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
         }
     }
@@ -417,47 +437,49 @@ struct DatePlanView: View {
     // MARK: - Helpers
 
     private func planDetailRows(_ plan: DatePlanItem) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            detailRow(icon: "mappin.circle.fill", label: plan.venue.name, sublabel: plan.venue.type?.capitalized)
+        VStack(spacing: 0) {
+            detailRow(label: plan.venue.name, sublabel: plan.venue.type?.capitalized)
             if let address = plan.venue.address, !address.isEmpty {
-                detailRow(icon: "map.fill", label: address, sublabel: nil)
+                detailRow(label: address, sublabel: nil)
             }
             detailRow(
-                icon: "calendar",
                 label: plan.proposedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()),
                 sublabel: plan.proposedTime
             )
             if let notes = plan.notes, !notes.isEmpty {
-                detailRow(icon: "text.quote", label: notes, sublabel: nil)
+                detailRow(label: notes, sublabel: nil)
             }
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
         }
     }
 
-    private func detailRow(icon: String, label: String, sublabel: String?) -> some View {
-        HStack(spacing: BoopSpacing.sm) {
-            Image(systemName: icon)
-                .font(.system(size: 14))
-                .foregroundStyle(BoopColors.secondary)
-                .frame(width: 20)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(label)
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textPrimary)
+    private func detailRow(label: String, sublabel: String?) -> some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            HStack(alignment: .firstTextBaseline, spacing: BoopSpacing.sm) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(label)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer()
                 if let sublabel {
                     Text(sublabel)
-                        .font(BoopTypography.caption)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.textSecondary)
                 }
             }
+            .padding(.vertical, BoopSpacing.md)
         }
     }
 
     private func statusColor(_ status: String) -> Color {
         switch status {
-        case "proposed": return BoopColors.accent
+        case "proposed": return BoopColors.accentColor
         case "accepted": return BoopColors.success
         case "declined": return BoopColors.error
-        case "completed": return BoopColors.secondary
+        case "completed": return BoopColors.textSecondary
         default: return BoopColors.textMuted
         }
     }

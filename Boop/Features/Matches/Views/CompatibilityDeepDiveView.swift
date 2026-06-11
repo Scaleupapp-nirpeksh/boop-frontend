@@ -13,52 +13,34 @@ struct CompatibilityDeepDiveView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             if viewModel.isLoading && viewModel.data == nil {
-                VStack(spacing: BoopSpacing.lg) {
-                    ForEach(0..<4, id: \.self) { _ in
-                        RoundedRectangle(cornerRadius: BoopRadius.xl)
+                VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                    ForEach(0..<5, id: \.self) { _ in
+                        Rectangle()
                             .fill(BoopColors.surfaceSecondary)
-                            .frame(height: 120)
+                            .frame(height: 1)
+                            .padding(.vertical, BoopSpacing.xl)
                     }
                 }
                 .padding(.horizontal, BoopSpacing.xl)
-                .padding(.vertical, BoopSpacing.lg)
+                .padding(.vertical, BoopSpacing.xl)
             } else if let data = viewModel.data {
-                VStack(spacing: BoopSpacing.lg) {
-                    overallCard(data: data)
+                VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+                    overallSection(data: data)
 
                     if let strongest = viewModel.strongestDimension {
-                        calloutCard(
-                            title: "Strongest bond",
-                            dimension: strongest,
-                            tintColor: BoopColors.success
-                        )
+                        calloutSection(title: "Strongest bond", dimension: strongest, accent: BoopColors.success)
                     }
 
                     if let growth = viewModel.growthDimension {
-                        calloutCard(
-                            title: "Growth opportunity",
-                            dimension: growth,
-                            tintColor: BoopColors.accent
-                        )
+                        calloutSection(title: "Growth opportunity", dimension: growth, accent: BoopColors.accentColor)
                     }
 
-                    ForEach(viewModel.sortedDimensions) { dimension in
-                        dimensionCard(dimension: dimension)
-                    }
+                    dimensionBreakdownSection(viewModel.sortedDimensions)
                 }
                 .padding(.horizontal, BoopSpacing.xl)
-                .padding(.vertical, BoopSpacing.lg)
+                .padding(.vertical, BoopSpacing.xl)
             } else if let error = viewModel.errorMessage {
-                VStack(spacing: BoopSpacing.md) {
-                    Image(systemName: "exclamationmark.triangle")
-                        .font(.system(size: 32))
-                        .foregroundStyle(BoopColors.error)
-                    Text(error)
-                        .font(BoopTypography.body)
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-                .padding(BoopSpacing.xl)
+                errorView(error)
             }
         }
         .boopBackground()
@@ -72,65 +54,67 @@ struct CompatibilityDeepDiveView: View {
         }
     }
 
-    // MARK: - Overall Card
+    // MARK: - Overall (editorial hero + radar bars)
 
-    private func overallCard(data: CompatibilityDeepDiveResponse) -> some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
+    private func overallSection(data: CompatibilityDeepDiveResponse) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.lg) {
             VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(data.user1Name ?? "You") & \(data.user2Name ?? "Match")")
-                            .font(BoopTypography.headline)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        if let tier = data.matchTier {
-                            Text(tier.capitalized + " match")
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.secondary)
-                        }
-                    }
-
+                HStack(alignment: .firstTextBaseline) {
+                    EyebrowLabel(text: "Compatibility", color: BoopColors.accentColor)
                     Spacer()
-
-                    VStack(spacing: 2) {
-                        Text("\(data.compatibilityScore ?? 0)%")
-                            .font(BoopTypography.title1)
-                            .foregroundStyle(BoopColors.primary)
-                        Text("overall")
-                            .font(BoopTypography.caption)
+                    if let tier = data.matchTier {
+                        Text((tier + " match").uppercased())
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
                             .foregroundStyle(BoopColors.textMuted)
                     }
                 }
 
-                if let narrative = data.overallNarrative {
-                    Text(narrative)
-                        .font(BoopTypography.body)
+                AccentRule()
+
+                HStack(alignment: .firstTextBaseline, spacing: BoopSpacing.sm) {
+                    Text("\(data.compatibilityScore ?? 0)")
+                        .font(BoopTypography.cineDisplayXL)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    Text("%")
+                        .font(BoopTypography.cineTitle)
                         .foregroundStyle(BoopColors.textSecondary)
+                    Spacer()
                 }
 
-                // Mini radar-style bars
-                VStack(spacing: BoopSpacing.xs) {
+                Text("\(data.user1Name ?? "You")  &  \(data.user2Name ?? "Match")")
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1.5)
+                    .foregroundStyle(BoopColors.textSecondary)
+
+                if let narrative = data.overallNarrative {
+                    Text(narrative)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .lineSpacing(6)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, BoopSpacing.xs)
+                }
+            }
+
+            // Mini radar-style bars (typeset % + thin coral bars)
+            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                EyebrowLabel(text: "At a glance")
+
+                VStack(spacing: BoopSpacing.sm) {
                     ForEach(data.dimensions) { dim in
                         HStack(spacing: BoopSpacing.sm) {
                             Text(dim.label)
-                                .font(BoopTypography.caption)
+                                .font(BoopTypography.cineCaption)
                                 .foregroundStyle(BoopColors.textSecondary)
-                                .frame(width: 110, alignment: .leading)
+                                .frame(width: 120, alignment: .leading)
 
-                            GeometryReader { proxy in
-                                ZStack(alignment: .leading) {
-                                    Capsule()
-                                        .fill(BoopColors.surfaceSecondary)
-                                    Capsule()
-                                        .fill(Color(hex: dim.color))
-                                        .frame(width: proxy.size.width * CGFloat(dim.score ?? 0) / 100.0)
-                                }
-                            }
-                            .frame(height: 6)
+                            HairlineProgress(progress: Double(dim.score ?? 0) / 100.0)
 
-                            Text("\(dim.score ?? 0)%")
-                                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                                .foregroundStyle(Color(hex: dim.color))
-                                .frame(width: 35, alignment: .trailing)
+                            Text("\(dim.score ?? 0)")
+                                .font(.system(size: 13, weight: .light))
+                                .foregroundStyle(BoopColors.textPrimary)
+                                .frame(width: 28, alignment: .trailing)
                         }
                     }
                 }
@@ -138,100 +122,89 @@ struct CompatibilityDeepDiveView: View {
         }
     }
 
-    // MARK: - Callout Card
+    // MARK: - Callout (strongest / growth)
 
-    private func calloutCard(title: String, dimension: CompatibilityDimension, tintColor: Color) -> some View {
-        HStack(spacing: BoopSpacing.md) {
-            Image(systemName: dimension.icon)
-                .font(.system(size: 22))
-                .foregroundStyle(tintColor)
-                .frame(width: 44, height: 44)
-                .background(tintColor.opacity(0.12))
-                .clipShape(Circle())
+    private func calloutSection(title: String, dimension: CompatibilityDimension, accent: Color) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: title, color: accent)
+            AccentRule()
 
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(tintColor)
-                    .fontWeight(.semibold)
+            HStack(alignment: .firstTextBaseline) {
                 Text(dimension.label)
-                    .font(BoopTypography.callout)
-                    .fontWeight(.semibold)
+                    .font(BoopTypography.cineHeadline)
                     .foregroundStyle(BoopColors.textPrimary)
-                if let narrative = dimension.narrative {
-                    Text(narrative)
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .lineLimit(2)
-                }
+                Spacer()
+                Text("\(dimension.score ?? 0)%")
+                    .font(BoopTypography.cineTitle)
+                    .foregroundStyle(accent)
             }
 
-            Spacer()
-
-            Text("\(dimension.score ?? 0)%")
-                .font(BoopTypography.title3)
-                .foregroundStyle(tintColor)
+            if let narrative = dimension.narrative {
+                Text(narrative)
+                    .font(BoopTypography.cineBody)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .lineSpacing(5)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
-        .padding(BoopSpacing.md)
-        .background(
-            RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                .fill(tintColor.opacity(0.06))
-                .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                        .stroke(tintColor.opacity(0.15), lineWidth: 1)
-                )
-        )
     }
 
-    // MARK: - Dimension Card
+    // MARK: - Dimension Breakdown (hairline rows)
 
-    private func dimensionCard(dimension: CompatibilityDimension) -> some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                HStack(spacing: BoopSpacing.sm) {
-                    Image(systemName: dimension.icon)
-                        .font(.system(size: 16))
-                        .foregroundStyle(Color(hex: dimension.color))
-                        .frame(width: 32, height: 32)
-                        .background(Color(hex: dimension.color).opacity(0.12))
-                        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    private func dimensionBreakdownSection(_ dimensions: [CompatibilityDimension]) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "Dimension breakdown")
 
+            VStack(spacing: 0) {
+                ForEach(dimensions) { dimension in
+                    dimensionRow(dimension)
+                }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            }
+        }
+    }
+
+    private func dimensionRow(_ dimension: CompatibilityDimension) -> some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                HStack(alignment: .firstTextBaseline) {
                     Text(dimension.label)
-                        .font(BoopTypography.headline)
+                        .font(BoopTypography.cineBody)
                         .foregroundStyle(BoopColors.textPrimary)
-
                     Spacer()
-
-                    Text("\(dimension.score ?? 0)%")
-                        .font(BoopTypography.title3)
-                        .fontWeight(.bold)
-                        .foregroundStyle(Color(hex: dimension.color))
+                    Text("\(dimension.score ?? 0)")
+                        .font(.system(size: 17, weight: .light))
+                        .foregroundStyle(BoopColors.textPrimary)
                 }
 
-                // Score bar
-                GeometryReader { proxy in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(BoopColors.surfaceSecondary)
-                        Capsule()
-                            .fill(
-                                LinearGradient(
-                                    colors: [Color(hex: dimension.color).opacity(0.7), Color(hex: dimension.color)],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
-                                )
-                            )
-                            .frame(width: proxy.size.width * CGFloat(dimension.score ?? 0) / 100.0)
-                    }
-                }
-                .frame(height: 8)
+                HairlineProgress(progress: Double(dimension.score ?? 0) / 100.0)
 
                 if let narrative = dimension.narrative {
                     Text(narrative)
-                        .font(BoopTypography.body)
+                        .font(BoopTypography.cineBodyLight)
                         .foregroundStyle(BoopColors.textSecondary)
+                        .lineSpacing(3)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
+            .padding(.vertical, BoopSpacing.md)
         }
+    }
+
+    // MARK: - Error
+
+    private func errorView(_ message: String) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Couldn't load", color: BoopColors.error)
+            AccentRule()
+            Text(message)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.error)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, minHeight: 300, alignment: .topLeading)
+        .padding(.horizontal, BoopSpacing.xl)
+        .padding(.vertical, BoopSpacing.xl)
     }
 }

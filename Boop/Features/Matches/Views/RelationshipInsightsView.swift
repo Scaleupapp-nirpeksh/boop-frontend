@@ -5,162 +5,122 @@ struct RelationshipInsightsCard: View {
     let scores: InsightScores?
 
     var body: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Relationship insights")
-                            .font(BoopTypography.headline)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        HStack(spacing: 4) {
-                            Image(systemName: insights.source == "ai" ? "sparkles" : "brain")
-                                .font(.system(size: 10))
-                            Text(insights.source == "ai" ? "AI-powered analysis" : "Pattern-based analysis")
-                        }
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.secondary)
-                    }
-                    Spacer()
-                    Image(systemName: "heart.text.square.fill")
-                        .font(.system(size: 24))
-                        .foregroundStyle(BoopColors.primary.opacity(0.6))
+        VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+            // Header
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                EyebrowLabel(text: "Relationship insights", color: BoopColors.accentColor)
+                Text(insights.source == "ai" ? "AI-powered analysis" : "Pattern-based analysis")
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1)
+                    .foregroundStyle(BoopColors.textSecondary)
+            }
+
+            AccentRule()
+
+            // Overall summary
+            if let summary = insights.overallSummary, !summary.isEmpty {
+                Text(summary)
+                    .font(BoopTypography.cineBody)
+                    .foregroundStyle(BoopColors.textPrimary)
+                    .lineSpacing(6)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            // Strengths
+            if let strengths = insights.strengths, !strengths.isEmpty {
+                insightItemSection(title: "Your strengths", items: strengths)
+            }
+
+            // Growth areas
+            if let growthAreas = insights.growthAreas, !growthAreas.isEmpty {
+                insightItemSection(title: "Areas to grow", items: growthAreas)
+            }
+
+            // Game insights
+            if let gameInsights = insights.gameInsights, !gameInsights.isEmpty {
+                narrativeSection(title: "Game chemistry", body: gameInsights)
+            }
+
+            // Communication style
+            if let commStyle = insights.communicationStyle, !commStyle.isEmpty {
+                narrativeSection(title: "Communication", body: commStyle)
+            }
+
+            // Next steps
+            if let nextSteps = insights.nextSteps, !nextSteps.isEmpty {
+                nextStepsSection(nextSteps)
+            }
+        }
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
+    }
+
+    // MARK: - Sections
+
+    private func insightItemSection(title: String, items: [InsightItem]) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: title)
+
+            VStack(spacing: 0) {
+                ForEach(items) { item in
+                    insightRow(item)
                 }
-
-                // Overall summary
-                if let summary = insights.overallSummary, !summary.isEmpty {
-                    Text(summary)
-                        .font(BoopTypography.body)
-                        .foregroundStyle(BoopColors.textPrimary)
-                        .padding(BoopSpacing.md)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(BoopColors.surfaceSecondary)
-                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                }
-
-                // Strengths
-                if let strengths = insights.strengths, !strengths.isEmpty {
-                    VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                        HStack(spacing: BoopSpacing.xs) {
-                            Image(systemName: "star.fill")
-                                .foregroundStyle(BoopColors.accent)
-                            Text("Your strengths")
-                                .font(BoopTypography.callout)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(BoopColors.textPrimary)
-                        }
-
-                        ForEach(strengths) { item in
-                            insightRow(item, tint: BoopColors.success)
-                        }
-                    }
-                }
-
-                // Growth areas
-                if let growthAreas = insights.growthAreas, !growthAreas.isEmpty {
-                    VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                        HStack(spacing: BoopSpacing.xs) {
-                            Image(systemName: "leaf.fill")
-                                .foregroundStyle(BoopColors.secondary)
-                            Text("Areas to grow")
-                                .font(BoopTypography.callout)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(BoopColors.textPrimary)
-                        }
-
-                        ForEach(growthAreas) { item in
-                            insightRow(item, tint: BoopColors.warning)
-                        }
-                    }
-                }
-
-                // Game insights
-                if let gameInsights = insights.gameInsights, !gameInsights.isEmpty {
-                    HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                        Image(systemName: "gamecontroller.fill")
-                            .foregroundStyle(BoopColors.primary)
-                            .frame(width: 20)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Game chemistry")
-                                .font(BoopTypography.callout)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(BoopColors.textPrimary)
-                            Text(gameInsights)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.textSecondary)
-                        }
-                    }
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.primary.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                }
-
-                // Communication style
-                if let commStyle = insights.communicationStyle, !commStyle.isEmpty {
-                    HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                        Image(systemName: "bubble.left.and.bubble.right.fill")
-                            .foregroundStyle(BoopColors.secondary)
-                            .frame(width: 20)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Communication")
-                                .font(BoopTypography.callout)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(BoopColors.textPrimary)
-                            Text(commStyle)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.textSecondary)
-                        }
-                    }
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.secondary.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                }
-
-                // Next steps
-                if let nextSteps = insights.nextSteps, !nextSteps.isEmpty {
-                    VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                        Text("Suggested next steps")
-                            .font(BoopTypography.callout)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(BoopColors.textPrimary)
-
-                        ForEach(Array(nextSteps.enumerated()), id: \.offset) { index, step in
-                            HStack(alignment: .top, spacing: BoopSpacing.xs) {
-                                Text("\(index + 1)")
-                                    .font(BoopTypography.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(.white)
-                                    .frame(width: 20, height: 20)
-                                    .background(BoopColors.primary)
-                                    .clipShape(Circle())
-
-                                Text(step)
-                                    .font(BoopTypography.footnote)
-                                    .foregroundStyle(BoopColors.textSecondary)
-                            }
-                        }
-                    }
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.surfaceWarm)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
         }
     }
 
-    private func insightRow(_ item: InsightItem, tint: Color) -> some View {
-        HStack(alignment: .top, spacing: BoopSpacing.sm) {
-            Circle()
-                .fill(tint)
-                .frame(width: 8, height: 8)
-                .padding(.top, 6)
-
-            VStack(alignment: .leading, spacing: 2) {
+    private func insightRow(_ item: InsightItem) -> some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
                 Text(item.title)
-                    .font(BoopTypography.callout)
+                    .font(BoopTypography.cineBody)
                     .foregroundStyle(BoopColors.textPrimary)
                 Text(item.detail)
-                    .font(BoopTypography.footnote)
+                    .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, BoopSpacing.md)
+        }
+    }
+
+    private func narrativeSection(title: String, body: String) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+            EyebrowLabel(text: title)
+            Text(body)
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
+                .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func nextStepsSection(_ steps: [String]) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "Suggested next steps")
+
+            VStack(spacing: 0) {
+                ForEach(Array(steps.enumerated()), id: \.offset) { index, step in
+                    VStack(spacing: 0) {
+                        Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                        HStack(alignment: .firstTextBaseline, spacing: BoopSpacing.sm) {
+                            Text(String(format: "%02d", index + 1))
+                                .font(.system(size: 13, weight: .light))
+                                .foregroundStyle(BoopColors.accentColor)
+                                .frame(width: 22, alignment: .leading)
+                            Text(step)
+                                .font(BoopTypography.cineBodyLight)
+                                .foregroundStyle(BoopColors.textSecondary)
+                                .lineSpacing(3)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        .padding(.vertical, BoopSpacing.md)
+                    }
+                }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
         }
     }
@@ -168,16 +128,19 @@ struct RelationshipInsightsCard: View {
 
 struct RelationshipInsightsLoadingCard: View {
     var body: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(spacing: BoopSpacing.md) {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Relationship insights", color: BoopColors.accentColor)
+            AccentRule()
+            HStack(spacing: BoopSpacing.sm) {
                 ProgressView()
-                    .tint(BoopColors.secondary)
-                Text("Analyzing your connection...")
-                    .font(BoopTypography.callout)
+                    .tint(BoopColors.accentColor)
+                Text("Analyzing your connection")
+                    .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, BoopSpacing.lg)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 }
