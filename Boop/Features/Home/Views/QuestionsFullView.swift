@@ -10,23 +10,24 @@ struct QuestionsFullView: View {
         VStack(spacing: 0) {
             // Background upload indicator
             if viewModel.pendingVoiceUploads > 0 {
-                HStack(spacing: BoopSpacing.xs) {
+                HStack(spacing: BoopSpacing.sm) {
                     ProgressView()
                         .scaleEffect(0.7)
-                        .tint(BoopColors.secondary)
-                    Text("Uploading \(viewModel.pendingVoiceUploads) voice answer\(viewModel.pendingVoiceUploads > 1 ? "s" : "")...")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.secondary)
+                        .tint(BoopColors.accentColor)
+                    Text("UPLOADING \(viewModel.pendingVoiceUploads) VOICE ANSWER\(viewModel.pendingVoiceUploads > 1 ? "S" : "")")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                        .foregroundStyle(BoopColors.textMuted)
+                    Spacer()
                 }
-                .padding(.vertical, BoopSpacing.xs)
-                .frame(maxWidth: .infinity)
-                .background(BoopColors.secondary.opacity(0.08))
+                .padding(.horizontal, BoopSpacing.xl)
+                .padding(.vertical, BoopSpacing.sm)
             }
 
             if viewModel.isLoading {
                 Spacer()
                 ProgressView()
-                    .tint(BoopColors.primary)
+                    .tint(BoopColors.accentColor)
                 Spacer()
             } else if let question = viewModel.currentQuestion {
                 questionContent(question)
@@ -42,22 +43,9 @@ struct QuestionsFullView: View {
 
     private func questionContent(_ question: Question) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                Text(viewModel.progressText)
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textMuted)
-
-                Text(question.dimensionDisplayName)
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.secondary)
-                    .padding(.horizontal, BoopSpacing.sm)
-                    .padding(.vertical, BoopSpacing.xxxs)
-                    .background(BoopColors.secondary.opacity(0.1))
-                    .clipShape(Capsule())
-
-                Text(question.questionText)
-                    .font(BoopTypography.title3)
-                    .foregroundStyle(BoopColors.textPrimary)
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+                questionHeader
+                questionPrompt(question)
 
                 // Answer mode toggle for text questions
                 if question.questionType == .text {
@@ -73,65 +61,88 @@ struct QuestionsFullView: View {
 
                 if let error = viewModel.errorMessage {
                     Text(error)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.error)
                 }
 
                 BoopButton(
-                    title: viewModel.isVoiceMode ? "Submit Voice Answer" : "Next",
+                    title: viewModel.isVoiceMode ? "Submit Voice Answer" : "Continue",
                     isLoading: viewModel.isSubmitting,
                     isDisabled: !viewModel.canSubmitAnswer
                 ) {
                     Task { await viewModel.submitAnswer() }
                 }
+                .padding(.top, BoopSpacing.xs)
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
         .onTapGesture { hideKeyboard() }
     }
 
-    private var answerModeToggle: some View {
-        HStack(spacing: BoopSpacing.xs) {
-            modeButton(title: "Type", icon: "keyboard", isActive: !viewModel.isVoiceMode)
-            modeButton(title: "Voice", icon: "mic.fill", isActive: viewModel.isVoiceMode)
+    // MARK: - Header (eyebrow + progress counter + hairline progress)
+
+    private var questionHeader: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "Question \(String(format: "%02d", viewModel.currentIndex + 1))",
+                             color: BoopColors.accentColor)
+                Spacer()
+                Text("\(String(format: "%02d", viewModel.currentIndex + 1)) / \(String(format: "%02d", max(viewModel.questions.count, 1)))")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textMuted)
+            }
+
+            HairlineProgress(progress: Double(viewModel.currentIndex + 1) / Double(max(viewModel.questions.count, 1)))
+                .animation(.easeInOut(duration: 0.3), value: viewModel.currentIndex)
         }
     }
 
-    private func modeButton(title: String, icon: String, isActive: Bool) -> some View {
+    // MARK: - Prompt (rule + dimension + cinematic question)
+
+    private func questionPrompt(_ question: Question) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            AccentRule()
+            EyebrowLabel(text: question.dimensionDisplayName, color: BoopColors.textMuted)
+            Text(question.questionText)
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Answer Mode Toggle (voice option as a tracked text line)
+
+    private var answerModeToggle: some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 viewModel.toggleVoiceMode()
             }
         } label: {
-            HStack(spacing: BoopSpacing.xxs) {
-                Image(systemName: icon)
-                    .font(.system(size: 13))
-                Text(title)
-                    .font(BoopTypography.footnote)
+            HStack(spacing: BoopSpacing.sm) {
+                Text(viewModel.isVoiceMode ? "— OR ANSWER BY TYPING" : "— OR ANSWER BY VOICE")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.accentColor)
+                Spacer()
+                Image(systemName: viewModel.isVoiceMode ? "keyboard" : "mic")
+                    .font(.system(size: 13, weight: .thin))
+                    .foregroundStyle(BoopColors.accentColor)
             }
-            .padding(.horizontal, BoopSpacing.md)
-            .padding(.vertical, BoopSpacing.xs)
-            .foregroundStyle(isActive ? .white : BoopColors.textSecondary)
-            .background(isActive ? BoopColors.primary : BoopColors.surfaceSecondary)
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(isActive ? Color.clear : BoopColors.border, lineWidth: 1)
-            )
         }
+        .buttonStyle(.plain)
     }
 
     private var voiceAnswerArea: some View {
-        VStack(spacing: BoopSpacing.md) {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
             BoopVoiceRecorder(state: viewModel.voiceRecorder)
 
             Text("Record your answer — transcription happens automatically")
-                .font(BoopTypography.caption)
+                .font(BoopTypography.cineCaption)
                 .foregroundStyle(BoopColors.textMuted)
-                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.vertical, BoopSpacing.md)
     }
 
     @ViewBuilder
@@ -148,72 +159,75 @@ struct QuestionsFullView: View {
 
         case .singleChoice:
             if let options = question.options, !options.isEmpty {
-                VStack(spacing: BoopSpacing.xs) {
+                VStack(spacing: 0) {
                     ForEach(options, id: \.self) { option in
-                        choiceButton(option, isSelected: viewModel.selectedChoices.contains(option)) {
+                        optionRow(option,
+                                  isSelected: viewModel.selectedChoices.contains(option),
+                                  isMulti: false) {
                             viewModel.toggleChoice(option, multiSelect: false)
                         }
                     }
+                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
                 }
             }
 
         case .multipleChoice:
             if let options = question.options, !options.isEmpty {
-                VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-                    Text("Select all that apply")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textMuted)
-                    VStack(spacing: BoopSpacing.xs) {
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    EyebrowLabel(text: "Select all that apply", color: BoopColors.textMuted)
+                    VStack(spacing: 0) {
                         ForEach(options, id: \.self) { option in
-                            choiceButton(option, isSelected: viewModel.selectedChoices.contains(option)) {
+                            optionRow(option,
+                                      isSelected: viewModel.selectedChoices.contains(option),
+                                      isMulti: true) {
                                 viewModel.toggleChoice(option, multiSelect: true)
                             }
                         }
+                        Rectangle().fill(BoopColors.hairline).frame(height: 1)
                     }
                 }
             }
         }
     }
 
-    private func choiceButton(_ text: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    /// Hairline option row with a coral radio (single) or coral check (multi).
+    private func optionRow(_ text: String, isSelected: Bool, isMulti: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack {
-                Text(text)
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(isSelected ? .white : BoopColors.textPrimary)
-                Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
+            VStack(spacing: 0) {
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                HStack(spacing: BoopSpacing.md) {
+                    OptionIndicator(isSelected: isSelected, isMulti: isMulti)
+                    Text(text)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(isSelected ? BoopColors.textPrimary : BoopColors.textSecondary)
+                        .multilineTextAlignment(.leading)
+                    Spacer(minLength: BoopSpacing.sm)
                 }
+                .padding(.vertical, BoopSpacing.md)
             }
-            .padding(.horizontal, BoopSpacing.md)
-            .padding(.vertical, BoopSpacing.sm)
-            .background(isSelected ? BoopColors.primary : BoopColors.surfaceSecondary)
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .stroke(isSelected ? Color.clear : BoopColors.border, lineWidth: 1)
-            )
         }
+        .buttonStyle(.plain)
         .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 
     private var allDoneView: some View {
-        VStack(spacing: BoopSpacing.md) {
+        VStack(alignment: .leading, spacing: 0) {
             Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 48))
-                .foregroundStyle(BoopColors.success)
-            Text("All caught up!")
-                .font(BoopTypography.headline)
-                .foregroundStyle(BoopColors.textPrimary)
-            Text("No new questions right now.\nCheck back tomorrow!")
-                .font(BoopTypography.body)
-                .foregroundStyle(BoopColors.textMuted)
-                .multilineTextAlignment(.center)
+            VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                EyebrowLabel(text: "All Caught Up", color: BoopColors.accentColor)
+                AccentRule()
+                Text("All caught up.")
+                    .font(BoopTypography.cineDisplay)
+                    .foregroundStyle(BoopColors.textPrimary)
+                Text("No new questions right now. Check back tomorrow.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Spacer()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, BoopSpacing.xl)
+        .padding(.vertical, BoopSpacing.xl)
     }
 }

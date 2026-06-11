@@ -8,23 +8,24 @@ struct QuestionsView: View {
         VStack(spacing: 0) {
             // Background upload indicator
             if viewModel.pendingVoiceUploads > 0 {
-                HStack(spacing: BoopSpacing.xs) {
+                HStack(spacing: BoopSpacing.sm) {
                     ProgressView()
                         .scaleEffect(0.7)
-                        .tint(BoopColors.secondary)
-                    Text("Uploading \(viewModel.pendingVoiceUploads) voice answer\(viewModel.pendingVoiceUploads > 1 ? "s" : "")...")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.secondary)
+                        .tint(BoopColors.accentColor)
+                    Text("UPLOADING \(viewModel.pendingVoiceUploads) VOICE ANSWER\(viewModel.pendingVoiceUploads > 1 ? "S" : "")")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                        .foregroundStyle(BoopColors.textMuted)
+                    Spacer()
                 }
-                .padding(.vertical, BoopSpacing.xs)
-                .frame(maxWidth: .infinity)
-                .background(BoopColors.secondary.opacity(0.08))
+                .padding(.horizontal, BoopSpacing.xl)
+                .padding(.vertical, BoopSpacing.sm)
             }
 
             if viewModel.isLoading {
                 Spacer()
                 ProgressView()
-                    .tint(BoopColors.primary)
+                    .tint(BoopColors.accentColor)
                 Spacer()
             } else if viewModel.isComplete {
                 // Profile stage is ready (15+ answers)
@@ -38,6 +39,7 @@ struct QuestionsView: View {
                 emptyView
             }
         }
+        .background(BoopColors.ground.ignoresSafeArea())
         .task {
             await viewModel.fetchQuestions()
         }
@@ -47,57 +49,9 @@ struct QuestionsView: View {
 
     private func questionContent(_ question: Question) -> some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                // Progress
-                HStack {
-                    Text(viewModel.progressText)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.textMuted)
-
-                    Spacer()
-
-                    Text("\(viewModel.answeredCount) answered")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.secondary)
-                        .padding(.horizontal, BoopSpacing.xs)
-                        .padding(.vertical, 3)
-                        .background(BoopColors.secondary.opacity(0.1))
-                        .clipShape(Capsule())
-                }
-
-                // Progress toward the 15 answers that unlock the full profile + best matches
-                if viewModel.answeredCount < 15 {
-                    VStack(alignment: .leading, spacing: 4) {
-                        GeometryReader { proxy in
-                            ZStack(alignment: .leading) {
-                                Capsule().fill(BoopColors.surfaceSecondary)
-                                Capsule()
-                                    .fill(BoopColors.secondaryGradient)
-                                    .frame(width: proxy.size.width * CGFloat(min(viewModel.answeredCount, 15)) / 15.0)
-                            }
-                        }
-                        .frame(height: 6)
-                        .animation(.easeInOut(duration: 0.3), value: viewModel.answeredCount)
-
-                        Text("\(viewModel.answeredCount) of 15 to unlock your full profile & best matches")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textMuted)
-                    }
-                }
-
-                // Dimension badge
-                Text(question.dimensionDisplayName)
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.secondary)
-                    .padding(.horizontal, BoopSpacing.sm)
-                    .padding(.vertical, BoopSpacing.xxxs)
-                    .background(BoopColors.secondary.opacity(0.1))
-                    .clipShape(Capsule())
-
-                // Question text
-                Text(question.questionText)
-                    .font(BoopTypography.title3)
-                    .foregroundStyle(BoopColors.textPrimary)
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+                questionHeader
+                questionPrompt(question)
 
                 // Answer mode toggle for text questions
                 if question.questionType == .text {
@@ -114,96 +68,131 @@ struct QuestionsView: View {
                 // Error
                 if let error = viewModel.errorMessage {
                     Text(error)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.error)
                 }
 
-                // Submit
-                BoopButton(
-                    title: viewModel.isVoiceMode ? "Submit Voice Answer" : "Next",
-                    isLoading: viewModel.isSubmitting,
-                    isDisabled: !viewModel.canSubmitAnswer
-                ) {
-                    Task { await viewModel.submitAnswer() }
-                }
-
-                // Skip to homepage button (visible after 6+ answers)
-                if viewModel.canSkipToHome {
-                    Button {
-                        Task {
-                            await viewModel.goToHomepage()
-                            onboardingVM.markComplete()
-                        }
-                    } label: {
-                        HStack(spacing: BoopSpacing.xs) {
-                            Text("Skip to homepage")
-                                .font(BoopTypography.callout)
-                            Image(systemName: "arrow.right")
-                                .font(.system(size: 13))
-                        }
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, BoopSpacing.sm)
+                VStack(spacing: BoopSpacing.md) {
+                    // Submit
+                    BoopButton(
+                        title: viewModel.isVoiceMode ? "Submit Voice Answer" : "Continue",
+                        isLoading: viewModel.isSubmitting,
+                        isDisabled: !viewModel.canSubmitAnswer
+                    ) {
+                        Task { await viewModel.submitAnswer() }
                     }
 
-                    Text("You can answer remaining questions from your profile anytime.")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textMuted)
-                        .multilineTextAlignment(.center)
-                        .frame(maxWidth: .infinity)
+                    // Skip to homepage button (visible after 6+ answers)
+                    if viewModel.canSkipToHome {
+                        Button {
+                            Task {
+                                await viewModel.goToHomepage()
+                                onboardingVM.markComplete()
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text("SKIP TO HOMEPAGE")
+                                    .font(BoopTypography.cineLabel)
+                                    .tracking(2)
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 11, weight: .thin))
+                            }
+                            .foregroundStyle(BoopColors.textSecondary)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, BoopSpacing.xs)
+                        }
+
+                        Text("You can answer remaining questions from your profile anytime.")
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textMuted)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                    }
                 }
+                .padding(.top, BoopSpacing.xs)
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
         .onTapGesture { hideKeyboard() }
     }
 
-    // MARK: - Answer Mode Toggle
+    // MARK: - Header (eyebrow + counter + hairline progress)
 
-    private var answerModeToggle: some View {
-        HStack(spacing: BoopSpacing.xs) {
-            modeButton(title: "Type", icon: "keyboard", isActive: !viewModel.isVoiceMode)
-            modeButton(title: "Voice", icon: "mic.fill", isActive: viewModel.isVoiceMode)
+    private var questionHeader: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "Question \(String(format: "%02d", viewModel.currentIndex + 1))",
+                             color: BoopColors.accentColor)
+                Spacer()
+                Text("\(String(format: "%02d", min(viewModel.answeredCount, 15))) / 15")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textMuted)
+            }
+
+            // Progress toward the 15 answers that unlock the full profile + best matches
+            HairlineProgress(progress: Double(min(viewModel.answeredCount, 15)) / 15.0)
+                .animation(.easeInOut(duration: 0.3), value: viewModel.answeredCount)
+
+            if viewModel.answeredCount < 15 {
+                Text("\(viewModel.answeredCount) of 15 to unlock your full profile & best matches")
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
+            } else {
+                Text(viewModel.progressText.uppercased())
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
+            }
         }
     }
 
-    private func modeButton(title: String, icon: String, isActive: Bool) -> some View {
+    // MARK: - Prompt (rule + dimension + cinematic question)
+
+    private func questionPrompt(_ question: Question) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            AccentRule()
+            EyebrowLabel(text: question.dimensionDisplayName, color: BoopColors.textMuted)
+            Text(question.questionText)
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    // MARK: - Answer Mode Toggle (voice option as a tracked text line)
+
+    private var answerModeToggle: some View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 viewModel.toggleVoiceMode()
             }
         } label: {
-            HStack(spacing: BoopSpacing.xxs) {
-                Image(systemName: icon)
-                    .font(.system(size: 13))
-                Text(title)
-                    .font(BoopTypography.footnote)
+            HStack(spacing: BoopSpacing.sm) {
+                Text(viewModel.isVoiceMode ? "— OR ANSWER BY TYPING" : "— OR ANSWER BY VOICE")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.accentColor)
+                Spacer()
+                Image(systemName: viewModel.isVoiceMode ? "keyboard" : "mic")
+                    .font(.system(size: 13, weight: .thin))
+                    .foregroundStyle(BoopColors.accentColor)
             }
-            .padding(.horizontal, BoopSpacing.md)
-            .padding(.vertical, BoopSpacing.xs)
-            .foregroundStyle(isActive ? .white : BoopColors.textSecondary)
-            .background(isActive ? BoopColors.primary : BoopColors.surfaceSecondary)
-            .clipShape(Capsule())
-            .overlay(
-                Capsule()
-                    .stroke(isActive ? Color.clear : BoopColors.border, lineWidth: 1)
-            )
         }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Voice Answer Area
 
     private var voiceAnswerArea: some View {
-        VStack(spacing: BoopSpacing.md) {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
             BoopVoiceRecorder(state: viewModel.voiceRecorder)
 
             Text("Record your answer — it'll be transcribed automatically while you continue with other questions")
-                .font(BoopTypography.caption)
+                .font(BoopTypography.cineCaption)
                 .foregroundStyle(BoopColors.textMuted)
-                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
         }
-        .padding(.vertical, BoopSpacing.md)
     }
 
     @ViewBuilder
@@ -220,77 +209,73 @@ struct QuestionsView: View {
 
         case .singleChoice:
             if let options = question.options, !options.isEmpty {
-                VStack(spacing: BoopSpacing.xs) {
+                VStack(spacing: 0) {
                     ForEach(options, id: \.self) { option in
-                        choiceButton(option, isSelected: viewModel.selectedChoices.contains(option)) {
+                        optionRow(option,
+                                  isSelected: viewModel.selectedChoices.contains(option),
+                                  isMulti: false) {
                             viewModel.toggleChoice(option, multiSelect: false)
                         }
                     }
+                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
                 }
             }
 
         case .multipleChoice:
             if let options = question.options, !options.isEmpty {
-                VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-                    Text("Select all that apply")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textMuted)
-                    VStack(spacing: BoopSpacing.xs) {
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    EyebrowLabel(text: "Select all that apply", color: BoopColors.textMuted)
+                    VStack(spacing: 0) {
                         ForEach(options, id: \.self) { option in
-                            choiceButton(option, isSelected: viewModel.selectedChoices.contains(option)) {
+                            optionRow(option,
+                                      isSelected: viewModel.selectedChoices.contains(option),
+                                      isMulti: true) {
                                 viewModel.toggleChoice(option, multiSelect: true)
                             }
                         }
+                        Rectangle().fill(BoopColors.hairline).frame(height: 1)
                     }
                 }
             }
         }
     }
 
-    private func choiceButton(_ text: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    /// Hairline option row with a coral radio (single) or coral check (multi).
+    private func optionRow(_ text: String, isSelected: Bool, isMulti: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            HStack {
-                Text(text)
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(isSelected ? .white : BoopColors.textPrimary)
-                Spacer()
-                if isSelected {
-                    Image(systemName: "checkmark")
-                        .font(.system(size: 14, weight: .bold))
-                        .foregroundStyle(.white)
+            VStack(spacing: 0) {
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                HStack(spacing: BoopSpacing.md) {
+                    OptionIndicator(isSelected: isSelected, isMulti: isMulti)
+                    Text(text)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(isSelected ? BoopColors.textPrimary : BoopColors.textSecondary)
+                        .multilineTextAlignment(.leading)
+                    Spacer(minLength: BoopSpacing.sm)
                 }
+                .padding(.vertical, BoopSpacing.md)
             }
-            .padding(.horizontal, BoopSpacing.md)
-            .padding(.vertical, BoopSpacing.sm)
-            .background(isSelected ? BoopColors.primary : BoopColors.surfaceSecondary)
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .stroke(isSelected ? Color.clear : BoopColors.border, lineWidth: 1)
-            )
         }
+        .buttonStyle(.plain)
         .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 
     // MARK: - Full Completion (profile ready, 15+ answers)
 
     private var fullCompletionView: some View {
-        VStack(spacing: BoopSpacing.xxl) {
+        VStack(alignment: .leading, spacing: 0) {
             Spacer()
 
-            VStack(spacing: BoopSpacing.md) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 60))
-                    .foregroundStyle(BoopColors.accent)
-
-                Text("You're all set!")
-                    .font(BoopTypography.title1)
+            VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                EyebrowLabel(text: "Profile Complete", color: BoopColors.accentColor)
+                AccentRule()
+                Text("You're all set.")
+                    .font(BoopTypography.cineDisplay)
                     .foregroundStyle(BoopColors.textPrimary)
-
-                Text("Your personality profile is complete.\nTime to find your connections!")
-                    .font(BoopTypography.body)
+                Text("Your personality profile is complete. Time to find your connections.")
+                    .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
-                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Spacer()
@@ -299,52 +284,39 @@ struct QuestionsView: View {
                 onboardingVM.markComplete()
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, BoopSpacing.xl)
-        .padding(.vertical, BoopSpacing.lg)
+        .padding(.vertical, BoopSpacing.xl)
     }
 
     // MARK: - Batch Completion (answered all available but < 15 total)
 
     private var batchCompletionView: some View {
-        VStack(spacing: BoopSpacing.xxl) {
+        VStack(alignment: .leading, spacing: 0) {
             Spacer()
 
-            VStack(spacing: BoopSpacing.md) {
-                ZStack {
-                    Circle()
-                        .fill(BoopColors.secondary.opacity(0.12))
-                        .frame(width: 100, height: 100)
-
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 56))
-                        .foregroundStyle(BoopColors.secondary)
-                }
-
-                Text("Great start!")
-                    .font(BoopTypography.title1)
+            VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                EyebrowLabel(text: "Great Start", color: BoopColors.accentColor)
+                AccentRule()
+                Text("\(viewModel.answeredCount) answered")
+                    .font(BoopTypography.cineDisplay)
                     .foregroundStyle(BoopColors.textPrimary)
-
-                Text("You've answered \(viewModel.answeredCount) questions")
-                    .font(BoopTypography.title3)
-                    .foregroundStyle(BoopColors.secondary)
 
                 if viewModel.answeredCount < 15 {
                     Text("Answer \(15 - viewModel.answeredCount) more to unlock your full personality profile and get the best matches.")
-                        .font(BoopTypography.body)
+                        .font(BoopTypography.cineBodyLight)
                         .foregroundStyle(BoopColors.textSecondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, BoopSpacing.lg)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Text("New questions unlock every day at midnight.")
-                    .font(BoopTypography.caption)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textMuted)
-                    .multilineTextAlignment(.center)
             }
 
             Spacer()
 
-            VStack(spacing: BoopSpacing.sm) {
+            VStack(spacing: BoopSpacing.md) {
                 BoopButton(title: "Go to Homepage") {
                     Task {
                         await viewModel.goToHomepage()
@@ -353,30 +325,33 @@ struct QuestionsView: View {
                 }
 
                 Text("You can continue answering from your profile anytime.")
-                    .font(BoopTypography.caption)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textMuted)
                     .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, BoopSpacing.xl)
-        .padding(.vertical, BoopSpacing.lg)
+        .padding(.vertical, BoopSpacing.xl)
     }
 
     private var emptyView: some View {
-        VStack(spacing: BoopSpacing.md) {
+        VStack(alignment: .leading, spacing: 0) {
             Spacer()
 
             if viewModel.answeredCount >= 6 {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 48))
-                    .foregroundStyle(BoopColors.success)
-                Text("All caught up for today!")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
-                Text("New questions unlock tomorrow at midnight.")
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textMuted)
-                    .multilineTextAlignment(.center)
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    EyebrowLabel(text: "All Caught Up", color: BoopColors.accentColor)
+                    AccentRule()
+                    Text("All caught up for today.")
+                        .font(BoopTypography.cineDisplay)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    Text("New questions unlock tomorrow at midnight.")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
                 Spacer()
 
@@ -387,17 +362,60 @@ struct QuestionsView: View {
                     }
                 }
             } else {
-                Text("No questions available right now")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textSecondary)
-                Text("Check back tomorrow for more!")
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textMuted)
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    EyebrowLabel(text: "No Questions", color: BoopColors.textMuted)
+                    AccentRule()
+                    Text("No questions available right now.")
+                        .font(BoopTypography.cineHeadline)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    Text("Check back tomorrow for more.")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textMuted)
+                }
 
                 Spacer()
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, BoopSpacing.xl)
-        .padding(.vertical, BoopSpacing.lg)
+        .padding(.vertical, BoopSpacing.xl)
+    }
+}
+
+// MARK: - Option indicator (coral radio / coral checkbox)
+
+/// A thin-ring radio (single-choice) or square checkbox (multi-choice) that
+/// fills with the coral accent when selected.
+struct OptionIndicator: View {
+    let isSelected: Bool
+    let isMulti: Bool
+
+    var body: some View {
+        ZStack {
+            if isMulti {
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(isSelected ? BoopColors.accentColor : BoopColors.textMuted, lineWidth: 1)
+                    .background(
+                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            .fill(isSelected ? BoopColors.accentColor : Color.clear)
+                    )
+                    .frame(width: 18, height: 18)
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.white)
+                }
+            } else {
+                Circle()
+                    .stroke(isSelected ? BoopColors.accentColor : BoopColors.textMuted, lineWidth: 1)
+                    .frame(width: 18, height: 18)
+                if isSelected {
+                    Circle()
+                        .fill(BoopColors.accentColor)
+                        .frame(width: 10, height: 10)
+                }
+            }
+        }
+        .frame(width: 18, height: 18)
     }
 }
