@@ -102,6 +102,13 @@ struct PersonalityReportView: View {
                 .foregroundStyle(BoopColors.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
 
+            if let rarity = analysis.rarityPercent {
+                Text("Only \(rarity)% of members share this type")
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
             AccentRule()
 
             if let essence = analysis.essence, !essence.isEmpty {
@@ -125,9 +132,9 @@ struct PersonalityReportView: View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
             EyebrowLabel(text: "Preliminary — answer more to sharpen your type")
 
-            Text("Answer \(viewModel.questionsUntilNext) more for deeper insights.")
-                .font(BoopTypography.cineBodyLight)
-                .foregroundStyle(BoopColors.textSecondary)
+            Text("Your type recalibrates at \(viewModel.nextMilestone) answers — answer \(viewModel.questionsUntilNext) more.")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textMuted)
 
             HairlineProgress(
                 progress: 1.0 - (Double(viewModel.questionsUntilNext) / Double(max(viewModel.nextMilestone, 1)))

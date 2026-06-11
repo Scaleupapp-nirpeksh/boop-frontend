@@ -28,6 +28,7 @@ struct CandidateCardView: View {
                 shape: .roundedRect(0),
                 scrim: false
             )
+            .frame(maxWidth: .infinity)
             .frame(height: cardHeight)
             .clipped()
 
@@ -37,11 +38,13 @@ struct CandidateCardView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
+            .frame(maxWidth: .infinity)
             .frame(height: cardHeight)
 
             content
                 .padding(BoopSpacing.lg)
         }
+        .frame(maxWidth: .infinity)
         .frame(height: cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous))
         .overlay(

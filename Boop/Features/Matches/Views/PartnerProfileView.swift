@@ -145,6 +145,13 @@ struct PartnerProfileView: View {
                     .foregroundStyle(BoopColors.textPrimary)
                     .fixedSize(horizontal: false, vertical: true)
 
+                if let rarity = archetype.rarityPercent {
+                    Text("Only \(rarity)% share \(name)")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textMuted)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
                 AccentRule()
 
                 if let essence = archetype.essence, !essence.isEmpty {

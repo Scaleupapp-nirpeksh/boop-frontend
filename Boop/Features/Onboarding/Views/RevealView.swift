@@ -85,6 +85,13 @@ struct RevealView: View {
                         .foregroundStyle(BoopColors.textPrimary)
                         .fixedSize(horizontal: false, vertical: true)
 
+                    if let rarity = analysis?.rarityPercent, rarity > 0 {
+                        Text("Only \(rarity)% of members share this type")
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
                     AccentRule()
 
                     // Essence line.

@@ -34,6 +34,11 @@ struct BlurredPortrait<Overlay: View>: View {
             BoopRemoteImage(urlString: urlString) {
                 BoopColors.brandGradient.opacity(0.35)
             }
+            // Fill the proposed (parent) size and CROP overflow instead of letting a
+            // square source image expand the layout width. Fixed-frame callers
+            // (e.g. circle avatars) still win because their frame constrains this.
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
             .blur(radius: blurRadius)
             .animation(.easeInOut(duration: 0.6), value: blurRadius)
 
