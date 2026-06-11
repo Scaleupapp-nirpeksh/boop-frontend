@@ -244,7 +244,7 @@ struct MatchDetailView: View {
                         .padding(.vertical, BoopSpacing.xs)
                         .padding(.horizontal, BoopSpacing.sm)
                         .overlay(
-                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                                 .stroke(BoopColors.hairline, lineWidth: 1)
                         )
                     }
@@ -284,7 +284,7 @@ struct MatchDetailView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, BoopSpacing.md)
                 .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                         .stroke(viewModel.canBoop ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
                 )
             }

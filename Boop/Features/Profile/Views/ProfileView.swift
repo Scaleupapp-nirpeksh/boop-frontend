@@ -172,7 +172,7 @@ struct ProfileView: View {
             .padding(.vertical, BoopSpacing.sm)
             .padding(.horizontal, BoopSpacing.md)
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .stroke(disabled ? BoopColors.hairline : BoopColors.accentColor.opacity(0.5), lineWidth: 1)
             )
         }
@@ -188,7 +188,7 @@ struct ProfileView: View {
                 }
                 .frame(height: 150)
                 .clipped()
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous))
 
                 Button {
                     Task { await viewModel.deletePhoto(at: index) }
@@ -226,11 +226,11 @@ struct ProfileView: View {
                 }
             }
             .overlay {
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .stroke(draggedPhotoId == item.id ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
             }
             .draggable(item.id) {
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .fill(BoopColors.surface)
                     .overlay(
                         Text("MOVE")

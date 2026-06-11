@@ -108,7 +108,7 @@ struct GameHistoryView: View {
                 .padding(.horizontal, BoopSpacing.md)
                 .padding(.vertical, BoopSpacing.sm)
                 .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                         .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
                 )
         }

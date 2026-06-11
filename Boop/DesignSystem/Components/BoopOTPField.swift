@@ -56,11 +56,11 @@ struct BoopOTPField: View {
             .foregroundStyle(BoopColors.textPrimary)
             .frame(width: 48, height: 56)
             .background(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .fill(BoopColors.surface)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .stroke(
                         isCurrentIndex ? BoopColors.accentColor : (isFilled ? BoopColors.textMuted : BoopColors.hairline),
                         lineWidth: isCurrentIndex ? 1.5 : 1

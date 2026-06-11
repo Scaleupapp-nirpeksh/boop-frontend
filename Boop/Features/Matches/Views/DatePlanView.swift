@@ -226,7 +226,7 @@ struct DatePlanView: View {
             .frame(maxWidth: .infinity)
             .padding(.vertical, BoopSpacing.sm)
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .stroke(tint, lineWidth: 1)
             )
         }
@@ -394,7 +394,7 @@ struct DatePlanView: View {
                 .padding(.horizontal, BoopSpacing.md)
                 .padding(.vertical, BoopSpacing.sm)
                 .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                         .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
                 )
         }

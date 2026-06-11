@@ -51,7 +51,7 @@ struct ChatInboxView: View {
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(BoopSpacing.xl)
-                            .boopCard(radius: BoopRadius.sharp, shadow: false)
+                            .boopCard(radius: BoopRadius.soft, shadow: false)
                         } else {
                             LazyVStack(spacing: 0) {
                                 ForEach(filteredConversations) { conversation in
@@ -291,11 +291,11 @@ struct ChatConversationView: View {
             .padding(.horizontal, BoopSpacing.sm)
             .padding(.vertical, 7)
             .background(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                     .fill(BoopColors.surface)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                     .stroke(BoopColors.hairline, lineWidth: 1)
             )
         }
@@ -565,10 +565,12 @@ struct ChatConversationView: View {
                                 }
                         }
 
+                        let lastMessageID = filteredMessages.last?.id
                         ForEach(filteredMessages) { message in
                             ChatMessageBubble(
                                 message: message,
                                 isCurrentUser: message.senderId.id == AuthManager.shared.currentUser?.id,
+                                isMostRecent: message.id == lastMessageID,
                                 deliveryState: viewModel.deliveryState(for: message),
                                 audioPlayer: audioPlayer,
                                 onReact: { emoji in
@@ -686,7 +688,7 @@ struct ChatConversationView: View {
                 .padding(.horizontal, BoopSpacing.md)
                 .padding(.vertical, BoopSpacing.xs)
                 .background(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                         .fill(BoopColors.surfaceSecondary)
                 )
             }
@@ -705,11 +707,11 @@ struct ChatConversationView: View {
                         .foregroundStyle(BoopColors.textPrimary)
                         .frame(width: 42, height: 42)
                         .background(
-                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                                 .fill(BoopColors.surface)
                         )
                         .overlay(
-                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                                 .stroke(BoopColors.hairline, lineWidth: 1)
                         )
                 }
@@ -720,11 +722,11 @@ struct ChatConversationView: View {
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.sm)
                     .background(
-                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                             .fill(BoopColors.surface)
                     )
                     .overlay(
-                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                             .stroke(BoopColors.hairline, lineWidth: 1)
                     )
                     .onChange(of: viewModel.draft) { _, newValue in
@@ -746,11 +748,11 @@ struct ChatConversationView: View {
                         .foregroundStyle(BoopColors.textPrimary)
                         .frame(width: 42, height: 42)
                         .background(
-                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                                 .fill(BoopColors.surface)
                         )
                         .overlay(
-                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                                 .stroke(BoopColors.hairline, lineWidth: 1)
                         )
                 }
@@ -767,7 +769,7 @@ struct ChatConversationView: View {
                         .foregroundStyle(.white)
                         .frame(width: 42, height: 42)
                         .background(
-                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                                 .fill(BoopColors.accentColor)
                         )
                 }
@@ -794,6 +796,7 @@ struct ChatConversationView: View {
 private struct ChatMessageBubble: View {
     let message: ChatMessage
     let isCurrentUser: Bool
+    let isMostRecent: Bool
     let deliveryState: ChatMessageDeliveryState
     let audioPlayer: RemoteAudioPlayer
     let onReact: (String) -> Void
@@ -840,7 +843,7 @@ private struct ChatMessageBubble: View {
                             }
                             .padding(BoopSpacing.xs)
                             .background(isCurrentUser ? Color.white.opacity(0.12) : BoopColors.overlayLight)
-                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous))
                         }
 
                         content
@@ -853,7 +856,7 @@ private struct ChatMessageBubble: View {
                                         .padding(.horizontal, BoopSpacing.xs)
                                         .padding(.vertical, 3)
                                         .background(
-                                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                            RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                                                 .fill(isCurrentUser ? Color.white.opacity(0.18) : BoopColors.overlayLight)
                                         )
                                 }
@@ -863,10 +866,10 @@ private struct ChatMessageBubble: View {
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.sm)
                     .background {
-                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.bubble, style: .continuous)
                             .fill(bubbleBackground)
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.bubble, style: .continuous))
                     // Subtle shadow so received bubbles stay legible over bright fog in light mode.
                     .shadow(color: isCurrentUser ? .clear : Color.black.opacity(0.06), radius: 4, x: 0, y: 1)
                     .contextMenu {
@@ -891,27 +894,38 @@ private struct ChatMessageBubble: View {
                     if !isCurrentUser { Spacer() }
                 }
 
-                HStack(spacing: 6) {
-                    ForEach(quickReactions, id: \.self) { emoji in
-                        Button(emoji) { onReact(emoji) }
-                            .font(.system(size: 13))
-                    }
+                // Quick reactions surface only under the newest message so the
+                // thread stays quiet — every message keeps the full reaction
+                // picker via long-press (context menu). Delivery status shows on
+                // the newest message, plus any failed send so RETRY stays reachable.
+                let showsQuickReactions = isMostRecent
+                let showsDeliveryStatus = isCurrentUser && (isMostRecent || deliveryState == .failed)
 
-                    if isCurrentUser {
-                        Text(deliveryLabel.uppercased())
-                            .font(BoopTypography.cineCaption)
-                            .tracking(1)
-                            .foregroundStyle(deliveryColor)
+                if showsQuickReactions || showsDeliveryStatus {
+                    HStack(spacing: 6) {
+                        if showsQuickReactions {
+                            ForEach(quickReactions, id: \.self) { emoji in
+                                Button(emoji) { onReact(emoji) }
+                                    .font(.system(size: 13))
+                            }
+                        }
 
-                        if deliveryState == .failed && message.type == "text" {
-                            Button("RETRY") { onRetry() }
+                        if showsDeliveryStatus {
+                            Text(deliveryLabel.uppercased())
                                 .font(BoopTypography.cineCaption)
                                 .tracking(1)
-                                .foregroundStyle(BoopColors.accentColor)
+                                .foregroundStyle(deliveryColor)
+
+                            if deliveryState == .failed && message.type == "text" {
+                                Button("RETRY") { onRetry() }
+                                    .font(BoopTypography.cineCaption)
+                                    .tracking(1)
+                                    .foregroundStyle(BoopColors.accentColor)
+                            }
                         }
                     }
+                    .padding(.horizontal, isCurrentUser ? 0 : BoopSpacing.sm)
                 }
-                .padding(.horizontal, isCurrentUser ? 0 : BoopSpacing.sm)
             }
         }
     }
@@ -927,11 +941,11 @@ private struct ChatMessageBubble: View {
                     AsyncImage(url: URL(string: mediaURL)) { image in
                         image.resizable().scaledToFill()
                     } placeholder: {
-                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                             .fill(BoopColors.overlayLight)
                     }
                     .frame(width: 180, height: 180)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous))
                 }
             }
         case "voice":
@@ -977,6 +991,11 @@ private struct ChatMessageBubble: View {
 
     private var bubbleBackground: some ShapeStyle {
         if isCurrentUser {
+            // Game-invite slabs sit slightly calmer than regular sent bubbles
+            // so a run of invites doesn't shout. Same flat coral language.
+            if message.type == "game_invite" {
+                return AnyShapeStyle(BoopColors.accentColor.opacity(0.92))
+            }
             return AnyShapeStyle(BoopColors.accentColor)
         }
         return AnyShapeStyle(BoopColors.chatBubbleReceived)

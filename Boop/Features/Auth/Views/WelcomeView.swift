@@ -71,7 +71,7 @@ struct WelcomeView: View {
                             .frame(height: 52)
                             .foregroundStyle(.white)
                             .background(BoopColors.accentColor)
-                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous))
                             .shadow(color: BoopColors.accentColor.opacity(0.25), radius: 8, x: 0, y: 4)
                     }
                     .padding(.top, BoopSpacing.xs)

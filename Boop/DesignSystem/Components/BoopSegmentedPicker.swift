@@ -41,11 +41,11 @@ struct BoopSegmentedPicker<T: Hashable>: View {
                 .padding(.horizontal, BoopSpacing.md)
                 .padding(.vertical, BoopSpacing.sm)
                 .background(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                         .fill(isSelected ? BoopColors.accentColor : Color.clear)
                 )
                 .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                         .stroke(isSelected ? Color.clear : BoopColors.hairline, lineWidth: 1)
                 )
         }

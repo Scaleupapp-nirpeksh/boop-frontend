@@ -138,7 +138,7 @@ struct MatchGamesView: View {
                 .padding(.horizontal, BoopSpacing.lg)
                 .frame(maxWidth: .infinity)
                 .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                         .stroke(BoopColors.accentColor, lineWidth: 1)
                 )
             }
@@ -782,7 +782,7 @@ struct GameSessionView: View {
             .padding(BoopSpacing.md)
             .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
             )
         }
@@ -1120,7 +1120,7 @@ struct GameSessionView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, BoopSpacing.md)
                 .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                         .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
                 )
         }

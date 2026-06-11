@@ -35,7 +35,7 @@ struct BoopButton: View {
             .padding(.horizontal, BoopSpacing.xl)
             .foregroundStyle(foregroundColor)
             .background(backgroundView)
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous))
             .overlay(overlayView)
             .shadow(
                 color: variant == .primary ? BoopColors.accentColor.opacity(0.25) : .clear,
@@ -63,10 +63,10 @@ struct BoopButton: View {
     private var overlayView: some View {
         switch variant {
         case .secondary:
-            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                 .stroke(BoopColors.hairline, lineWidth: 1)
         case .outline:
-            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                 .stroke(BoopColors.accentColor, lineWidth: 1)
         case .primary, .ghost:
             EmptyView()

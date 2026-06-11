@@ -77,6 +77,6 @@ struct ConversationStartersCard: View {
             }
         }
         .padding(BoopSpacing.md)
-        .boopCard(radius: BoopRadius.sharp, shadow: false)
+        .boopCard(radius: BoopRadius.soft, shadow: false)
     }
 }

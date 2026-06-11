@@ -208,7 +208,7 @@ struct CandidateCardView: View {
     @ViewBuilder
     private var actionButtons: some View {
         HStack(spacing: BoopSpacing.sm) {
-            // Pass — hairline-outlined sharp
+            // Pass — hairline-outlined, softly rounded
             Button(action: onSkip) {
                 Text("Pass")
                     .font(.system(size: 15, weight: .regular))
@@ -217,12 +217,12 @@ struct CandidateCardView: View {
                     .frame(height: 52)
                     .foregroundStyle(BoopColors.textPrimary)
                     .overlay(
-                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                             .stroke(BoopColors.hairline, lineWidth: 1)
                     )
             }
 
-            // Connect — flat coral bar sharp
+            // Connect — flat coral bar, softly rounded
             Button(action: onConnect) {
                 Text("Connect")
                     .font(.system(size: 15, weight: .semibold))
@@ -231,7 +231,7 @@ struct CandidateCardView: View {
                     .frame(height: 52)
                     .foregroundStyle(.white)
                     .background(BoopColors.accentColor)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous))
             }
         }
     }
@@ -239,7 +239,7 @@ struct CandidateCardView: View {
 
 // MARK: - Flowing hairline chips
 
-/// Wrapping row of thin, hairline-outlined sharp text chips. No emoji, no candy.
+/// Wrapping row of thin, hairline-outlined, softly rounded text chips. No emoji, no candy.
 private struct FlowChips: View {
     let items: [String]
 
@@ -253,7 +253,7 @@ private struct FlowChips: View {
                     .padding(.horizontal, BoopSpacing.sm)
                     .padding(.vertical, BoopSpacing.xs)
                     .overlay(
-                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous)
                             .stroke(BoopColors.hairline, lineWidth: 1)
                     )
             }

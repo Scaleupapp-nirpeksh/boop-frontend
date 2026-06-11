@@ -50,17 +50,17 @@ struct BoopPhotoGrid: View {
                 .scaledToFill()
                 .frame(height: 140)
                 .clipped()
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous))
 
             if slots[index].isUploading {
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .fill(BoopColors.ground.opacity(0.55))
                 ProgressView()
                     .tint(BoopColors.accentColor)
             }
 
             // 1px hairline frame
-            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                 .stroke(BoopColors.hairline, lineWidth: 1)
 
             // Delete button
@@ -72,7 +72,7 @@ struct BoopPhotoGrid: View {
                     .foregroundStyle(.white)
                     .frame(width: 26, height: 26)
                     .background(BoopColors.ground.opacity(0.7))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.chip, style: .continuous))
             }
             .padding(BoopSpacing.xs)
 
@@ -118,7 +118,7 @@ struct BoopPhotoGrid: View {
             maxSelectionCount: maxPhotos - slots.filter({ $0.image != nil }).count,
             matching: .images
         ) {
-            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                 .stroke(BoopColors.hairline, lineWidth: 1)
                 .frame(height: 140)
                 .overlay(

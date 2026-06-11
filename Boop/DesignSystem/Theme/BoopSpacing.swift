@@ -16,8 +16,11 @@ enum BoopSpacing {
 enum BoopRadius {
     static let sharp: CGFloat = 2
     static let sm: CGFloat = 8
+    static let chip: CGFloat = 10     // chips/tags
+    static let soft: CGFloat = 12     // buttons, inputs, cards that are touched
     static let md: CGFloat = 12
     static let lg: CGFloat = 16
+    static let bubble: CGFloat = 18   // chat bubbles
     static let xl: CGFloat = 20
     static let xxl: CGFloat = 24
     static let full: CGFloat = 999

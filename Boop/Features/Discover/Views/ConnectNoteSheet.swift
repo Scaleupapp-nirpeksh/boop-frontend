@@ -67,10 +67,10 @@ struct ConnectNoteSheet: View {
                 .padding(BoopSpacing.md)
                 .background(BoopColors.surface)
                 .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                         .stroke(isNoteFocused ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous))
 
             HStack {
                 Spacer()
@@ -168,7 +168,7 @@ struct ConnectNoteSheet: View {
                 .frame(height: 52)
                 .foregroundStyle(.white)
                 .background(BoopColors.accentColor)
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous))
             }
             .disabled(viewModel.isSendingLike || !isNoteValid)
             .opacity(isNoteValid ? 1 : 0.5)

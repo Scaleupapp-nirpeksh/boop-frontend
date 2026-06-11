@@ -32,7 +32,7 @@ struct BoopDatePicker: View {
             .frame(maxHeight: 150)
             .clipped()
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
                     .stroke(BoopColors.hairline, lineWidth: 1)
             )
 
