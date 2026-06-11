@@ -79,6 +79,10 @@ actor APIClient {
             if let apiResponse = try? decoder.decode(APIResponse<EmptyResponse>.self, from: data) {
                 throw APIError.serverError(statusCode: httpResponse.statusCode, message: apiResponse.message, code: apiResponse.code)
             }
+            // 413 bodies aren't JSON (multer/proxy reject) — give a legible reason
+            if httpResponse.statusCode == 413 {
+                throw APIError.serverError(statusCode: 413, message: "That file is too large. Photos can be up to 12MB.")
+            }
             throw APIError.serverError(statusCode: httpResponse.statusCode, message: "Request failed")
         }
     }
@@ -209,6 +213,10 @@ actor APIClient {
     private func parseResponse<T: Decodable>(data: Data, statusCode: Int) throws -> T {
         if statusCode == 429 {
             throw APIError.rateLimited(retryAfter: nil)
+        }
+        // 413 bodies aren't JSON (multer/proxy reject) — decode would throw a cryptic error
+        if statusCode == 413 {
+            throw APIError.serverError(statusCode: 413, message: "That file is too large. Photos can be up to 12MB.")
         }
 
         let apiResponse = try decoder.decode(APIResponse<T>.self, from: data)
