@@ -2,13 +2,20 @@ import SwiftUI
 
 struct QuestionsProgressView: View {
     @State private var viewModel = QuestionsProgressViewModel()
+    @State private var showAnswerSheet = false
+    /// Drives the ring trim animation on appear.
+    @State private var ringFraction: Double = 0
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
                 if let progress = viewModel.progress {
-                    summary(progress)
-                    dimensionList(progress)
+                    header
+                    confidenceRing(progress)
+                    coverage(progress)
+                    BoopButton(title: "Answer more") {
+                        showAnswerSheet = true
+                    }
                 } else if viewModel.isLoading {
                     ProgressView()
                         .tint(BoopColors.accentColor)
@@ -23,54 +30,94 @@ struct QuestionsProgressView: View {
             .padding(.vertical, BoopSpacing.xl)
         }
         .background(BoopColors.ground.ignoresSafeArea())
-        .navigationTitle("Question Progress")
+        .navigationTitle("Deepen your profile")
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.load()
+            animateRing()
+        }
+        .sheet(isPresented: $showAnswerSheet) {
+            NavigationStack {
+                QuestionsFullView()
+                    .navigationTitle("Deepen your profile")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showAnswerSheet = false }
+                        }
+                    }
+            }
+            .onDisappear {
+                Task {
+                    await viewModel.load()
+                    animateRing()
+                }
+            }
         }
     }
 
-    // MARK: - Summary (eyebrow + headline count + hairline progress to ready)
+    private func animateRing() {
+        guard let progress = viewModel.progress else { return }
+        let target = viewModel.confidenceFraction(progress)
+        ringFraction = 0
+        withAnimation(.easeOut(duration: 0.9)) {
+            ringFraction = target
+        }
+    }
 
-    private func summary(_ progress: QuestionsProgressResponse) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            HStack(alignment: .firstTextBaseline) {
-                EyebrowLabel(text: "Answered", color: BoopColors.accentColor)
-                Spacer()
-                Text("\(progress.totalAnswered) / \(progress.readyThreshold)")
-                    .font(BoopTypography.cineLabel)
-                    .tracking(2)
-                    .foregroundStyle(BoopColors.textMuted)
-            }
+    // MARK: - Header
 
-            AccentRule()
-
-            Text("\(progress.totalAnswered) answered")
+    private var header: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "Your profile", color: BoopColors.accentColor)
+            Text("Deepen to match better")
                 .font(BoopTypography.cineDisplay)
                 .foregroundStyle(BoopColors.textPrimary)
-
-            Text(progress.isReady
-                 ? "Profile threshold reached."
-                 : "\(max(progress.readyThreshold - progress.totalAnswered, 0)) more to reach ready.")
-                .font(BoopTypography.cineBodyLight)
-                .foregroundStyle(BoopColors.textSecondary)
-
-            HairlineProgress(progress: Double(progress.totalAnswered) / Double(max(progress.readyThreshold, 1)))
-                .padding(.top, BoopSpacing.xxs)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
-    // MARK: - Per-dimension breakdown (hairline rows)
+    // MARK: - Match-confidence ring (centerpiece)
 
-    private func dimensionList(_ progress: QuestionsProgressResponse) -> some View {
+    private func confidenceRing(_ progress: QuestionsProgressResponse) -> some View {
+        let percent = viewModel.confidencePercent(progress)
+        return VStack(spacing: BoopSpacing.lg) {
+            ZStack {
+                Circle()
+                    .stroke(Color.white.opacity(0.1), lineWidth: 2)
+                Circle()
+                    .trim(from: 0, to: ringFraction)
+                    .stroke(BoopColors.accentColor,
+                            style: StrokeStyle(lineWidth: 2, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+
+                VStack(spacing: BoopSpacing.xs) {
+                    Text("\(percent)%")
+                        .font(BoopTypography.cineDisplayXL)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    EyebrowLabel(text: "Match confidence", color: BoopColors.textMuted)
+                }
+            }
+            .frame(width: 150, height: 150)
+
+            Text(viewModel.nudgeText(progress))
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Coverage by dimension (least-covered first)
+
+    private func coverage(_ progress: QuestionsProgressResponse) -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            EyebrowLabel(text: "By dimension", color: BoopColors.textMuted)
+            EyebrowLabel(text: "Coverage by dimension", color: BoopColors.textMuted)
 
             VStack(spacing: 0) {
-                ForEach(progress.dimensions.keys.sorted(), id: \.self) { key in
-                    if let dimension = progress.dimensions[key] {
-                        dimensionRow(key: key, dimension: dimension)
-                    }
+                ForEach(viewModel.sortedDimensions(progress), id: \.key) { entry in
+                    dimensionRow(key: entry.key, dimension: entry.value)
                 }
                 Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
@@ -82,18 +129,34 @@ struct QuestionsProgressView: View {
             Rectangle().fill(BoopColors.hairline).frame(height: 1)
             VStack(alignment: .leading, spacing: BoopSpacing.xs) {
                 HStack {
-                    Text(key.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .font(BoopTypography.cineBody)
+                    Text(Self.dimensionDisplayName(key))
+                        .font(BoopTypography.cineBodyLight)
                         .foregroundStyle(BoopColors.textPrimary)
                     Spacer()
                     Text("\(dimension.answered) / \(dimension.unlocked)")
                         .font(BoopTypography.cineCaption)
+                        .tracking(1)
                         .foregroundStyle(BoopColors.textMuted)
                 }
 
                 HairlineProgress(progress: Double(dimension.answered) / Double(max(dimension.unlocked, 1)))
             }
             .padding(.vertical, BoopSpacing.md)
+        }
+    }
+
+    /// Canonical dimension display names (mirrors `Question.dimensionDisplayName`).
+    static func dimensionDisplayName(_ key: String) -> String {
+        switch key {
+        case "emotional_vulnerability": return "Emotional Vulnerability"
+        case "attachment_patterns": return "Attachment Patterns"
+        case "life_vision": return "Life Vision"
+        case "conflict_resolution": return "Conflict Resolution"
+        case "love_expression": return "Love Expression"
+        case "intimacy_comfort": return "Intimacy Comfort"
+        case "lifestyle_rhythm": return "Lifestyle Rhythm"
+        case "growth_mindset": return "Growth Mindset"
+        default: return key.replacingOccurrences(of: "_", with: " ").capitalized
         }
     }
 }

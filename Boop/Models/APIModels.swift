@@ -146,6 +146,10 @@ struct QuestionsProgressResponse: Decodable {
     let readyThreshold: Int
     let isReady: Bool
     let dimensions: [String: QuestionDimensionProgress]
+    /// 0–100 match-confidence score (newer backend). Optional for safe decode against older servers.
+    let matchConfidence: Int?
+    /// Whether reward-first onboarding has completed (newer backend). Optional for safe decode.
+    let onboardingComplete: Bool?
 }
 
 struct QuestionDimensionProgress: Decodable, Identifiable {

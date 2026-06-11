@@ -8,10 +8,10 @@ struct DailyQuestionBand: View {
     var body: some View {
         Button(action: { Haptics.light(); onTap() }) {
             VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                EyebrowLabel(text: "Today's questions")
+                EyebrowLabel(text: "Sharpen your matches")
                 Text(newCount > 0
-                     ? "\(newCount) new unlocked — answer to grow your profile"
-                     : "Answer today's questions to deepen your matches")
+                     ? "\(newCount) new question\(newCount == 1 ? "" : "s") to sharpen your matches"
+                     : "A new question to sharpen your matches")
                     .font(BoopTypography.cineHeadline)
                     .foregroundStyle(BoopColors.textPrimary)
                     .multilineTextAlignment(.leading)
