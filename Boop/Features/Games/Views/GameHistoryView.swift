@@ -16,16 +16,17 @@ struct GameHistoryView: View {
         Array(Set(games.map(\.gameType))).sorted()
     }
 
-    private var stats: GameStats {
-        let total = games.count
-        let typeBreakdown = Dictionary(grouping: games, by: \.gameType).mapValues(\.count)
-        return GameStats(totalGames: total, typeBreakdown: typeBreakdown)
+    private var typeBreakdown: [(key: String, value: Int)] {
+        Dictionary(grouping: games, by: \.gameType)
+            .mapValues(\.count)
+            .sorted { $0.value > $1.value }
     }
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                statsCard
+            VStack(alignment: .leading, spacing: BoopSpacing.xl) {
+                masthead
+                breakdownSection
                 filterChips
                 gamesList
             }
@@ -45,44 +46,45 @@ struct GameHistoryView: View {
         }
     }
 
-    private var statsCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("Game stats")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Text("\(stats.totalGames) played")
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(BoopColors.secondary)
-                }
+    // MARK: - Masthead
 
-                LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())], spacing: BoopSpacing.sm) {
-                    ForEach(stats.typeBreakdown.sorted(by: { $0.value > $1.value }), id: \.key) { type, count in
-                        let option = GameTypeOption(rawValue: type)
-                        VStack(spacing: 4) {
-                            Text("\(count)")
-                                .font(BoopTypography.title3)
-                                .foregroundStyle(option?.tint ?? BoopColors.primary)
-                            Text(option?.label ?? type)
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.textSecondary)
-                                .lineLimit(1)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, BoopSpacing.sm)
-                        .background((option?.tint ?? BoopColors.primary).opacity(0.08))
-                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
+    private var masthead: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "History")
+            Text("\(games.count) played")
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Breakdown (hairline rows)
+
+    @ViewBuilder
+    private var breakdownSection: some View {
+        if !typeBreakdown.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                EyebrowLabel(text: "By Game")
+                    .padding(.bottom, BoopSpacing.sm)
+
+                ForEach(typeBreakdown, id: \.key) { type, count in
+                    let option = GameTypeOption(rawValue: type)
+                    HairlineRow(option?.label ?? type) {
+                        Text("\(count)")
+                            .font(BoopTypography.cineBody)
+                            .foregroundStyle(BoopColors.textSecondary)
                     }
                 }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
         }
     }
 
+    // MARK: - Filter chips (hairline)
+
     private var filterChips: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: BoopSpacing.xs) {
+            HStack(spacing: BoopSpacing.sm) {
                 filterChip("All", isSelected: selectedType == nil) {
                     selectedType = nil
                 }
@@ -99,78 +101,71 @@ struct GameHistoryView: View {
 
     private func filterChip(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            Text(label)
-                .font(BoopTypography.caption)
-                .foregroundStyle(isSelected ? .white : BoopColors.textPrimary)
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(isSelected ? BoopColors.accentColor : BoopColors.textMuted)
                 .padding(.horizontal, BoopSpacing.md)
-                .padding(.vertical, BoopSpacing.xs)
-                .background(isSelected ? BoopColors.primary : BoopColors.surfaceSecondary)
-                .clipShape(Capsule())
+                .padding(.vertical, BoopSpacing.sm)
+                .overlay(
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
+                )
         }
+        .buttonStyle(.plain)
     }
 
+    // MARK: - Games list (hairline)
+
     private var gamesList: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+        VStack(alignment: .leading, spacing: 0) {
             if filteredGames.isEmpty {
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    Text("No games of this type yet")
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(BoopColors.textSecondary)
-                }
+                Text("No games of this type yet")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .padding(.vertical, BoopSpacing.md)
             } else {
                 ForEach(filteredGames) { game in
                     Button {
                         selectedGameId = game.gameId
                     } label: {
-                        gameHistoryCard(game)
+                        gameHistoryRow(game)
                     }
                     .buttonStyle(.plain)
                 }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
         }
     }
 
-    private func gameHistoryCard(_ game: GameSummary) -> some View {
+    private func gameHistoryRow(_ game: GameSummary) -> some View {
         let option = GameTypeOption(rawValue: game.gameType)
+        let title = option?.label ?? game.gameType.replacingOccurrences(of: "_", with: " ").capitalized
 
-        return BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack(spacing: BoopSpacing.xs) {
-                            Circle()
-                                .fill(option?.tint ?? BoopColors.primary)
-                                .frame(width: 8, height: 8)
-                            Text(option?.label ?? game.gameType)
-                                .font(BoopTypography.callout)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(BoopColors.textPrimary)
-                        }
-
+        return VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            HStack(spacing: BoopSpacing.sm) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    HStack(spacing: 6) {
+                        Text("\(game.totalRounds) rounds".uppercased())
                         if let completedAt = game.completedAt {
-                            Text(completedAt.formatted(date: .abbreviated, time: .shortened))
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.textMuted)
+                            Text("·")
+                            Text(completedAt.formatted(date: .abbreviated, time: .shortened).uppercased())
                         }
                     }
-
-                    Spacer()
-
-                    HStack(spacing: 4) {
-                        Text("\(game.totalRounds) rounds")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.success)
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10))
-                            .foregroundStyle(BoopColors.textMuted)
-                    }
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1.5)
+                    .foregroundStyle(BoopColors.textMuted)
                 }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .thin))
+                    .foregroundStyle(BoopColors.textMuted)
             }
+            .padding(.vertical, BoopSpacing.md)
         }
     }
-}
-
-private struct GameStats {
-    let totalGames: Int
-    let typeBreakdown: [String: Int]
 }

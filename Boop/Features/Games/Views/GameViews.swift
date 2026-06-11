@@ -6,11 +6,6 @@ struct MatchGamesView: View {
     @State private var viewModel: MatchGamesViewModel
     @State private var newGameId: String?
 
-    private let columns = [
-        GridItem(.flexible(), spacing: BoopSpacing.sm),
-        GridItem(.flexible(), spacing: BoopSpacing.sm)
-    ]
-
     init(matchId: String) {
         self.matchId = matchId
         _viewModel = State(initialValue: MatchGamesViewModel(matchId: matchId))
@@ -18,10 +13,15 @@ struct MatchGamesView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                heroCard
+            VStack(alignment: .leading, spacing: BoopSpacing.xl) {
+                masthead
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.accentColor)
+                }
+                liveSection
                 gamePicker
-                activeSection
                 completedSection
             }
             .padding(.horizontal, BoopSpacing.xl)
@@ -54,137 +54,35 @@ struct MatchGamesView: View {
         }
     }
 
-    private var heroCard: some View {
-        BoopCard(padding: 0, radius: BoopRadius.xxl) {
-            ZStack(alignment: .bottomLeading) {
-                LinearGradient(
-                    colors: [BoopColors.cardDarkAlt, Color(hex: "21354D"), BoopColors.secondary.opacity(0.8)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .frame(height: 220)
+    // MARK: - Masthead
 
-                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                    Text("PLAY TOGETHER")
-                        .font(BoopTypography.caption)
-                        .fontWeight(.bold)
-                        .kerning(1.2)
-                        .foregroundStyle(Color.white.opacity(0.72))
-
-                    Text("Shared games, shared timing")
-                        .font(BoopTypography.title1)
-                        .foregroundStyle(.white)
-
-                    Text("Both players enter, tap ready, see the same 3-2-1, then answer live.")
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(Color.white.opacity(0.82))
-
-                    HStack(spacing: BoopSpacing.xs) {
-                        gameHeroChip("Live sync")
-                        gameHeroChip("Round timers")
-                        gameHeroChip("Replay later")
-                    }
-                }
-                .padding(BoopSpacing.lg)
-            }
-        }
-    }
-
-    private var gamePicker: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                Text("Start a game")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
-
-                Text("Pick the kind of chemistry you want to explore next.")
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textSecondary)
-
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.error)
-                }
-
-                LazyVGrid(columns: columns, spacing: BoopSpacing.sm) {
-                    ForEach(GameTypeOption.allCases, id: \.rawValue) { option in
-                        let blocked = viewModel.isGameTypeBlocked(option.rawValue)
-                        let cooldown = viewModel.cooldownEnd(for: option.rawValue)
-
-                        Button {
-                            Task {
-                                newGameId = await viewModel.createGame(type: option.rawValue)
-                            }
-                        } label: {
-                            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                                HStack {
-                                    Text(option.label)
-                                        .font(BoopTypography.callout)
-                                        .foregroundStyle(blocked ? BoopColors.textMuted : BoopColors.textPrimary)
-                                        .multilineTextAlignment(.leading)
-                                    Spacer()
-                                    if blocked {
-                                        Image(systemName: cooldown != nil ? "clock.fill" : "play.fill")
-                                            .font(.system(size: 10))
-                                            .foregroundStyle(BoopColors.textMuted)
-                                    }
-                                }
-
-                                Text(option.subtitle)
-                                    .font(BoopTypography.caption)
-                                    .foregroundStyle(blocked ? BoopColors.textMuted : BoopColors.textSecondary)
-                                    .multilineTextAlignment(.leading)
-
-                                if let cooldown {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "clock.arrow.circlepath")
-                                            .font(.system(size: 10))
-                                        Text("Available \(cooldown.formatted(.relative(presentation: .named)))")
-                                    }
-                                    .font(BoopTypography.caption)
-                                    .foregroundStyle(BoopColors.warning)
-                                } else {
-                                    HStack(spacing: 6) {
-                                        Text(option.focus)
-                                        Text("•")
-                                        Text(option.timeLabel)
-                                    }
-                                    .font(BoopTypography.caption)
-                                    .foregroundStyle(blocked ? BoopColors.textMuted : option.tint)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(BoopSpacing.md)
-                            .background(blocked ? BoopColors.surfaceSecondary.opacity(0.5) : option.tint.opacity(0.08))
-                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                                    .stroke(blocked ? BoopColors.border : option.tint.opacity(0.18), lineWidth: 1)
-                            )
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(viewModel.isCreating || blocked)
-                    }
-                }
-            }
-        }
-    }
-
-    private var activeSection: some View {
+    private var masthead: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text("Active now")
-                .font(BoopTypography.headline)
+            EyebrowLabel(text: "Play Together")
+            Text("Shared timing")
+                .font(BoopTypography.cineDisplay)
                 .foregroundStyle(BoopColors.textPrimary)
+            Text("Both enter, ready up, watch the same 3-2-1, then answer live.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
 
-            if viewModel.activeGames.isEmpty {
-                emptyCard("No live games yet", "Start one when you want the chat to move from talking to doing.")
-            } else {
-                ForEach(viewModel.activeGames) { game in
+    // MARK: - Live (feature block for the first active game)
+
+    @ViewBuilder
+    private var liveSection: some View {
+        if let game = viewModel.activeGames.first {
+            VStack(alignment: .leading, spacing: 0) {
+                EyebrowLabel(text: "Live Now")
+                    .padding(.bottom, BoopSpacing.sm)
+                liveFeatureBlock(game)
+                ForEach(viewModel.activeGames.dropFirst()) { extra in
                     NavigationLink {
-                        GameSessionView(gameId: game.gameId)
+                        GameSessionView(gameId: extra.gameId)
                     } label: {
-                        gameSummaryCard(game)
+                        gameRow(extra)
                     }
                     .buttonStyle(.plain)
                 }
@@ -192,196 +90,259 @@ struct MatchGamesView: View {
         }
     }
 
-    private var completedSection: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text("Played together")
-                .font(BoopTypography.headline)
-                .foregroundStyle(BoopColors.textPrimary)
-
-            if viewModel.completedGames.isEmpty {
-                emptyCard("No completed games yet", "Finished games show up here so you can revisit the energy of the connection.")
-            } else {
-                ForEach(viewModel.completedGames) { game in
-                    NavigationLink {
-                        GameSessionView(gameId: game.gameId)
-                    } label: {
-                        completedGameCard(game)
-                    }
-                    .buttonStyle(.plain)
-                }
-
-                NavigationLink {
-                    GameHistoryView(matchId: matchId, games: viewModel.completedGames)
-                } label: {
-                    HStack {
-                        Image(systemName: "clock.arrow.circlepath")
-                        Text("View full game history")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.secondary)
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.secondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                }
-            }
-        }
-    }
-
-    private func gameSummaryCard(_ game: GameSummary) -> some View {
+    private func liveFeatureBlock(_ game: GameSummary) -> some View {
         let option = GameTypeOption(rawValue: game.gameType)
+        let title = option?.label ?? game.gameType.replacingOccurrences(of: "_", with: " ").capitalized
+        let waiting = game.sync?.waitingForUserNames ?? []
 
-        return BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(option?.label ?? game.gameType.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(BoopTypography.title3)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        Text(option?.subtitle ?? "Live game")
-                            .font(BoopTypography.footnote)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
+        return VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            AccentRule()
 
-                    Spacer()
-
-                    Text(game.phaseLabel)
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(game.phaseTint)
-                        .padding(.horizontal, BoopSpacing.sm)
-                        .padding(.vertical, 6)
-                        .background(game.phaseTint.opacity(0.12))
-                        .clipShape(Capsule())
+            HStack(alignment: .top, spacing: BoopSpacing.sm) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(BoopTypography.cineTitle)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    Text(option?.subtitle ?? "Live shared round")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textSecondary)
                 }
+                Spacer()
+                Text("+8 Comfort".uppercased())
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.accentColor)
+            }
 
-                HStack(spacing: BoopSpacing.md) {
-                    summaryMetric("Round", "\(min(game.currentRound + 1, game.totalRounds))/\(game.totalRounds)")
-                    if let waiting = game.sync?.waitingForUserNames, !waiting.isEmpty, game.status != "completed" {
-                        summaryMetric("Waiting", waiting.joined(separator: ", "))
-                    } else {
-                        summaryMetric("Mode", "Together")
-                    }
+            HStack(spacing: BoopSpacing.lg) {
+                liveMeta("Round", "\(min(game.currentRound + 1, game.totalRounds)) / \(game.totalRounds)")
+                liveMeta("Phase", game.phaseLabel)
+                if !waiting.isEmpty, game.status != "completed" {
+                    liveMeta("Waiting", waiting.joined(separator: ", "))
                 }
             }
+
+            NavigationLink {
+                GameSessionView(gameId: game.gameId)
+            } label: {
+                HStack {
+                    Text("Start Talking".uppercased())
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 13, weight: .thin))
+                }
+                .foregroundStyle(BoopColors.textPrimary)
+                .padding(.vertical, BoopSpacing.md)
+                .padding(.horizontal, BoopSpacing.lg)
+                .frame(maxWidth: .infinity)
+                .overlay(
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .stroke(BoopColors.accentColor, lineWidth: 1)
+                )
+            }
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
-    private func summaryMetric(_ title: String, _ value: String) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .font(BoopTypography.caption)
+    private func liveMeta(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
                 .foregroundStyle(BoopColors.textMuted)
             Text(value)
-                .font(BoopTypography.callout)
+                .font(BoopTypography.cineBody)
                 .foregroundStyle(BoopColors.textPrimary)
                 .lineLimit(1)
         }
     }
 
-    private func completedGameCard(_ game: GameSummary) -> some View {
+    private func gameRow(_ game: GameSummary) -> some View {
         let option = GameTypeOption(rawValue: game.gameType)
+        let title = option?.label ?? game.gameType.replacingOccurrences(of: "_", with: " ").capitalized
+
+        return VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            HStack(spacing: BoopSpacing.sm) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    Text("\(game.phaseLabel)  ·  Round \(min(game.currentRound + 1, game.totalRounds)) / \(game.totalRounds)".uppercased())
+                        .font(BoopTypography.cineCaption)
+                        .tracking(1.5)
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .thin))
+                    .foregroundStyle(BoopColors.textMuted)
+            }
+            .padding(.vertical, BoopSpacing.md)
+        }
+    }
+
+    // MARK: - Game picker (hairline rows)
+
+    private var gamePicker: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            EyebrowLabel(text: "Start A Game")
+                .padding(.bottom, BoopSpacing.sm)
+
+            ForEach(GameTypeOption.allCases, id: \.rawValue) { option in
+                let blocked = viewModel.isGameTypeBlocked(option.rawValue)
+                let cooldown = viewModel.cooldownEnd(for: option.rawValue)
+
+                Button {
+                    Task {
+                        newGameId = await viewModel.createGame(type: option.rawValue)
+                    }
+                } label: {
+                    gamePickerRow(option, blocked: blocked, cooldown: cooldown)
+                }
+                .buttonStyle(.plain)
+                .disabled(viewModel.isCreating || blocked)
+            }
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+        }
+    }
+
+    private func gamePickerRow(_ option: GameTypeOption, blocked: Bool, cooldown: Date?) -> some View {
+        let titleColor = blocked ? BoopColors.textMuted : BoopColors.textPrimary
+        let metaColor = blocked ? BoopColors.textMuted : BoopColors.textSecondary
+
+        return VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            HStack(spacing: BoopSpacing.sm) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(option.label)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(titleColor)
+                    if let cooldown {
+                        Text("Available \(cooldown.formatted(.relative(presentation: .named)))".uppercased())
+                            .font(BoopTypography.cineCaption)
+                            .tracking(1.5)
+                            .foregroundStyle(BoopColors.textMuted)
+                    } else {
+                        Text("\(option.focus)  ·  \(option.timeLabel)".uppercased())
+                            .font(BoopTypography.cineCaption)
+                            .tracking(1.5)
+                            .foregroundStyle(metaColor)
+                    }
+                }
+                Spacer()
+                if blocked {
+                    Image(systemName: cooldown != nil ? "clock" : "circle.dotted")
+                        .font(.system(size: 13, weight: .thin))
+                        .foregroundStyle(BoopColors.textMuted)
+                } else {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .thin))
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+            }
+            .padding(.vertical, BoopSpacing.md)
+        }
+    }
+
+    // MARK: - Completed (hairline rows)
+
+    private var completedSection: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            EyebrowLabel(text: "Played Together")
+                .padding(.bottom, BoopSpacing.sm)
+
+            if viewModel.completedGames.isEmpty {
+                Text("Finished games settle here — revisit the energy of what came out of them.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .padding(.vertical, BoopSpacing.md)
+            } else {
+                ForEach(viewModel.completedGames) { game in
+                    NavigationLink {
+                        GameSessionView(gameId: game.gameId)
+                    } label: {
+                        completedRow(game)
+                    }
+                    .buttonStyle(.plain)
+                }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+
+                NavigationLink {
+                    GameHistoryView(matchId: matchId, games: viewModel.completedGames)
+                } label: {
+                    HStack {
+                        Text("Full game history".uppercased())
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
+                            .foregroundStyle(BoopColors.accentColor)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 13, weight: .thin))
+                            .foregroundStyle(BoopColors.textMuted)
+                    }
+                    .padding(.vertical, BoopSpacing.md)
+                }
+            }
+        }
+    }
+
+    private func completedRow(_ game: GameSummary) -> some View {
+        let option = GameTypeOption(rawValue: game.gameType)
+        let title = option?.label ?? game.gameType.replacingOccurrences(of: "_", with: " ").capitalized
         let canReplay = !viewModel.isGameTypeBlocked(game.gameType)
         let cooldown = viewModel.cooldownEnd(for: game.gameType)
 
-        return BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(option?.label ?? game.gameType.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(BoopTypography.title3)
-                            .foregroundStyle(BoopColors.textPrimary)
+        return VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            HStack(spacing: BoopSpacing.sm) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    HStack(spacing: 6) {
+                        Text("\(game.totalRounds) rounds".uppercased())
                         if let completedAt = game.completedAt {
-                            Text(completedAt.formatted(.relative(presentation: .named)))
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.textMuted)
+                            Text("·")
+                            Text(completedAt.formatted(.relative(presentation: .named)).uppercased())
                         }
                     }
-
-                    Spacer()
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(BoopColors.success)
-                        Text("\(game.totalRounds) rounds")
-                    }
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.success)
-                    .padding(.horizontal, BoopSpacing.sm)
-                    .padding(.vertical, 6)
-                    .background(BoopColors.success.opacity(0.12))
-                    .clipShape(Capsule())
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1.5)
+                    .foregroundStyle(BoopColors.textMuted)
                 }
-
-                Divider()
-
-                HStack(spacing: BoopSpacing.sm) {
-                    if canReplay {
-                        Button {
-                            Task {
-                                newGameId = await viewModel.replayGame(type: game.gameType)
-                            }
-                        } label: {
-                            HStack(spacing: 6) {
-                                Image(systemName: "arrow.counterclockwise")
-                                Text("Play Again")
-                            }
-                            .font(BoopTypography.callout)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, BoopSpacing.md)
-                            .padding(.vertical, BoopSpacing.sm)
-                            .background(option?.tint ?? BoopColors.primary)
-                            .clipShape(Capsule())
+                Spacer()
+                if canReplay {
+                    Button {
+                        Task {
+                            newGameId = await viewModel.replayGame(type: game.gameType)
                         }
-                        .disabled(viewModel.isCreating)
-                    } else if let cooldown {
-                        HStack(spacing: 4) {
-                            Image(systemName: "clock.fill")
-                            Text("Replay \(cooldown.formatted(.relative(presentation: .named)))")
-                        }
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.warning)
-                        .padding(.horizontal, BoopSpacing.sm)
-                        .padding(.vertical, 6)
-                        .background(BoopColors.warning.opacity(0.1))
-                        .clipShape(Capsule())
+                    } label: {
+                        Text("Replay".uppercased())
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
+                            .foregroundStyle(BoopColors.accentColor)
                     }
-
-                    Spacer()
-
-                    HStack(spacing: 4) {
-                        Image(systemName: "eye")
-                        Text("View")
-                    }
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textSecondary)
+                    .buttonStyle(.plain)
+                    .disabled(viewModel.isCreating)
+                } else if cooldown != nil {
+                    Image(systemName: "clock")
+                        .font(.system(size: 13, weight: .thin))
+                        .foregroundStyle(BoopColors.textMuted)
                 }
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .thin))
+                    .foregroundStyle(BoopColors.textMuted)
             }
+            .padding(.vertical, BoopSpacing.md)
         }
-    }
-
-    private func emptyCard(_ title: String, _ body: String) -> some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                Text(title)
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.textPrimary)
-                Text(body)
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textSecondary)
-            }
-        }
-    }
-
-    private func gameHeroChip(_ text: String) -> some View {
-        Text(text)
-            .font(BoopTypography.caption)
-            .foregroundStyle(.white)
-            .padding(.horizontal, BoopSpacing.sm)
-            .padding(.vertical, 6)
-            .background(Color.white.opacity(0.12))
-            .clipShape(Capsule())
     }
 }
 
@@ -410,7 +371,7 @@ struct GameSessionView: View {
                         completedRounds
                     } else if viewModel.isLoading {
                         ProgressView()
-                            .tint(BoopColors.primary)
+                            .tint(BoopColors.accentColor)
                             .frame(maxWidth: .infinity, minHeight: 280)
                     }
                 }
@@ -444,44 +405,41 @@ struct GameSessionView: View {
     private func headerCard(for game: GameSession, now: Date) -> some View {
         let option = GameTypeOption(rawValue: game.gameType)
 
-        return BoopCard(padding: 0, radius: BoopRadius.xxl) {
-            ZStack(alignment: .bottomLeading) {
-                LinearGradient(
-                    colors: [BoopColors.cardDarkAlt, BoopColors.cardDarkDeepBlue, option?.tint.opacity(0.9) ?? BoopColors.primary],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .frame(height: 220)
+        return VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: viewModel.sessionPhaseTitle, color: BoopColors.accentColor)
+            Text(option?.label ?? game.gameType)
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text(option?.subtitle ?? "Live shared round")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
 
-                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                    Text(viewModel.sessionPhaseTitle.uppercased())
-                        .font(BoopTypography.caption)
-                        .fontWeight(.bold)
-                        .kerning(1.1)
-                        .foregroundStyle(Color.white.opacity(0.72))
-
-                    Text(option?.label ?? game.gameType)
-                        .font(BoopTypography.title1)
-                        .foregroundStyle(.white)
-
-                    Text(option?.subtitle ?? "Live shared round")
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(Color.white.opacity(0.84))
-
-                    HStack(spacing: BoopSpacing.xs) {
-                        heroPill("Round \(min(game.currentRound + 1, game.totalRounds))/\(game.totalRounds)")
-                        if viewModel.sessionPhase == "countdown" {
-                            heroPill("Starts in \(viewModel.countdownValue(at: now))")
-                        } else if viewModel.sessionPhase == "live_round" {
-                            heroPill("\(viewModel.roundTimeRemaining(at: now))s left")
-                        } else if viewModel.sessionPhase == "completed",
-                                  let replayAt = game.sync?.replayAvailableAt {
-                            heroPill("Replay after \(replayAt.formatted(date: .omitted, time: .shortened))")
-                        }
-                    }
+            HStack(spacing: BoopSpacing.lg) {
+                headerMeta("Round", "\(min(game.currentRound + 1, game.totalRounds)) / \(game.totalRounds)")
+                if viewModel.sessionPhase == "countdown" {
+                    headerMeta("Starts In", "\(viewModel.countdownValue(at: now))")
+                } else if viewModel.sessionPhase == "live_round" {
+                    headerMeta("Remaining", "\(viewModel.roundTimeRemaining(at: now))s")
+                } else if viewModel.sessionPhase == "completed",
+                          let replayAt = game.sync?.replayAvailableAt {
+                    headerMeta("Replay", replayAt.formatted(date: .omitted, time: .shortened))
                 }
-                .padding(BoopSpacing.lg)
             }
+            .padding(.top, BoopSpacing.xs)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func headerMeta(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(BoopColors.textMuted)
+            Text(value)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textPrimary)
+                .lineLimit(1)
         }
     }
 
@@ -504,256 +462,250 @@ struct GameSessionView: View {
     }
 
     private var waitingRoomCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                Text("Waiting room")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            AccentRule()
+            Text("The game begins only when both of you are here and ready. Once both tap ready, the same 3-2-1 starts for both screens.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
 
-                Text("The game begins only when both of you are here and ready. Once both tap ready, the same 3-2-1 starts for both screens.")
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textSecondary)
+            participantReadiness
 
-                participantReadiness
+            if let error = viewModel.errorMessage {
+                Text(error)
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.accentColor)
+            }
 
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.error)
+            HStack(spacing: BoopSpacing.md) {
+                BoopButton(
+                    title: viewModel.myReady ? "Unready" : "I'm Ready",
+                    variant: viewModel.myReady ? .outline : .primary,
+                    isLoading: viewModel.isUpdatingReady,
+                    fullWidth: false
+                ) {
+                    Task { await viewModel.setReady(!viewModel.myReady) }
                 }
 
-                HStack(spacing: BoopSpacing.sm) {
-                    BoopButton(
-                        title: viewModel.myReady ? "Unready" : "I'm Ready",
-                        variant: viewModel.myReady ? .outline : .primary,
-                        isLoading: viewModel.isUpdatingReady,
-                        fullWidth: false
-                    ) {
-                        Task { await viewModel.setReady(!viewModel.myReady) }
-                    }
-
-                    Button("Cancel game") {
-                        Task { await viewModel.cancelGame() }
-                    }
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.error)
+                Button {
+                    Task { await viewModel.cancelGame() }
+                } label: {
+                    Text("Cancel game".uppercased())
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                        .foregroundStyle(BoopColors.textMuted)
                 }
             }
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     private func countdownCard(now: Date) -> some View {
         let countdown = max(1, viewModel.countdownValue(at: now))
 
-        return BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(spacing: BoopSpacing.md) {
-                Text("Starting together")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
+        return VStack(spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Starting Together", color: BoopColors.accentColor)
 
-                ZStack {
-                    Circle()
-                        .stroke(BoopColors.primary.opacity(0.15), lineWidth: 6)
-                        .frame(width: 120, height: 120)
+            Text("\(countdown)")
+                .font(BoopTypography.cineDisplayXL)
+                .foregroundStyle(BoopColors.textPrimary)
+                .contentTransition(.numericText())
+                .animation(.spring(duration: 0.3), value: countdown)
+                .padding(.vertical, BoopSpacing.sm)
 
-                    Circle()
-                        .trim(from: 0, to: CGFloat(countdown) / 3.0)
-                        .stroke(BoopColors.primary, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                        .frame(width: 120, height: 120)
-                        .rotationEffect(.degrees(-90))
-                        .animation(.easeInOut(duration: 0.4), value: countdown)
+            HairlineProgress(progress: Double(countdown) / 3.0)
+                .animation(.easeInOut(duration: 0.4), value: countdown)
+                .frame(width: 160)
 
-                    Text("\(countdown)")
-                        .font(.nunito(.extraBold, size: 56))
-                        .foregroundStyle(BoopColors.primary)
-                        .contentTransition(.numericText())
-                        .animation(.spring(duration: 0.3), value: countdown)
-                }
-
-                Text("Both players are locked in. The timer starts for both of you at the same moment.")
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            .frame(maxWidth: .infinity)
+            Text("Both players are locked in. The timer starts for both of you at the same moment.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
+                .multilineTextAlignment(.center)
         }
+        .frame(maxWidth: .infinity)
+        .padding(BoopSpacing.xl)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     private func liveInfoCard(now: Date) -> some View {
         let remaining = viewModel.roundTimeRemaining(at: now)
         let progress = viewModel.roundProgress(at: now)
 
-        return BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("Live round")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Text("\(remaining)s")
-                        .font(BoopTypography.title3)
-                        .foregroundStyle(BoopColors.primary)
-                }
-
-                GeometryReader { proxy in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(BoopColors.surfaceSecondary)
-                        Capsule()
-                            .fill(BoopColors.primaryGradient)
-                            .frame(width: proxy.size.width * (1 - progress))
-                    }
-                }
-                .frame(height: 12)
-
-                Text("Answer while the bar is alive. If either side misses the timer, the round closes and the game moves on.")
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textSecondary)
+        return VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "Live Round", color: BoopColors.accentColor)
+                Spacer()
+                Text("\(remaining)s")
+                    .font(BoopTypography.cineTitle)
+                    .foregroundStyle(BoopColors.accentColor)
+                    .contentTransition(.numericText())
             }
+
+            HairlineProgress(progress: 1 - progress)
+
+            Text("Answer while the line is alive. If either side misses the timer, the round closes and the game moves on.")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textSecondary)
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     private var completedCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("Finished together")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Image(systemName: "checkmark.seal.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(BoopColors.success)
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            AccentRule()
+            Text("Finished together")
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text("You completed this game live. Use the completed rounds below to revisit what came out of it.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
+
+            if let game = viewModel.game {
+                let completedCount = game.rounds.filter(\.isComplete).count
+                let answeredCount = game.rounds.filter { round in
+                    round.responses?.contains(where: { $0.userId?.id == AuthManager.shared.currentUser?.id }) == true
+                }.count
+
+                HStack(spacing: BoopSpacing.lg) {
+                    completionStat(value: "\(completedCount)/\(game.totalRounds)", label: "Rounds")
+                    completionStat(value: "\(answeredCount)", label: "You answered")
+                    completionStat(value: game.rounds.filter(\.isComplete).count == game.totalRounds ? "Full" : "Partial", label: "Completion")
                 }
-
-                Text("You completed this game live. Use the completed rounds below to revisit what came out of it.")
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textSecondary)
-
-                if let game = viewModel.game {
-                    let completedCount = game.rounds.filter(\.isComplete).count
-                    let answeredCount = game.rounds.filter { round in
-                        round.responses?.contains(where: { $0.userId?.id == AuthManager.shared.currentUser?.id }) == true
-                    }.count
-
-                    HStack(spacing: BoopSpacing.sm) {
-                        completionStat(value: "\(completedCount)/\(game.totalRounds)", label: "Rounds", tint: BoopColors.secondary)
-                        completionStat(value: "\(answeredCount)", label: "You answered", tint: BoopColors.primary)
-                        completionStat(value: game.rounds.filter(\.isComplete).count == game.totalRounds ? "Full" : "Partial", label: "Completion", tint: BoopColors.accent)
-                    }
-                }
+                .padding(.top, BoopSpacing.xs)
             }
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
-    private func completionStat(value: String, label: String, tint: Color) -> some View {
-        VStack(spacing: 4) {
+    private func completionStat(value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
             Text(value)
-                .font(BoopTypography.title3)
-                .foregroundStyle(tint)
-            Text(label)
-                .font(BoopTypography.caption)
-                .foregroundStyle(BoopColors.textSecondary)
+                .font(BoopTypography.cineHeadline)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(BoopColors.textMuted)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, BoopSpacing.sm)
-        .background(tint.opacity(0.08))
-        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var cancelledCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "Cancelled", color: BoopColors.accentColor)
             Text("This game was cancelled.")
-                .font(BoopTypography.callout)
-                .foregroundStyle(BoopColors.error)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textSecondary)
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     private var transitionCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            Text("Syncing the next round...")
-                .font(BoopTypography.callout)
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "Syncing")
+            Text("Syncing the next round…")
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     private func roundCard(_ round: GameRound, now: Date) -> some View {
         let gameType = viewModel.game?.gameType ?? ""
 
-        return BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                // Game-type icon + context badge row
-                HStack(spacing: BoopSpacing.xs) {
-                    Image(systemName: gameTypeIcon(gameType))
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(gameTypeTint(gameType))
-
-                    if let context = round.prompt.context {
-                        Text(context.replacingOccurrences(of: "_", with: " ").capitalized)
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(gameTypeTint(gameType))
-                            .padding(.horizontal, BoopSpacing.sm)
-                            .padding(.vertical, 5)
-                            .background(gameTypeTint(gameType).opacity(0.12))
-                            .clipShape(Capsule())
-                    }
+        return VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            // Context marker
+            HStack(spacing: BoopSpacing.sm) {
+                AccentRule()
+                if let context = round.prompt.context {
+                    Text(context.replacingOccurrences(of: "_", with: " ").uppercased())
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
+                        .foregroundStyle(BoopColors.textMuted)
                 }
+            }
 
-                Text(round.prompt.text)
-                    .font(BoopTypography.title3)
-                    .foregroundStyle(BoopColors.textPrimary)
+            Text(round.prompt.text)
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
 
-                if let revealPrompt = round.prompt.revealPrompt {
-                    HStack(alignment: .top, spacing: BoopSpacing.xs) {
-                        Image(systemName: "eye.slash.fill")
-                            .font(.system(size: 12))
-                            .foregroundStyle(BoopColors.secondary)
-                            .padding(.top, 2)
-                        Text(revealPrompt)
-                            .font(BoopTypography.footnote)
-                            .foregroundStyle(BoopColors.textSecondary)
-                            .italic()
-                    }
-                    .padding(BoopSpacing.sm)
-                    .background(BoopColors.secondary.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
+            if let revealPrompt = round.prompt.revealPrompt {
+                HStack(alignment: .top, spacing: BoopSpacing.sm) {
+                    Rectangle().fill(BoopColors.hairline).frame(width: 1)
+                    Text(revealPrompt)
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .italic()
                 }
+                .fixedSize(horizontal: false, vertical: true)
+            }
 
-                answerInput(for: round)
+            answerInput(for: round)
 
-                if round.waitingForOther == true {
-                    HStack(spacing: BoopSpacing.xs) {
-                        ProgressView()
-                            .tint(BoopColors.secondary)
-                            .scaleEffect(0.8)
-                        Text("Answer locked. Waiting for the other player...")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
-                    .padding(BoopSpacing.sm)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(BoopColors.secondary.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
+            if round.waitingForOther == true {
+                HStack(spacing: BoopSpacing.sm) {
+                    ProgressView()
+                        .tint(BoopColors.accentColor)
+                        .scaleEffect(0.8)
+                    Text("Answer locked. Waiting for the other player…".uppercased())
+                        .font(BoopTypography.cineCaption)
+                        .tracking(1.5)
+                        .foregroundStyle(BoopColors.textSecondary)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.vertical, BoopSpacing.sm)
+            }
 
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.error)
-                }
+            if let error = viewModel.errorMessage {
+                Text(error)
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.accentColor)
+            }
 
-                if round.waitingForOther != true {
-                    BoopButton(
-                        title: "Lock answer",
-                        isLoading: viewModel.isSubmitting,
-                        isDisabled: viewModel.answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-                    ) {
-                        Haptics.medium()
-                        Task { await viewModel.submitAnswer() }
-                    }
+            if round.waitingForOther != true {
+                BoopButton(
+                    title: "Lock answer",
+                    isLoading: viewModel.isSubmitting,
+                    isDisabled: viewModel.answer.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ) {
+                    Haptics.medium()
+                    Task { await viewModel.submitAnswer() }
                 }
             }
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     @ViewBuilder
@@ -789,57 +741,49 @@ struct GameSessionView: View {
     // MARK: - Would You Rather (card-style options)
 
     private func wouldYouRatherInput(optionA: String, optionB: String) -> some View {
-        VStack(spacing: BoopSpacing.sm) {
-            Text("Tap your pick")
-                .font(BoopTypography.caption)
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            Text("Tap your pick".uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
                 .foregroundStyle(BoopColors.textMuted)
 
-            wyrOptionCard(label: optionA, value: "A", icon: "a.circle.fill", tint: Color(hex: "FF7A59"))
-
-            HStack {
-                Rectangle().fill(BoopColors.border).frame(height: 1)
-                Text("or")
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textMuted)
-                Rectangle().fill(BoopColors.border).frame(height: 1)
-            }
-
-            wyrOptionCard(label: optionB, value: "B", icon: "b.circle.fill", tint: BoopColors.secondary)
+            wyrOptionCard(label: optionA, value: "A")
+            wyrOptionCard(label: optionB, value: "B")
         }
     }
 
-    private func wyrOptionCard(label: String, value: String, icon: String, tint: Color) -> some View {
+    private func wyrOptionCard(label: String, value: String) -> some View {
         let isSelected = viewModel.answer == value
         return Button {
             Haptics.selection()
             withAnimation(.spring(duration: 0.25)) { viewModel.answer = value }
         } label: {
-            HStack(spacing: BoopSpacing.sm) {
-                Image(systemName: icon)
-                    .font(.system(size: 22))
-                    .foregroundStyle(isSelected ? .white : tint)
+            HStack(spacing: BoopSpacing.md) {
+                Text(value)
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(isSelected ? BoopColors.accentColor : BoopColors.textMuted)
+                    .frame(width: 16)
 
                 Text(label)
-                    .font(BoopTypography.callout)
-                    .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundStyle(isSelected ? .white : BoopColors.textPrimary)
+                    .font(BoopTypography.cineBody)
+                    .foregroundStyle(isSelected ? BoopColors.textPrimary : BoopColors.textSecondary)
                     .multilineTextAlignment(.leading)
 
                 Spacer()
 
                 if isSelected {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.white.opacity(0.9))
-                        .transition(.scale.combined(with: .opacity))
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 13, weight: .thin))
+                        .foregroundStyle(BoopColors.accentColor)
+                        .transition(.opacity)
                 }
             }
             .padding(BoopSpacing.md)
-            .background(isSelected ? tint : tint.opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+            .frame(maxWidth: .infinity, alignment: .leading)
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                    .stroke(isSelected ? tint : tint.opacity(0.15), lineWidth: isSelected ? 2 : 1)
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
             )
         }
         .buttonStyle(.plain)
@@ -849,71 +793,67 @@ struct GameSessionView: View {
 
     private func spectrumSlider(min: Int, max: Int) -> some View {
         VStack(spacing: BoopSpacing.md) {
-            Text("Where do you land?")
-                .font(BoopTypography.caption)
+            Text("Where do you land?".uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
                 .foregroundStyle(BoopColors.textMuted)
 
             // Large value display
             Text("\(Int(viewModel.sliderValue))")
-                .font(.nunito(.extraBold, size: 44))
-                .foregroundStyle(spectrumColor(value: viewModel.sliderValue, min: Double(min), max: Double(max)))
+                .font(BoopTypography.cineDisplayXL)
+                .foregroundStyle(BoopColors.textPrimary)
                 .contentTransition(.numericText())
                 .animation(.spring(duration: 0.2), value: Int(viewModel.sliderValue))
 
             Text(spectrumLabel(value: Int(viewModel.sliderValue)))
-                .font(BoopTypography.footnote)
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
 
             // Slider
-            VStack(spacing: BoopSpacing.xs) {
-                Slider(
-                    value: $viewModel.sliderValue,
-                    in: Double(min)...Double(max),
-                    step: 1
-                ) {
-                    Text("Spectrum")
-                } minimumValueLabel: {
-                    Text("\(min)")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textMuted)
-                } maximumValueLabel: {
-                    Text("\(max)")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textMuted)
-                }
-                .tint(spectrumColor(value: viewModel.sliderValue, min: Double(min), max: Double(max)))
-                .onChange(of: viewModel.sliderValue) { _, newValue in
-                    viewModel.answer = "\(Int(newValue))"
-                }
-                .onAppear {
-                    if viewModel.answer.isEmpty {
-                        let midpoint = (min + max) / 2
-                        viewModel.sliderValue = Double(midpoint)
-                        viewModel.answer = "\(midpoint)"
-                    }
+            Slider(
+                value: $viewModel.sliderValue,
+                in: Double(min)...Double(max),
+                step: 1
+            ) {
+                Text("Spectrum")
+            } minimumValueLabel: {
+                Text("\(min)")
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
+            } maximumValueLabel: {
+                Text("\(max)")
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
+            }
+            .tint(BoopColors.accentColor)
+            .onChange(of: viewModel.sliderValue) { _, newValue in
+                viewModel.answer = "\(Int(newValue))"
+            }
+            .onAppear {
+                if viewModel.answer.isEmpty {
+                    let midpoint = (min + max) / 2
+                    viewModel.sliderValue = Double(midpoint)
+                    viewModel.answer = "\(midpoint)"
                 }
             }
 
             HStack {
-                Text("Not at all")
-                    .font(BoopTypography.caption)
+                Text("Not at all".uppercased())
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1.5)
                     .foregroundStyle(BoopColors.textMuted)
                 Spacer()
-                Text("Completely")
-                    .font(BoopTypography.caption)
+                Text("Completely".uppercased())
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1.5)
                     .foregroundStyle(BoopColors.textMuted)
             }
         }
-        .padding(BoopSpacing.md)
-        .background(BoopColors.surfaceSecondary)
-        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-    }
-
-    private func spectrumColor(value: Double, min: Double, max: Double) -> Color {
-        let normalized = (value - min) / (max - min)
-        if normalized < 0.35 { return BoopColors.primary }
-        if normalized < 0.65 { return BoopColors.accent }
-        return BoopColors.secondary
+        .padding(BoopSpacing.lg)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     private func spectrumLabel(value: Int) -> String {
@@ -932,12 +872,13 @@ struct GameSessionView: View {
 
     private func neverHaveIEverInput() -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text("Have you ever?")
-                .font(BoopTypography.caption)
+            Text("Have you ever?".uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
                 .foregroundStyle(BoopColors.textMuted)
             HStack(spacing: BoopSpacing.sm) {
-                neverHaveIEverButton("I Have", value: "I have", icon: "hand.thumbsup.fill", tint: BoopColors.secondary)
-                neverHaveIEverButton("Never", value: "Never", icon: "hand.thumbsdown.fill", tint: BoopColors.primary)
+                neverHaveIEverButton("I Have", value: "I have")
+                neverHaveIEverButton("Never", value: "Never")
             }
         }
     }
@@ -946,24 +887,7 @@ struct GameSessionView: View {
 
     private func twoTruthsInput() -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            HStack(spacing: BoopSpacing.xs) {
-                Image(systemName: "theatermasks.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(BoopColors.accent)
-                Text("Write all three — two truths and one lie")
-                    .font(BoopTypography.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(BoopColors.textSecondary)
-            }
-
-            Text("Mix them up so your partner has to guess which is the lie.")
-                .font(BoopTypography.caption)
-                .foregroundStyle(BoopColors.textMuted)
-                .padding(BoopSpacing.sm)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(BoopColors.accent.opacity(0.06))
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
-
+            promptHint("Write all three — two truths and one lie. Mix them up so your partner has to guess which is the lie.")
             BoopTextField(
                 label: "Your three statements",
                 text: $viewModel.answer,
@@ -978,20 +902,7 @@ struct GameSessionView: View {
 
     private func blindRevealInput() -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            HStack(spacing: BoopSpacing.xs) {
-                Image(systemName: "eye.slash.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(hex: "1F8A70"))
-                Text("Photos are hidden — personality first")
-                    .font(BoopTypography.caption)
-                    .fontWeight(.medium)
-                    .foregroundStyle(Color(hex: "1F8A70"))
-            }
-            .padding(BoopSpacing.sm)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(hex: "1F8A70").opacity(0.08))
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
-
+            promptHint("Photos are hidden — personality first.")
             BoopTextField(
                 label: "Your answer",
                 text: $viewModel.answer,
@@ -1006,15 +917,7 @@ struct GameSessionView: View {
 
     private func whatWouldYouDoInput() -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            HStack(spacing: BoopSpacing.xs) {
-                Image(systemName: "brain.head.profile.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(hex: "5B6CFF"))
-                Text("What would you actually do? Be honest.")
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textSecondary)
-            }
-
+            promptHint("What would you actually do? Be honest.")
             BoopTextField(
                 label: "Your response",
                 text: $viewModel.answer,
@@ -1029,15 +932,7 @@ struct GameSessionView: View {
 
     private func dreamBoardInput() -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            HStack(spacing: BoopSpacing.xs) {
-                Image(systemName: "cloud.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Color(hex: "A66CFF"))
-                Text("Dream big — no wrong answers")
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textSecondary)
-            }
-
+            promptHint("Dream big — no wrong answers.")
             BoopTextField(
                 label: "Your vision",
                 text: $viewModel.answer,
@@ -1048,14 +943,22 @@ struct GameSessionView: View {
         }
     }
 
+    private func promptHint(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: BoopSpacing.sm) {
+            Rectangle().fill(BoopColors.hairline).frame(width: 1)
+            Text(text)
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textSecondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
+    }
+
     // MARK: - Completed Rounds (rich display)
 
     private var completedRounds: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
             if let completed = viewModel.game?.rounds.filter(\.isComplete), !completed.isEmpty {
-                Text("What came out of it")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
+                EyebrowLabel(text: "What Came Out Of It")
 
                 ForEach(completed) { round in
                     completedRoundCard(round)
@@ -1069,84 +972,66 @@ struct GameSessionView: View {
         let responses = round.responses ?? []
         let currentUserId = AuthManager.shared.currentUser?.id
 
-        return BoopCard(padding: BoopSpacing.md, radius: BoopRadius.xl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                HStack {
-                    Text("Round \(round.roundNumber)")
-                        .font(BoopTypography.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Image(systemName: gameTypeIcon(gameType))
-                        .font(.system(size: 12))
-                        .foregroundStyle(gameTypeTint(gameType))
-                }
+        return VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            Text("Round \(round.roundNumber)".uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(BoopColors.textMuted)
 
-                Text(round.prompt.text)
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textSecondary)
+            Text(round.prompt.text)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textPrimary)
 
-                Divider()
-
-                ForEach(responses) { response in
-                    let isMe = response.userId?.id == currentUserId
+            ForEach(responses) { response in
+                let isMe = response.userId?.id == currentUserId
+                VStack(spacing: 0) {
+                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
                     HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                        Circle()
-                            .fill(isMe ? BoopColors.primary.opacity(0.15) : BoopColors.secondary.opacity(0.15))
-                            .frame(width: 32, height: 32)
-                            .overlay(
-                                Text(String(response.userId?.firstName?.prefix(1) ?? "?"))
-                                    .font(BoopTypography.caption)
-                                    .fontWeight(.bold)
-                                    .foregroundStyle(isMe ? BoopColors.primary : BoopColors.secondary)
-                            )
+                        Text(isMe ? "You" : (response.userId?.firstName ?? "Partner"))
+                            .font(BoopTypography.cineCaption)
+                            .tracking(1)
+                            .foregroundStyle(BoopColors.textMuted)
+                            .frame(width: 64, alignment: .leading)
 
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(isMe ? "You" : (response.userId?.firstName ?? "Partner"))
-                                .font(BoopTypography.caption)
-                                .fontWeight(.semibold)
-                                .foregroundStyle(BoopColors.textPrimary)
+                        completedAnswerView(answer: response.answer, gameType: gameType, round: round)
 
-                            completedAnswerView(answer: response.answer, gameType: gameType, round: round)
-                        }
+                        Spacer(minLength: 0)
                     }
-                }
-
-                // Match indicator for option-based games
-                if (gameType == "would_you_rather" || gameType == "never_have_i_ever") && responses.count == 2 {
-                    let matched = responses[0].answer.lowercased() == responses[1].answer.lowercased()
-                    HStack(spacing: BoopSpacing.xs) {
-                        Image(systemName: matched ? "heart.fill" : "arrow.left.arrow.right")
-                            .font(.system(size: 12))
-                        Text(matched ? "You both picked the same!" : "Different picks — interesting contrast")
-                            .font(BoopTypography.caption)
-                    }
-                    .foregroundStyle(matched ? BoopColors.primary : BoopColors.textMuted)
-                    .padding(BoopSpacing.sm)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(matched ? BoopColors.primary.opacity(0.06) : BoopColors.surfaceSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
-                }
-
-                // Spectrum comparison
-                if gameType == "intimacy_spectrum" && responses.count == 2 {
-                    let val1 = Int(responses[0].answer) ?? 0
-                    let val2 = Int(responses[1].answer) ?? 0
-                    let diff = abs(val1 - val2)
-                    HStack(spacing: BoopSpacing.xs) {
-                        Image(systemName: diff <= 2 ? "equal.circle.fill" : "shuffle")
-                            .font(.system(size: 12))
-                        Text(diff <= 2 ? "Very aligned (\(diff) apart)" : "\(diff) points apart — room to explore")
-                            .font(BoopTypography.caption)
-                    }
-                    .foregroundStyle(diff <= 2 ? BoopColors.secondary : BoopColors.textMuted)
-                    .padding(BoopSpacing.sm)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(diff <= 2 ? BoopColors.secondary.opacity(0.06) : BoopColors.surfaceSecondary)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
+                    .padding(.vertical, BoopSpacing.sm)
                 }
             }
+
+            // Match indicator for option-based games (the reveal payoff)
+            if (gameType == "would_you_rather" || gameType == "never_have_i_ever") && responses.count == 2 {
+                let matched = responses[0].answer.lowercased() == responses[1].answer.lowercased()
+                revealLine(matched ? "You both picked the same" : "Different picks — interesting contrast", emphasised: matched)
+            }
+
+            // Spectrum comparison
+            if gameType == "intimacy_spectrum" && responses.count == 2 {
+                let val1 = Int(responses[0].answer) ?? 0
+                let val2 = Int(responses[1].answer) ?? 0
+                let diff = abs(val1 - val2)
+                revealLine(diff <= 2 ? "Very aligned — \(diff) apart" : "\(diff) points apart — room to explore", emphasised: diff <= 2)
+            }
         }
+        .padding(BoopSpacing.lg)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
+    }
+
+    private func revealLine(_ text: String, emphasised: Bool) -> some View {
+        HStack(spacing: BoopSpacing.sm) {
+            AccentRule(width: emphasised ? 24 : 12)
+            Text(text.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(emphasised ? BoopColors.accentColor : BoopColors.textMuted)
+        }
+        .padding(.top, BoopSpacing.xs)
     }
 
     @ViewBuilder
@@ -1154,140 +1039,92 @@ struct GameSessionView: View {
         switch gameType {
         case "would_you_rather":
             let optionText = answer.uppercased() == "A" ? (round.prompt.optionA ?? "Option A") : (round.prompt.optionB ?? "Option B")
-            HStack(spacing: BoopSpacing.xs) {
+            HStack(spacing: BoopSpacing.sm) {
                 Text(answer.uppercased())
-                    .font(BoopTypography.caption)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.white)
-                    .frame(width: 22, height: 22)
-                    .background(answer.uppercased() == "A" ? Color(hex: "FF7A59") : BoopColors.secondary)
-                    .clipShape(Circle())
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.accentColor)
                 Text(optionText)
-                    .font(BoopTypography.body)
+                    .font(BoopTypography.cineBody)
                     .foregroundStyle(BoopColors.textPrimary)
             }
         case "intimacy_spectrum":
             if let value = Int(answer) {
-                HStack(spacing: BoopSpacing.xs) {
+                HStack(spacing: BoopSpacing.sm) {
                     Text("\(value)")
-                        .font(BoopTypography.title3)
-                        .fontWeight(.bold)
-                        .foregroundStyle(spectrumColor(value: Double(value), min: 1, max: 10))
+                        .font(BoopTypography.cineHeadline)
+                        .foregroundStyle(BoopColors.textPrimary)
                     Text("/ 10")
-                        .font(BoopTypography.caption)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.textMuted)
-
-                    GeometryReader { proxy in
-                        ZStack(alignment: .leading) {
-                            Capsule().fill(BoopColors.surfaceSecondary)
-                            Capsule()
-                                .fill(spectrumColor(value: Double(value), min: 1, max: 10))
-                                .frame(width: proxy.size.width * CGFloat(value) / 10.0)
-                        }
-                    }
-                    .frame(height: 6)
+                    HairlineProgress(progress: Double(value) / 10.0)
+                        .frame(maxWidth: 120)
                 }
             } else {
                 Text(answer)
-                    .font(BoopTypography.body)
+                    .font(BoopTypography.cineBody)
                     .foregroundStyle(BoopColors.textPrimary)
             }
         case "never_have_i_ever":
-            let isHave = answer.lowercased().contains("have")
-            HStack(spacing: BoopSpacing.xs) {
-                Image(systemName: isHave ? "hand.thumbsup.fill" : "hand.thumbsdown.fill")
-                    .font(.system(size: 14))
-                    .foregroundStyle(isHave ? BoopColors.secondary : BoopColors.primary)
-                Text(answer)
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textPrimary)
-            }
+            Text(answer)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textPrimary)
         default:
             Text(answer)
-                .font(BoopTypography.body)
+                .font(BoopTypography.cineBody)
                 .foregroundStyle(BoopColors.textPrimary)
         }
     }
 
-    // MARK: - Game Type Helpers
-
-    private func gameTypeIcon(_ type: String) -> String {
-        switch type {
-        case "would_you_rather": return "arrow.left.arrow.right"
-        case "intimacy_spectrum": return "slider.horizontal.3"
-        case "never_have_i_ever": return "hand.raised.fill"
-        case "what_would_you_do": return "brain.head.profile.fill"
-        case "dream_board": return "cloud.fill"
-        case "two_truths_a_lie": return "theatermasks.fill"
-        case "blind_reveal": return "eye.slash.fill"
-        default: return "gamecontroller.fill"
-        }
-    }
-
-    private func gameTypeTint(_ type: String) -> Color {
-        GameTypeOption(rawValue: type)?.tint ?? BoopColors.secondary
-    }
+    // MARK: - Readiness
 
     private var participantReadiness: some View {
-        HStack(spacing: BoopSpacing.sm) {
+        VStack(spacing: 0) {
             ForEach(viewModel.sync?.readyPlayers ?? []) { player in
-                VStack(spacing: 6) {
-                    Circle()
-                        .fill(player.isReady ? BoopColors.secondary.opacity(0.18) : BoopColors.surfaceSecondary)
-                        .frame(width: 52, height: 52)
-                        .overlay(
-                            Image(systemName: player.isReady ? "checkmark" : "person.fill")
-                                .foregroundStyle(player.isReady ? BoopColors.secondary : BoopColors.textMuted)
-                        )
+                VStack(spacing: 0) {
+                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                    HStack(spacing: BoopSpacing.sm) {
+                        Image(systemName: player.isReady ? "checkmark" : "circle")
+                            .font(.system(size: 13, weight: .thin))
+                            .foregroundStyle(player.isReady ? BoopColors.accentColor : BoopColors.textMuted)
+                            .frame(width: 16)
 
-                    Text(player.firstName)
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textPrimary)
+                        Text(player.firstName)
+                            .font(BoopTypography.cineBody)
+                            .foregroundStyle(BoopColors.textPrimary)
 
-                    Text(player.isReady ? "Ready" : "Waiting")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(player.isReady ? BoopColors.secondary : BoopColors.textMuted)
+                        Spacer()
+
+                        Text((player.isReady ? "Ready" : "Waiting").uppercased())
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
+                            .foregroundStyle(player.isReady ? BoopColors.accentColor : BoopColors.textMuted)
+                    }
+                    .padding(.vertical, BoopSpacing.md)
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, BoopSpacing.sm)
-                .background(player.isReady ? BoopColors.secondary.opacity(0.08) : BoopColors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
             }
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
         }
     }
 
-    private func heroPill(_ text: String) -> some View {
-        Text(text)
-            .font(BoopTypography.caption)
-            .foregroundStyle(.white)
-            .padding(.horizontal, BoopSpacing.sm)
-            .padding(.vertical, 6)
-            .background(Color.white.opacity(0.12))
-            .clipShape(Capsule())
-    }
-
-    private func neverHaveIEverButton(_ label: String, value: String, icon: String, tint: Color) -> some View {
-        Button {
+    private func neverHaveIEverButton(_ label: String, value: String) -> some View {
+        let isSelected = viewModel.answer == value
+        return Button {
             Haptics.selection()
             viewModel.answer = value
         } label: {
-            VStack(spacing: BoopSpacing.xs) {
-                Image(systemName: icon)
-                    .font(.system(size: 22, weight: .semibold))
-                Text(label)
-                    .font(BoopTypography.callout)
-                    .fontWeight(.semibold)
-            }
-            .foregroundStyle(viewModel.answer == value ? .white : tint)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, BoopSpacing.md)
-            .background(viewModel.answer == value ? tint : tint.opacity(0.1))
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous)
-                    .stroke(tint.opacity(0.2), lineWidth: 1)
-            )
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(isSelected ? BoopColors.accentColor : BoopColors.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, BoopSpacing.md)
+                .overlay(
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .stroke(isSelected ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
+                )
         }
+        .buttonStyle(.plain)
     }
 }
 
@@ -1344,18 +1181,6 @@ enum GameTypeOption: String, CaseIterable {
             return "60s rounds"
         }
     }
-
-    var tint: Color {
-        switch self {
-        case .wouldYouRather: return Color(hex: "FF7A59")
-        case .intimacySpectrum: return Color(hex: "4ECDC4")
-        case .neverHaveIEver: return Color(hex: "FF6B6B")
-        case .whatWouldYouDo: return Color(hex: "5B6CFF")
-        case .dreamBoard: return Color(hex: "A66CFF")
-        case .twoTruthsALie: return Color(hex: "F7B733")
-        case .blindReveal: return Color(hex: "1F8A70")
-        }
-    }
 }
 
 private extension GameSummary {
@@ -1367,17 +1192,6 @@ private extension GameSummary {
         case "completed": return "Completed"
         case "cancelled": return "Cancelled"
         default: return status.capitalized
-        }
-    }
-
-    var phaseTint: Color {
-        switch sessionPhase {
-        case "waiting_room": return BoopColors.warning
-        case "countdown": return BoopColors.primary
-        case "live_round": return BoopColors.secondary
-        case "completed": return BoopColors.success
-        case "cancelled": return BoopColors.error
-        default: return BoopColors.textMuted
         }
     }
 }
