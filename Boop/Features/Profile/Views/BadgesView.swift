@@ -3,12 +3,17 @@ import SwiftUI
 struct BadgesView: View {
     @State private var viewModel = BadgesViewModel()
 
+    private let columns = [
+        GridItem(.flexible(), spacing: BoopSpacing.md),
+        GridItem(.flexible(), spacing: BoopSpacing.md),
+        GridItem(.flexible(), spacing: BoopSpacing.md)
+    ]
+
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
-                if !viewModel.badges.isEmpty {
-                    summary
-                }
+                // Header
+                header
 
                 if viewModel.isLoading {
                     ProgressView()
@@ -20,9 +25,7 @@ struct BadgesView: View {
                         .foregroundStyle(BoopColors.textSecondary)
                         .frame(maxWidth: .infinity, minHeight: 200)
                 } else {
-                    ForEach(viewModel.categories, id: \.self) { category in
-                        categorySection(category)
-                    }
+                    trophyShelf
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
@@ -36,24 +39,23 @@ struct BadgesView: View {
         }
     }
 
-    // MARK: - Summary (earned / total + hairline progress)
+    // MARK: - Header
 
-    private var summary: some View {
+    private var header: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            HStack(alignment: .firstTextBaseline) {
-                EyebrowLabel(text: "Earned", color: BoopColors.accentColor)
-                Spacer()
-                Text("\(viewModel.earnedBadges.count) / \(viewModel.badges.count)")
-                    .font(BoopTypography.cineLabel)
-                    .tracking(2)
-                    .foregroundStyle(BoopColors.textMuted)
-            }
+            EyebrowLabel(text: "Achievements")
 
             AccentRule()
 
-            Text("\(viewModel.earnedBadges.count) earned")
-                .font(BoopTypography.cineDisplay)
-                .foregroundStyle(BoopColors.textPrimary)
+            HStack(alignment: .lastTextBaseline, spacing: BoopSpacing.xs) {
+                Text("\(viewModel.earnedBadges.count)")
+                    .font(BoopTypography.cineDisplay)
+                    .foregroundStyle(BoopColors.textPrimary)
+
+                Text("of \(viewModel.badges.count) earned")
+                    .font(BoopTypography.cineBody)
+                    .foregroundStyle(BoopColors.textMuted)
+            }
 
             HairlineProgress(
                 progress: viewModel.badges.isEmpty
@@ -64,71 +66,107 @@ struct BadgesView: View {
         }
     }
 
-    // MARK: - Category section (eyebrow + hairline badge rows)
+    // MARK: - Trophy shelf (per-category sub-grids)
 
-    private func categorySection(_ category: String) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            EyebrowLabel(text: categoryDisplayName(category))
-
-            VStack(spacing: 0) {
-                ForEach(viewModel.badgesForCategory(category)) { badge in
-                    badgeRow(badge)
-                }
-                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+    private var trophyShelf: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+            ForEach(viewModel.categories, id: \.self) { category in
+                categoryGrid(category)
             }
         }
     }
 
-    private func badgeRow(_ badge: BadgeCatalogItem) -> some View {
-        VStack(spacing: 0) {
-            Rectangle().fill(BoopColors.hairline).frame(height: 1)
-            HStack(alignment: .top, spacing: BoopSpacing.md) {
-                // Earned mark — thin coral circle; locked — hollow muted ring. No emoji.
-                Image(systemName: badge.earned ? "circle.fill" : "circle")
-                    .font(.system(size: 9, weight: .regular))
-                    .foregroundStyle(badge.earned ? BoopColors.accentColor : BoopColors.textMuted)
-                    .padding(.top, 5)
+    private func categoryGrid(_ category: String) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: categoryDisplayName(category))
 
-                VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-                    Text(badge.title)
-                        .font(BoopTypography.cineBody)
-                        .foregroundStyle(badge.earned ? BoopColors.textPrimary : BoopColors.textMuted)
-
-                    Text(badge.description)
-                        .font(BoopTypography.cineBodyLight)
-                        .foregroundStyle(badge.earned ? BoopColors.textSecondary : BoopColors.textMuted)
-                }
-
-                Spacer(minLength: BoopSpacing.sm)
-
-                if badge.earned, let earnedAt = badge.earnedAt {
-                    Text(earnedAt.formatted(.dateTime.month(.abbreviated).day()).uppercased())
-                        .font(BoopTypography.cineCaption)
-                        .tracking(1)
-                        .foregroundStyle(BoopColors.accentColor)
-                        .padding(.top, 2)
-                } else {
-                    Text("LOCKED")
-                        .font(BoopTypography.cineLabel)
-                        .tracking(2)
-                        .foregroundStyle(BoopColors.textMuted)
-                        .padding(.top, 2)
+            LazyVGrid(columns: columns, spacing: BoopSpacing.lg) {
+                ForEach(viewModel.badgesForCategory(category)) { badge in
+                    BadgeMedallion(badge: badge)
                 }
             }
-            .padding(.vertical, BoopSpacing.md)
-            .opacity(badge.earned ? 1 : 0.7)
         }
     }
 
     private func categoryDisplayName(_ category: String) -> String {
         switch category {
-        case "profile": return "Profile"
-        case "questions": return "Questions"
-        case "engagement": return "Engagement"
-        case "games": return "Games"
+        case "profile":     return "Profile"
+        case "questions":   return "Questions"
+        case "engagement":  return "Engagement"
+        case "games":       return "Games"
         case "connections": return "Connections"
-        case "special": return "Special"
-        default: return category.capitalized
+        case "special":     return "Special"
+        default:            return category.capitalized
+        }
+    }
+}
+
+// MARK: - Badge Medallion
+
+private struct BadgeMedallion: View {
+    let badge: BadgeCatalogItem
+
+    private let ringSize: CGFloat = 62
+    private let ringLineWidth: CGFloat = 1.5
+
+    var body: some View {
+        VStack(spacing: BoopSpacing.xs) {
+            ZStack {
+                // Track ring (always present)
+                Circle()
+                    .stroke(BoopColors.hairline, lineWidth: ringLineWidth)
+                    .frame(width: ringSize, height: ringSize)
+
+                // Earned ring: full coral; locked: remains track only (dimmed via opacity)
+                if badge.earned {
+                    Circle()
+                        .stroke(BoopColors.accentColor, lineWidth: ringLineWidth)
+                        .frame(width: ringSize, height: ringSize)
+                }
+
+                // SF Symbol glyph
+                Image(systemName: symbolName(for: badge))
+                    .font(.system(size: 22, weight: .thin))
+                    .foregroundStyle(badge.earned ? BoopColors.accentColor : BoopColors.textMuted)
+            }
+            .opacity(badge.earned ? 1 : 0.45)
+
+            Text(badge.title)
+                .font(BoopTypography.cineCaption)
+                .tracking(0.3)
+                .foregroundStyle(badge.earned ? BoopColors.textPrimary : BoopColors.textMuted)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func symbolName(for badge: BadgeCatalogItem) -> String {
+        // Key-first specifics
+        switch badge.key {
+        case _ where badge.key.contains("voice"):      return "waveform"
+        case _ where badge.key.contains("streak"):     return "flame"
+        case _ where badge.key.contains("photo"):      return "person.crop.square"
+        case _ where badge.key.contains("selfie"):     return "person.crop.square"
+        case _ where badge.key.contains("heart"):      return "heart"
+        case _ where badge.key.contains("match"):      return "heart"
+        case _ where badge.key.contains("game"):       return "gamecontroller"
+        case _ where badge.key.contains("connect"):    return "heart.circle"
+        case _ where badge.key.contains("question"):   return "text.alignleft"
+        case _ where badge.key.contains("answer"):     return "text.alignleft"
+        case _ where badge.key.contains("profile"):    return "person.crop.square"
+        default: break
+        }
+        // Category fallback
+        switch badge.category {
+        case "voice":        return "waveform"
+        case "questions":    return "text.alignleft"
+        case "engagement":   return "waveform"
+        case "games":        return "gamecontroller"
+        case "profile":      return "person.crop.square"
+        case "connections":  return "heart"
+        case "special":      return "sparkle"
+        default:             return "star"
         }
     }
 }
