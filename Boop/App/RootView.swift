@@ -79,11 +79,17 @@ struct RootView: View {
 
     private var loadingView: some View {
         ZStack {
-            BoopColors.background.ignoresSafeArea()
+            BoopColors.ground.ignoresSafeArea()
             VStack(spacing: BoopSpacing.lg) {
-                BoopLogo(size: 120, animated: true)
+                Text("UnMutee")
+                    .font(BoopTypography.cineDisplay)
+                    .tracking(6)
+                    .foregroundStyle(BoopColors.textPrimary)
+                Rectangle()
+                    .fill(BoopColors.accentColor)
+                    .frame(width: 40, height: 2)
                 ProgressView()
-                    .tint(BoopColors.primary)
+                    .tint(BoopColors.textMuted)
             }
         }
     }
