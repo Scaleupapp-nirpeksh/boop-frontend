@@ -314,10 +314,12 @@ struct ProfileView: View {
             EyebrowLabel(text: "Voice Intro")
 
             if let audioURL = viewModel.user?.voiceIntro?.audioUrl {
+                let isActive = audioPlayer.currentURL == audioURL && audioPlayer.isPlaying
                 VoiceLine(
                     duration: voiceDurationText,
-                    isPlaying: audioPlayer.currentURL == audioURL && audioPlayer.isPlaying,
-                    progress: audioPlayer.currentURL == audioURL ? audioPlayer.progress : 0
+                    isPlaying: isActive,
+                    progress: audioPlayer.currentURL == audioURL ? audioPlayer.progress : 0,
+                    elapsedText: isActive ? "\(formatPlaybackTime(audioPlayer.elapsed)) / \(formatPlaybackTime(audioPlayer.duration))" : nil
                 ) {
                     audioPlayer.togglePlayback(urlString: audioURL)
                 }

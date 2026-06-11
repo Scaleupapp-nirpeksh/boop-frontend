@@ -65,6 +65,13 @@ struct HairlineProgress: View {
     }
 }
 
+/// Formats a playback duration in seconds to "m:ss".
+func formatPlaybackTime(_ seconds: Double) -> String {
+    guard seconds.isFinite, seconds >= 0 else { return "0:00" }
+    let s = Int(seconds.rounded())
+    return String(format: "%d:%02d", s / 60, s % 60)
+}
+
 /// Refined voice control: a thin-stroked play circle + a 1px line + duration.
 struct VoiceLine: View {
     var duration: String

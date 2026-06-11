@@ -120,13 +120,14 @@ struct CandidateCardView: View {
 
     @ViewBuilder
     private var voiceIntroRow: some View {
-        let isThis = audioPlayer.currentURL == candidate.voiceIntro.audioUrl && audioPlayer.isPlaying
+        let isActive = audioPlayer.currentURL == candidate.voiceIntro.audioUrl && audioPlayer.isPlaying
         VStack(alignment: .leading, spacing: BoopSpacing.xs) {
             EyebrowLabel(text: "Voice intro", color: BoopColors.textMuted)
             VoiceLine(
                 duration: voiceDurationLabel,
-                isPlaying: isThis,
+                isPlaying: isActive,
                 progress: audioPlayer.currentURL == candidate.voiceIntro.audioUrl ? audioPlayer.progress : 0,
+                elapsedText: isActive ? "\(formatPlaybackTime(audioPlayer.elapsed)) / \(formatPlaybackTime(audioPlayer.duration))" : nil,
                 onTap: {
                     Haptics.light()
                     audioPlayer.togglePlayback(urlString: candidate.voiceIntro.audioUrl)

@@ -125,13 +125,16 @@ struct MyAnswersView: View {
     @ViewBuilder
     private func voiceAnswer(_ item: AnswerHistoryItem) -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            let url = item.voiceAnswerUrl
-            VoiceLine(
-                duration: "Listen",
-                isPlaying: audioPlayer.currentURL == url && audioPlayer.isPlaying,
-                progress: audioPlayer.currentURL == url ? audioPlayer.progress : 0
-            ) {
-                audioPlayer.togglePlayback(urlString: url)
+            if let url = item.voiceAnswerUrl {
+                let isActive = audioPlayer.currentURL == url && audioPlayer.isPlaying
+                VoiceLine(
+                    duration: "Listen",
+                    isPlaying: isActive,
+                    progress: audioPlayer.currentURL == url ? audioPlayer.progress : 0,
+                    elapsedText: isActive ? "\(formatPlaybackTime(audioPlayer.elapsed)) / \(formatPlaybackTime(audioPlayer.duration))" : nil
+                ) {
+                    audioPlayer.togglePlayback(urlString: url)
+                }
             }
 
             if let transcript = item.voiceAnswerTranscript, !transcript.isEmpty {
