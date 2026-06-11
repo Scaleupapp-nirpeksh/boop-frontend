@@ -143,18 +143,18 @@ struct SplashView: View {
         withAnimation(.easeOut(duration: 0.7).delay(1.3)) {
             wordmark = true
         }
-        withAnimation(.easeInOut(duration: 0.6).delay(1.8)) {
+        withAnimation(.easeInOut(duration: 0.6).delay(1.9)) {
             ruleReveal = true
         }
-        withAnimation(.easeOut(duration: 0.5).delay(2.2)) {
+        withAnimation(.easeOut(duration: 0.5).delay(2.35)) {
             tagline = true
         }
 
-        // 4. Fade out and finish (preserved timing)
-        withAnimation(.easeInOut(duration: 0.5).delay(2.8)) {
+        // 4. Hold the finished composition a beat, then fade out and finish
+        withAnimation(.easeInOut(duration: 0.5).delay(3.3)) {
             fadeOut = true
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.8) {
             isFinished = true
         }
     }

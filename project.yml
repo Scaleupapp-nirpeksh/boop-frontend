@@ -9,7 +9,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "16"
+    CURRENT_PROJECT_VERSION: "17"
     DEVELOPMENT_TEAM: "NK5P69WG2H"
     SWIFT_VERSION: "5.9"
     INFOPLIST_KEY_CFBundleDisplayName: "UnMutee"
@@ -82,7 +82,7 @@ targets:
       properties:
         CFBundleDisplayName: UnMutee
         CFBundleShortVersionString: "1.0.0"
-        CFBundleVersion: "16"
+        CFBundleVersion: "17"
         # App uses only standard HTTPS/TLS — exempt encryption. Auto-answers
         # the App Store Connect export-compliance question for every build.
         ITSAppUsesNonExemptEncryption: false
