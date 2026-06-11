@@ -21,6 +21,19 @@ struct CandidateCardView: View {
     private let cardHeight: CGFloat = 540
 
     var body: some View {
+        // Read the available viewport width and pin every layer to it. A square
+        // blurred portrait under aspectRatio(.fill) with a fixed height reports an
+        // intrinsic width equal to that height (~540), and `.frame(maxWidth: .infinity)`
+        // only caps growth — it can't shrink that intrinsic width below the proposal
+        // inside a vertical ScrollView. Binding to an explicit width stops any
+        // descendant (portrait, gradient, content, buttons) from widening the card.
+        GeometryReader { proxy in
+            cardStack(width: proxy.size.width)
+        }
+        .frame(height: cardHeight)
+    }
+
+    private func cardStack(width: CGFloat) -> some View {
         ZStack(alignment: .bottomLeading) {
             BlurredPortrait(
                 urlString: portraitURL,
@@ -28,8 +41,7 @@ struct CandidateCardView: View {
                 shape: .roundedRect(0),
                 scrim: false
             )
-            .frame(maxWidth: .infinity)
-            .frame(height: cardHeight)
+            .frame(width: width, height: cardHeight)
             .clipped()
 
             // Fade the portrait into the ground so the type sits on darkness.
@@ -38,14 +50,13 @@ struct CandidateCardView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .frame(maxWidth: .infinity)
-            .frame(height: cardHeight)
+            .frame(width: width, height: cardHeight)
 
             content
                 .padding(BoopSpacing.lg)
+                .frame(width: width, height: cardHeight, alignment: .bottomLeading)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: cardHeight)
+        .frame(width: width, height: cardHeight)
         .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)

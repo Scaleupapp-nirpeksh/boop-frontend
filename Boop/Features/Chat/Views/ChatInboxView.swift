@@ -232,6 +232,11 @@ struct ChatConversationView: View {
     @State private var showBlockError = false
     @State private var showComfortDetail = false
     @State private var showGames = false
+    /// Width of the message list's content area, captured once so every bubble
+    /// can be clamped to a fraction of it regardless of fog state. The fog
+    /// background ignores the safe area, which otherwise lets unclamped bubbles
+    /// size to the full screen and overflow both edges.
+    @State private var messageListWidth: CGFloat = 0
 
     init(conversation: ConversationInfo) {
         self.conversation = conversation
@@ -261,10 +266,16 @@ struct ChatConversationView: View {
         }
     }
 
+    /// Early-chat starter row. Voice + game are ALSO permanently reachable (the
+    /// composer mic and the header game button), so these chips are purely an
+    /// additive nudge for brand-new conversations — they never replace the
+    /// composer. Gated on a low message count so the bottom region settles into
+    /// the plain composer once the chat is underway instead of toggling shape.
     @ViewBuilder
     private var fogNudgeChips: some View {
         if let comfort = viewModel.comfortScore,
            comfort < 70,
+           viewModel.messages.count <= 3,
            conversation.matchId != nil,
            conversation.matchStage != "revealed",
            conversation.matchStage != "dating" {
@@ -275,6 +286,7 @@ struct ChatConversationView: View {
                 nudgeChip(icon: "gamecontroller", label: "Play a game") {
                     showGames = true
                 }
+                Spacer(minLength: 0)
             }
             .padding(.horizontal, BoopSpacing.md)
             .padding(.top, BoopSpacing.xs)
@@ -357,6 +369,23 @@ struct ChatConversationView: View {
                             }
                         }
                     }
+                }
+            }
+
+            // Game access lives here permanently (gated only on a match), so it
+            // no longer appears/vanishes with the fog nudge chips. Reachable in
+            // every conversation state.
+            if conversation.matchId != nil {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        Haptics.light()
+                        showGames = true
+                    } label: {
+                        Image(systemName: "gamecontroller")
+                            .font(.system(size: 15, weight: .thin))
+                            .foregroundStyle(BoopColors.textSecondary)
+                    }
+                    .accessibilityLabel("Play a game")
                 }
             }
 
@@ -571,6 +600,7 @@ struct ChatConversationView: View {
                                 message: message,
                                 isCurrentUser: message.senderId.id == AuthManager.shared.currentUser?.id,
                                 isMostRecent: message.id == lastMessageID,
+                                maxBubbleWidth: maxBubbleWidth,
                                 deliveryState: viewModel.deliveryState(for: message),
                                 audioPlayer: audioPlayer,
                                 onReact: { emoji in
@@ -596,7 +626,15 @@ struct ChatConversationView: View {
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.md)
                 }
-                .background(Color.clear)
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear
+                            .onAppear { messageListWidth = proxy.size.width }
+                            .onChange(of: proxy.size.width) { _, newValue in
+                                messageListWidth = newValue
+                            }
+                    }
+                )
                 .onChange(of: viewModel.messages.count) { _, _ in
                     if let last = viewModel.messages.last {
                         withAnimation(.easeOut(duration: 0.2)) {
@@ -636,6 +674,17 @@ struct ChatConversationView: View {
         } catch {
             showBlockError = true
         }
+    }
+
+    /// Cap each bubble at ~76% of the message list's usable width (after the
+    /// list's own 16pt horizontal padding) so sent bubbles hug the right with a
+    /// left gutter and received hug the left with a right gutter — identical in
+    /// fog and non-fog states. Falls back to the screen width before geometry
+    /// resolves so the very first layout pass is already constrained.
+    private var maxBubbleWidth: CGFloat {
+        let usable = (messageListWidth > 0 ? messageListWidth : UIScreen.main.bounds.width)
+            - (BoopSpacing.md * 2)
+        return max(120, usable * 0.76)
     }
 
     private var filteredMessages: [ChatMessage] {
@@ -797,6 +846,7 @@ private struct ChatMessageBubble: View {
     let message: ChatMessage
     let isCurrentUser: Bool
     let isMostRecent: Bool
+    let maxBubbleWidth: CGFloat
     let deliveryState: ChatMessageDeliveryState
     let audioPlayer: RemoteAudioPlayer
     let onReact: (String) -> Void
@@ -865,6 +915,11 @@ private struct ChatMessageBubble: View {
                     }
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.sm)
+                    // Clamp the bubble to ~76% of the list width so long text wraps
+                    // and the row keeps an opposite-side gutter. Applied here (after
+                    // padding, before the background) so the background hugs the
+                    // wrapped content. Identical in fog and non-fog states.
+                    .frame(maxWidth: maxBubbleWidth, alignment: isCurrentUser ? .trailing : .leading)
                     .background {
                         RoundedRectangle(cornerRadius: BoopRadius.bubble, style: .continuous)
                             .fill(bubbleBackground)
