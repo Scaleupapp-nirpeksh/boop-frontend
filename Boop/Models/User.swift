@@ -64,6 +64,7 @@ enum ProfileStage: String, Codable {
     case incomplete
     case voicePending = "voice_pending"
     case questionsPending = "questions_pending"
+    case preview
     case ready
 }
 

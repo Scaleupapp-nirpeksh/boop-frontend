@@ -18,7 +18,8 @@ class AppState {
         if !authManager.isAuthenticated {
             return .auth
         }
-        if let user = authManager.currentUser, user.profileStage == .ready {
+        if let user = authManager.currentUser,
+           user.profileStage == .ready || user.profileStage == .preview {
             return .main
         }
         return .onboarding

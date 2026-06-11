@@ -11,18 +11,6 @@ struct OnboardingContainerView: View {
                 BasicInfoView(viewModel: viewModel)
                     .tag(OnboardingStep.basicInfo)
 
-                LocationView(viewModel: viewModel)
-                    .tag(OnboardingStep.location)
-
-                BioView(viewModel: viewModel)
-                    .tag(OnboardingStep.bio)
-
-                VoiceIntroView(onboardingVM: viewModel)
-                    .tag(OnboardingStep.voiceIntro)
-
-                PhotoUploadView(onboardingVM: viewModel)
-                    .tag(OnboardingStep.photos)
-
                 QuestionsView(onboardingVM: viewModel)
                     .tag(OnboardingStep.questions)
             }

@@ -11,11 +11,15 @@ struct Question: Codable, Identifiable {
     var options: [String]?
     var characterLimit: Int?
     var depthLevel: String?
+    /// True for the small set of questions shown during reward-first onboarding.
+    /// Optional/default-safe: treat nil as false.
+    var isOnboarding: Bool?
 
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case questionNumber, questionText, dimension, questionType
         case dayAvailable, order, options, characterLimit, depthLevel
+        case isOnboarding
     }
 
     var dimensionDisplayName: String {

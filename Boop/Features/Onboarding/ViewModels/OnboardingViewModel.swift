@@ -1,26 +1,21 @@
 import SwiftUI
 
+/// Reward-first onboarding: basic info, then the 8 onboarding questions.
+/// Voice + photos + extended bio/location are deferred to a later
+/// "connect-setup" / profile-editing flow (their views remain in the project).
 enum OnboardingStep: Int, CaseIterable {
     case basicInfo = 0
-    case location
-    case bio
-    case voiceIntro
-    case photos
     case questions
 
     var title: String {
         switch self {
         case .basicInfo: return "About You"
-        case .location: return "Your Location"
-        case .bio: return "Your Bio"
-        case .voiceIntro: return "Voice Intro"
-        case .photos: return "Your Photos"
         case .questions: return "Questions"
         }
     }
 
     var isSkippable: Bool {
-        self == .bio
+        false
     }
 }
 
@@ -73,20 +68,15 @@ class OnboardingViewModel {
         coordinates = user.location?.coordinates
         bioText = user.bio?.text ?? ""
 
-        // Determine starting step
+        // Determine starting step. Basic info is collected first; once the
+        // backend has it the user moves on to the 8 onboarding questions.
+        // Voice is deferred, so a `voicePending` user resumes at questions.
         switch user.profileStage {
         case .incomplete:
             currentStep = .basicInfo
-        case .voicePending:
-            currentStep = .voiceIntro
-        case .questionsPending:
-            // If user already answered 6+ questions, skip onboarding (go to main)
-            if (user.questionsAnswered ?? 0) >= 6 {
-                isComplete = true
-            } else {
-                currentStep = .questions
-            }
-        case .ready:
+        case .voicePending, .questionsPending:
+            currentStep = .questions
+        case .preview, .ready:
             isComplete = true
         }
     }

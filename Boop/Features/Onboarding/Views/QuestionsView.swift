@@ -125,18 +125,18 @@ struct QuestionsView: View {
                 EyebrowLabel(text: "Question \(String(format: "%02d", viewModel.currentIndex + 1))",
                              color: BoopColors.accentColor)
                 Spacer()
-                Text("\(String(format: "%02d", min(viewModel.answeredCount, 15))) / 15")
+                Text("\(String(format: "%02d", min(viewModel.answeredCount, target))) / \(String(format: "%02d", target))")
                     .font(BoopTypography.cineLabel)
                     .tracking(2)
                     .foregroundStyle(BoopColors.textMuted)
             }
 
-            // Progress toward the 15 answers that unlock the full profile + best matches
-            HairlineProgress(progress: Double(min(viewModel.answeredCount, 15)) / 15.0)
+            // Progress toward the onboarding questions that unlock the reveal
+            HairlineProgress(progress: Double(min(viewModel.answeredCount, target)) / Double(target))
                 .animation(.easeInOut(duration: 0.3), value: viewModel.answeredCount)
 
-            if viewModel.answeredCount < 15 {
-                Text("\(viewModel.answeredCount) of 15 to unlock your full profile & best matches")
+            if viewModel.answeredCount < target {
+                Text("\(viewModel.answeredCount) of \(target) to unlock your profile")
                     .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textMuted)
             } else {
@@ -146,6 +146,8 @@ struct QuestionsView: View {
             }
         }
     }
+
+    private var target: Int { QuestionsViewModel.onboardingTarget }
 
     // MARK: - Prompt (rule + dimension + cinematic question)
 
@@ -296,20 +298,18 @@ struct QuestionsView: View {
             Spacer()
 
             VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                EyebrowLabel(text: "Great Start", color: BoopColors.accentColor)
+                EyebrowLabel(text: "All Set", color: BoopColors.accentColor)
                 AccentRule()
                 Text("\(viewModel.answeredCount) answered")
                     .font(BoopTypography.cineDisplay)
                     .foregroundStyle(BoopColors.textPrimary)
 
-                if viewModel.answeredCount < 15 {
-                    Text("Answer \(15 - viewModel.answeredCount) more to unlock your full personality profile and get the best matches.")
-                        .font(BoopTypography.cineBodyLight)
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
+                Text("That's everything we need to get you started. Step inside and start connecting.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                Text("New questions unlock every day at midnight.")
+                Text("More questions unlock as you go — they deepen your profile and matches.")
                     .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textMuted)
             }
@@ -317,14 +317,14 @@ struct QuestionsView: View {
             Spacer()
 
             VStack(spacing: BoopSpacing.md) {
-                BoopButton(title: "Go to Homepage") {
+                BoopButton(title: "Enter UnMutee") {
                     Task {
                         await viewModel.goToHomepage()
                         onboardingVM.markComplete()
                     }
                 }
 
-                Text("You can continue answering from your profile anytime.")
+                Text("You can keep answering from your profile anytime.")
                     .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textMuted)
                     .multilineTextAlignment(.center)
@@ -340,14 +340,14 @@ struct QuestionsView: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer()
 
-            if viewModel.answeredCount >= 6 {
+            if viewModel.answeredCount >= target {
                 VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                    EyebrowLabel(text: "All Caught Up", color: BoopColors.accentColor)
+                    EyebrowLabel(text: "All Set", color: BoopColors.accentColor)
                     AccentRule()
-                    Text("All caught up for today.")
+                    Text("You're all set.")
                         .font(BoopTypography.cineDisplay)
                         .foregroundStyle(BoopColors.textPrimary)
-                    Text("New questions unlock tomorrow at midnight.")
+                    Text("Step inside and start connecting.")
                         .font(BoopTypography.cineBodyLight)
                         .foregroundStyle(BoopColors.textSecondary)
                         .fixedSize(horizontal: false, vertical: true)
@@ -355,7 +355,7 @@ struct QuestionsView: View {
 
                 Spacer()
 
-                BoopButton(title: "Go to Homepage") {
+                BoopButton(title: "Enter UnMutee") {
                     Task {
                         await viewModel.goToHomepage()
                         onboardingVM.markComplete()

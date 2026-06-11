@@ -48,9 +48,13 @@ class QuestionsViewModel {
         }
     }
 
-    /// User can skip to homepage after answering 6+ questions
+    /// Number of onboarding questions a user must answer to unlock the reveal
+    /// and enter the app in `preview` mode.
+    static let onboardingTarget = 8
+
+    /// Reward-first onboarding requires all 8 questions; there is no skip-at-6.
     var canSkipToHome: Bool {
-        answeredCount >= 6
+        false
     }
 
     var progressText: String {
@@ -59,7 +63,11 @@ class QuestionsViewModel {
 
     // MARK: - Fetch Questions
 
-    /// Fetch all available questions for onboarding (no limit)
+    /// Fetch the onboarding question set (the 8 questions flagged `isOnboarding`).
+    /// The backend returns all unlocked day-1 questions; we filter to the
+    /// onboarding-flagged ones. If none are flagged (e.g. the field isn't
+    /// serialized), fall back to the first `onboardingTarget` by questionNumber
+    /// so the user is never left with an empty flow.
     @MainActor
     func fetchQuestions() async {
         isLoading = true
@@ -67,7 +75,25 @@ class QuestionsViewModel {
 
         do {
             let response: AvailableQuestionsResponse = try await APIClient.shared.request(.getQuestions)
-            questions = response.questions
+
+            let onboardingQuestions = response.questions
+                .filter { $0.isOnboarding == true }
+                .sorted { $0.questionNumber < $1.questionNumber }
+
+            if onboardingQuestions.isEmpty {
+                // Fallback: backend didn't flag any onboarding questions.
+                questions = Array(
+                    response.questions
+                        .sorted { $0.questionNumber < $1.questionNumber }
+                        .prefix(Self.onboardingTarget)
+                )
+                #if DEBUG
+                print("[QuestionsViewModel] No isOnboarding-flagged questions returned; falling back to first \(Self.onboardingTarget) by questionNumber. Verify the backend serializes `isOnboarding`.")
+                #endif
+            } else {
+                questions = onboardingQuestions
+            }
+
             answeredCount = response.meta.totalAnswered
             questionStartTime = Date()
         } catch let error as APIError {

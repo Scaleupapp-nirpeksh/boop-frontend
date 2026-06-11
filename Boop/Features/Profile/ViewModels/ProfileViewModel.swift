@@ -22,7 +22,7 @@ final class ProfileViewModel {
     var isUploadingVoice = false
 
     var isProfileComplete: Bool {
-        user?.profileStage == .ready || user?.profileStage == .questionsPending || user?.profileStage == .voicePending
+        user?.profileStage == .ready || user?.profileStage == .preview || user?.profileStage == .questionsPending || user?.profileStage == .voicePending
     }
 
     init() {

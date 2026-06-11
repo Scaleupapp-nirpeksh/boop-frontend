@@ -39,6 +39,13 @@ struct BasicInfoView: View {
                         options: InterestedIn.allCases.map { ($0, $0.displayName) },
                         selected: $viewModel.interestedIn
                     )
+
+                    BoopTextField(
+                        label: "City (optional)",
+                        text: $viewModel.city,
+                        placeholder: "Where are you based?",
+                        textContentType: .addressCity
+                    )
                 }
 
                 if let error = viewModel.errorMessage {

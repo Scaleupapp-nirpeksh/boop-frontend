@@ -487,6 +487,8 @@ struct ProfileView: View {
         switch viewModel.user?.profileStage {
         case .ready:
             return "Profile ready"
+        case .preview:
+            return "Preview"
         case .questionsPending:
             return "Questions pending"
         case .voicePending:
