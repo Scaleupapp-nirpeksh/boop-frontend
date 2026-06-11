@@ -77,7 +77,7 @@ actor APIClient {
         guard httpResponse.statusCode < 400 else {
             // Try to parse error message
             if let apiResponse = try? decoder.decode(APIResponse<EmptyResponse>.self, from: data) {
-                throw APIError.serverError(statusCode: httpResponse.statusCode, message: apiResponse.message)
+                throw APIError.serverError(statusCode: httpResponse.statusCode, message: apiResponse.message, code: apiResponse.code)
             }
             throw APIError.serverError(statusCode: httpResponse.statusCode, message: "Request failed")
         }
@@ -217,7 +217,7 @@ actor APIClient {
             if statusCode == 422 || statusCode == 400 {
                 throw APIError.validationError(apiResponse.message, errors: apiResponse.errors)
             }
-            throw APIError.serverError(statusCode: statusCode, message: apiResponse.message)
+            throw APIError.serverError(statusCode: statusCode, message: apiResponse.message, code: apiResponse.code)
         }
 
         return responseData

@@ -102,6 +102,7 @@
 		9FE242B2AF0D1A60218E2C76 /* LocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ABCAC6C867129184B5CD20C /* LocationView.swift */; };
 		A08D887B5D254DBC22440254 /* Analytics.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */; };
 		A1765A779E5D1C6FEEAD0FAE /* SplashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E43316338D42AFAB25864FBF /* SplashView.swift */; };
+		A342AA104B1CBD34F91D9A4E /* ConnectSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1D8BF60D9FE783990B5748D /* ConnectSetupView.swift */; };
 		A49C9686485DCB40673CDB0E /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 413048E1F6DF74842CEDBBCD /* AppTheme.swift */; };
 		A5D674A4EF62B1C65172414D /* NotificationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E222CBF6A7D59940EE3EC24 /* NotificationModels.swift */; };
 		A859A125CD7781E794D42A12 /* MultipartFormData.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5709D716BFF7F7B24781043 /* MultipartFormData.swift */; };
@@ -308,6 +309,7 @@
 		EC40F9231A91F32DAFDBFDE9 /* Analytics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Analytics.swift; sourceTree = "<group>"; };
 		EC7A0803A805D3BAC3F37F0B /* GoneQuietCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoneQuietCard.swift; sourceTree = "<group>"; };
 		EF40A424CE2A2723294A4A05 /* APIEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIEndpoint.swift; sourceTree = "<group>"; };
+		F1D8BF60D9FE783990B5748D /* ConnectSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectSetupView.swift; sourceTree = "<group>"; };
 		F4012798854623C6A1B6B050 /* CompatibilityDeepDiveView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompatibilityDeepDiveView.swift; sourceTree = "<group>"; };
 		F45F291A1D7C182F182A5B80 /* Nunito-ExtraBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-ExtraBold.ttf"; sourceTree = "<group>"; };
 		F776D60494C2E973E7537B03 /* Date+Boop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Boop.swift"; sourceTree = "<group>"; };
@@ -759,6 +761,7 @@
 			children = (
 				2AAD0E6FB6BAF8739B306E71 /* BasicInfoView.swift */,
 				82B492A47A12697F27111744 /* BioView.swift */,
+				F1D8BF60D9FE783990B5748D /* ConnectSetupView.swift */,
 				0ABCAC6C867129184B5CD20C /* LocationView.swift */,
 				8EF23B3EDF50A557CDCE95D4 /* OnboardingContainerView.swift */,
 				62207F99BBB7A440846C28FA /* PhotoUploadView.swift */,
@@ -1137,6 +1140,7 @@
 				30B3E0052B41EC677AB1DA30 /* CompatibilityDeepDiveView.swift in Sources */,
 				AB981E3490A3A9C9B9C6D71A /* CompatibilityDeepDiveViewModel.swift in Sources */,
 				822AB92F1223B551AB9BBAE5 /* ConnectNoteSheet.swift in Sources */,
+				A342AA104B1CBD34F91D9A4E /* ConnectSetupView.swift in Sources */,
 				CA1FD6B822DD43BC93B69A8F /* ConnectionCard.swift in Sources */,
 				F090D5D535BA96C51E9843B8 /* ConversationStartersCard.swift in Sources */,
 				469301EB0FB81E4CEA536047 /* DailyQuestionBand.swift in Sources */,

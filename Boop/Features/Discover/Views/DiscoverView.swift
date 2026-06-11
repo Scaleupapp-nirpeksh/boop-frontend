@@ -9,6 +9,10 @@ struct DiscoverView: View {
                 VStack(alignment: .leading, spacing: BoopSpacing.lg) {
                     header
 
+                    if AuthManager.shared.currentUser?.profileStage == .preview {
+                        setupBanner
+                    }
+
                     Group {
                         if viewModel.isLoading {
                             SkeletonCandidateCard()
@@ -64,6 +68,37 @@ struct DiscoverView: View {
         .sheet(isPresented: $viewModel.showConnectSheet) {
             ConnectNoteSheet(viewModel: viewModel)
         }
+        .sheet(isPresented: $viewModel.showConnectSetup) {
+            ConnectSetupView {
+                Task { await viewModel.completeSetupAndRetry() }
+            }
+        }
+    }
+
+    // MARK: - Setup banner (preview users — hairline prompt to unlock connecting)
+
+    private var setupBanner: some View {
+        Button {
+            Haptics.light()
+            viewModel.openConnectSetup()
+        } label: {
+            VStack(spacing: 0) {
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                HStack(spacing: BoopSpacing.sm) {
+                    Text("Add your voice + photos to start connecting")
+                        .font(BoopTypography.cineCaption)
+                        .tracking(0.5)
+                        .foregroundStyle(BoopColors.textSecondary)
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(BoopColors.accentColor)
+                }
+                .padding(.vertical, BoopSpacing.sm)
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: - Header (eyebrow + daily count)

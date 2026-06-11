@@ -2,6 +2,9 @@ import SwiftUI
 
 struct PhotoUploadView: View {
     @Bindable var onboardingVM: OnboardingViewModel
+    /// When set, called after a successful upload instead of `onboardingVM.advanceStep()`.
+    /// Lets non-onboarding flows (e.g. ConnectSetupView) drive their own progression.
+    var onComplete: (() -> Void)? = nil
     @State private var viewModel = PhotoUploadViewModel()
 
     var body: some View {
@@ -41,7 +44,11 @@ struct PhotoUploadView: View {
                         if let user = await viewModel.uploadAllPhotos() {
                             await MainActor.run {
                                 AuthManager.shared.updateUser(user)
-                                onboardingVM.advanceStep()
+                                if let onComplete {
+                                    onComplete()
+                                } else {
+                                    onboardingVM.advanceStep()
+                                }
                             }
                         }
                     }
