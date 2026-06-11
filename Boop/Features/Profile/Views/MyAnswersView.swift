@@ -5,20 +5,20 @@ struct MyAnswersView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
                 if viewModel.isLoading {
                     ProgressView()
-                        .tint(BoopColors.primary)
+                        .tint(BoopColors.accentColor)
                         .frame(maxWidth: .infinity, minHeight: 240)
                 } else if let error = viewModel.errorMessage {
                     Text(error)
-                        .font(BoopTypography.body)
+                        .font(BoopTypography.cineBody)
                         .foregroundStyle(BoopColors.error)
                         .frame(maxWidth: .infinity, minHeight: 120)
                 } else if viewModel.history.isEmpty {
                     emptyState
                 } else {
-                    summaryCard
+                    summary
 
                     ForEach(viewModel.groupedByDimension, id: \.key) { group in
                         dimensionSection(key: group.key, items: group.items)
@@ -26,7 +26,7 @@ struct MyAnswersView: View {
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
         .boopBackground()
         .navigationTitle("My Answers")
@@ -36,75 +36,70 @@ struct MyAnswersView: View {
         }
     }
 
-    private var summaryCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            HStack(spacing: BoopSpacing.md) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("\(viewModel.history.count)")
-                        .font(BoopTypography.title1)
-                        .foregroundStyle(BoopColors.primary)
-                    Text("questions answered")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textSecondary)
-                }
+    // MARK: - Summary (eyebrow + headline count)
 
+    private var summary: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "Answered", color: BoopColors.accentColor)
                 Spacer()
-
-                VStack(alignment: .trailing, spacing: 4) {
-                    Text("\(viewModel.groupedByDimension.count)")
-                        .font(BoopTypography.title1)
-                        .foregroundStyle(BoopColors.secondary)
-                    Text("dimensions explored")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textSecondary)
-                }
+                Text("\(viewModel.groupedByDimension.count) dimensions")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textMuted)
             }
+
+            AccentRule()
+
+            Text("\(viewModel.history.count) answers")
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+
+            Text("Everything you've shared, gathered by the dimension it speaks to.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
         }
     }
+
+    // MARK: - Dimension section (eyebrow tag + hairline rows)
 
     private func dimensionSection(key: String, items: [AnswerHistoryItem]) -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            HStack(spacing: BoopSpacing.xs) {
-                Circle()
-                    .fill(BoopColors.dimensionColor(for: key))
-                    .frame(width: 10, height: 10)
-
-                Text(key.replacingOccurrences(of: "_", with: " ").capitalized)
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
-
+            HStack {
+                EyebrowLabel(text: key.replacingOccurrences(of: "_", with: " "))
+                Spacer()
                 Text("\(items.count)")
-                    .font(BoopTypography.caption)
-                    .fontWeight(.bold)
-                    .foregroundStyle(BoopColors.dimensionColor(for: key))
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(BoopColors.dimensionColor(for: key).opacity(0.12))
-                    .clipShape(Capsule())
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
             }
 
-            ForEach(items) { item in
-                answerCard(item)
+            VStack(spacing: 0) {
+                ForEach(items) { item in
+                    answerRow(item)
+                }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
         }
     }
 
-    private func answerCard(_ item: AnswerHistoryItem) -> some View {
-        BoopCard(padding: BoopSpacing.md, radius: BoopRadius.xl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+    private func answerRow(_ item: AnswerHistoryItem) -> some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
                 Text(item.questionText)
-                    .font(BoopTypography.callout)
-                    .fontWeight(.medium)
+                    .font(BoopTypography.cineBody)
                     .foregroundStyle(BoopColors.textPrimary)
 
                 answerContent(item)
 
                 if let date = item.submittedAt {
-                    Text(date.formatted(date: .abbreviated, time: .omitted))
-                        .font(BoopTypography.caption)
+                    Text(date.formatted(date: .abbreviated, time: .omitted).uppercased())
+                        .font(BoopTypography.cineCaption)
+                        .tracking(1)
                         .foregroundStyle(BoopColors.textMuted)
                 }
             }
+            .padding(.vertical, BoopSpacing.md)
         }
     }
 
@@ -112,43 +107,35 @@ struct MyAnswersView: View {
     private func answerContent(_ item: AnswerHistoryItem) -> some View {
         if let text = item.textAnswer, !text.isEmpty {
             Text(text)
-                .font(BoopTypography.body)
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
-                .italic()
         } else if let option = item.selectedOption {
-            answerChip(option)
+            answerValue(option)
         } else if let options = item.selectedOptions, !options.isEmpty {
-            FlowLayout(spacing: BoopSpacing.xs) {
-                ForEach(options, id: \.self) { option in
-                    answerChip(option)
-                }
-            }
+            answerValue(options.joined(separator: ", "))
         }
     }
 
-    private func answerChip(_ text: String) -> some View {
-        Text(text)
-            .font(BoopTypography.footnote)
-            .foregroundStyle(BoopColors.secondary)
-            .padding(.horizontal, BoopSpacing.sm)
-            .padding(.vertical, BoopSpacing.xxs)
-            .background(BoopColors.secondary.opacity(0.1))
-            .clipShape(Capsule())
+    private func answerValue(_ text: String) -> some View {
+        HStack(alignment: .top, spacing: BoopSpacing.xs) {
+            Rectangle()
+                .fill(BoopColors.accentColor)
+                .frame(width: 2)
+            Text(text)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textSecondary)
+        }
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var emptyState: some View {
-        VStack(spacing: BoopSpacing.md) {
-            Image(systemName: "text.book.closed")
-                .font(.system(size: 40))
-                .foregroundStyle(BoopColors.textMuted)
-            Text("No answers yet")
-                .font(BoopTypography.headline)
-                .foregroundStyle(BoopColors.textPrimary)
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "No answers yet")
+            AccentRule()
             Text("Answer questions to build your personality profile.")
-                .font(BoopTypography.body)
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
-                .multilineTextAlignment(.center)
         }
-        .frame(maxWidth: .infinity, minHeight: 200)
+        .frame(maxWidth: .infinity, minHeight: 200, alignment: .topLeading)
     }
 }

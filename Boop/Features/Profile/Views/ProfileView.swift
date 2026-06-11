@@ -509,124 +509,119 @@ struct ProfileEditView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                BoopSectionIntro(
-                    title: "Edit profile",
-                    subtitle: "Tighten the essentials.",
-                    eyebrow: "Profile"
+            VStack(alignment: .leading, spacing: BoopSpacing.xl) {
+                header
+
+                BoopTextField(
+                    label: "First name",
+                    text: $viewModel.firstName,
+                    placeholder: "Your first name"
                 )
 
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                        BoopTextField(
-                            label: "First name",
-                            text: $viewModel.firstName,
-                            placeholder: "Your first name"
+                if viewModel.isProfileComplete {
+                    lockedField(label: "Date of birth", value: viewModel.dateOfBirth.formatted(date: .abbreviated, time: .omitted))
+                    lockedField(label: "Gender", value: viewModel.gender?.displayName ?? "Not set")
+                    lockedField(label: "Interested in", value: viewModel.interestedIn?.displayName ?? "Not set")
+                } else {
+                    VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                        EyebrowLabel(text: "Date of birth")
+                        DatePicker(
+                            "",
+                            selection: $viewModel.dateOfBirth,
+                            in: ...Calendar.current.date(byAdding: .year, value: -18, to: Date())!,
+                            displayedComponents: .date
                         )
-
-                        if viewModel.isProfileComplete {
-                            lockedField(label: "Date of birth", value: viewModel.dateOfBirth.formatted(date: .abbreviated, time: .omitted))
-                            lockedField(label: "Gender", value: viewModel.gender?.displayName ?? "Not set")
-                            lockedField(label: "Interested in", value: viewModel.interestedIn?.displayName ?? "Not set")
-                        } else {
-                            VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-                                Text("Date of birth")
-                                    .font(BoopTypography.subheadline)
-                                    .foregroundStyle(BoopColors.textSecondary)
-                                DatePicker(
-                                    "",
-                                    selection: $viewModel.dateOfBirth,
-                                    in: ...Calendar.current.date(byAdding: .year, value: -18, to: Date())!,
-                                    displayedComponents: .date
-                                )
-                                .datePickerStyle(.compact)
-                                .labelsHidden()
-                                .padding(.horizontal, BoopSpacing.md)
-                                .padding(.vertical, BoopSpacing.sm)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(
-                                    RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                                        .fill(BoopColors.surfaceElevated)
-                                )
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                                        .stroke(BoopColors.border, lineWidth: 1)
-                                )
-                            }
-
-                            BoopSegmentedPicker(
-                                label: "Gender",
-                                options: Gender.allCases.map { ($0, $0.displayName) },
-                                selected: $viewModel.gender
-                            )
-
-                            BoopSegmentedPicker(
-                                label: "Interested in",
-                                options: InterestedIn.allCases.map { ($0, $0.displayName) },
-                                selected: $viewModel.interestedIn
-                            )
-                        }
-
-                        BoopTextField(
-                            label: "City",
-                            text: $viewModel.city,
-                            placeholder: "City"
-                        )
-
-                        BoopTextField(
-                            label: "Bio",
-                            text: $viewModel.bio,
-                            placeholder: "A few lines about you",
-                            isMultiline: true,
-                            maxLength: 180
-                        )
-
-                        if let message = viewModel.errorMessage {
-                            Text(message)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.error)
-                        } else if let message = viewModel.successMessage {
-                            Text(message)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.success)
-                        }
-
-                        BoopButton(title: "Save changes", isLoading: viewModel.isSaving) {
-                            Task { await viewModel.saveProfile() }
+                        .datePickerStyle(.compact)
+                        .labelsHidden()
+                        .tint(BoopColors.accentColor)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, BoopSpacing.xs)
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(BoopColors.hairline).frame(height: 1)
                         }
                     }
+
+                    BoopSegmentedPicker(
+                        label: "Gender",
+                        options: Gender.allCases.map { ($0, $0.displayName) },
+                        selected: $viewModel.gender
+                    )
+
+                    BoopSegmentedPicker(
+                        label: "Interested in",
+                        options: InterestedIn.allCases.map { ($0, $0.displayName) },
+                        selected: $viewModel.interestedIn
+                    )
                 }
+
+                BoopTextField(
+                    label: "City",
+                    text: $viewModel.city,
+                    placeholder: "City"
+                )
+
+                BoopTextField(
+                    label: "Bio",
+                    text: $viewModel.bio,
+                    placeholder: "A few lines about you",
+                    isMultiline: true,
+                    maxLength: 180
+                )
+
+                if let message = viewModel.errorMessage {
+                    Text(message)
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.error)
+                } else if let message = viewModel.successMessage {
+                    Text(message)
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.success)
+                }
+
+                BoopButton(title: "Save changes", isLoading: viewModel.isSaving) {
+                    Task { await viewModel.saveProfile() }
+                }
+                .padding(.top, BoopSpacing.xs)
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
         .boopBackground()
         .navigationTitle("Edit Profile")
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func lockedField(label: String, value: String) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-            Text(label)
-                .font(BoopTypography.subheadline)
+    private var header: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "Profile", color: BoopColors.accentColor)
+            AccentRule()
+            Text("Edit profile")
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text("Tighten the essentials.")
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
-            HStack {
-                Text(value)
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textPrimary)
-                Spacer()
-                Image(systemName: "lock.fill")
-                    .font(.system(size: 12))
-                    .foregroundStyle(BoopColors.textMuted)
+        }
+    }
+
+    private func lockedField(label: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+            EyebrowLabel(text: label)
+            VStack(spacing: 0) {
+                HStack {
+                    Text(value)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textMuted)
+                    Spacer()
+                    Image(systemName: "lock")
+                        .font(.system(size: 12, weight: .thin))
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+                .padding(.vertical, BoopSpacing.sm)
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
-            .padding(.horizontal, BoopSpacing.md)
-            .padding(.vertical, BoopSpacing.sm)
-            .background(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .fill(BoopColors.surfaceSecondary)
-            )
             Text("Set during onboarding and cannot be changed.")
-                .font(BoopTypography.caption)
+                .font(BoopTypography.cineCaption)
                 .foregroundStyle(BoopColors.textMuted)
         }
     }

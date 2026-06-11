@@ -5,18 +5,18 @@ struct BadgesView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                // Summary header
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
                 if !viewModel.badges.isEmpty {
-                    summaryCard
+                    summary
                 }
 
                 if viewModel.isLoading {
                     ProgressView()
+                        .tint(BoopColors.accentColor)
                         .frame(maxWidth: .infinity, minHeight: 200)
                 } else if let error = viewModel.errorMessage {
                     Text(error)
-                        .font(BoopTypography.body)
+                        .font(BoopTypography.cineBody)
                         .foregroundStyle(BoopColors.textSecondary)
                         .frame(maxWidth: .infinity, minHeight: 200)
                 } else {
@@ -26,7 +26,7 @@ struct BadgesView: View {
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
         .boopBackground()
         .navigationTitle("Badges")
@@ -36,106 +36,88 @@ struct BadgesView: View {
         }
     }
 
-    private var summaryCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(spacing: BoopSpacing.md) {
-                HStack(spacing: BoopSpacing.sm) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(viewModel.earnedBadges.count)")
-                            .font(BoopTypography.title1)
-                            .foregroundStyle(BoopColors.primary)
-                        Text("Earned")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+    // MARK: - Summary (earned / total + hairline progress)
 
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(viewModel.badges.count)")
-                            .font(BoopTypography.title1)
-                            .foregroundStyle(BoopColors.textMuted)
-                        Text("Total")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-
-                // Progress bar
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(BoopColors.surfaceSecondary)
-                            .frame(height: 8)
-
-                        Capsule()
-                            .fill(BoopColors.primaryGradient)
-                            .frame(
-                                width: viewModel.badges.isEmpty ? 0 : geo.size.width * CGFloat(viewModel.earnedBadges.count) / CGFloat(viewModel.badges.count),
-                                height: 8
-                            )
-                    }
-                }
-                .frame(height: 8)
+    private var summary: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "Earned", color: BoopColors.accentColor)
+                Spacer()
+                Text("\(viewModel.earnedBadges.count) / \(viewModel.badges.count)")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textMuted)
             }
+
+            AccentRule()
+
+            Text("\(viewModel.earnedBadges.count) earned")
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+
+            HairlineProgress(
+                progress: viewModel.badges.isEmpty
+                    ? 0
+                    : Double(viewModel.earnedBadges.count) / Double(viewModel.badges.count)
+            )
+            .padding(.top, BoopSpacing.xxs)
         }
     }
+
+    // MARK: - Category section (eyebrow + hairline badge rows)
 
     private func categorySection(_ category: String) -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text(categoryDisplayName(category))
-                .font(BoopTypography.headline)
-                .foregroundStyle(BoopColors.textPrimary)
+            EyebrowLabel(text: categoryDisplayName(category))
 
-            LazyVGrid(columns: [
-                GridItem(.flexible(), spacing: BoopSpacing.sm),
-                GridItem(.flexible(), spacing: BoopSpacing.sm),
-            ], spacing: BoopSpacing.sm) {
+            VStack(spacing: 0) {
                 ForEach(viewModel.badgesForCategory(category)) { badge in
-                    badgeCard(badge)
+                    badgeRow(badge)
                 }
+                Rectangle().fill(BoopColors.hairline).frame(height: 1)
             }
         }
     }
 
-    private func badgeCard(_ badge: BadgeCatalogItem) -> some View {
-        BoopCard(padding: BoopSpacing.md, radius: BoopRadius.xl) {
-            VStack(spacing: BoopSpacing.sm) {
-                Text(badge.emoji)
-                    .font(.system(size: 32))
-                    .opacity(badge.earned ? 1 : 0.3)
+    private func badgeRow(_ badge: BadgeCatalogItem) -> some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            HStack(alignment: .top, spacing: BoopSpacing.md) {
+                // Earned mark — thin coral circle; locked — hollow muted ring. No emoji.
+                Image(systemName: badge.earned ? "circle.fill" : "circle")
+                    .font(.system(size: 9, weight: .regular))
+                    .foregroundStyle(badge.earned ? BoopColors.accentColor : BoopColors.textMuted)
+                    .padding(.top, 5)
 
-                Text(badge.title)
-                    .font(BoopTypography.callout)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(badge.earned ? BoopColors.textPrimary : BoopColors.textMuted)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
+                    Text(badge.title)
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(badge.earned ? BoopColors.textPrimary : BoopColors.textMuted)
 
-                Text(badge.description)
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
+                    Text(badge.description)
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(badge.earned ? BoopColors.textSecondary : BoopColors.textMuted)
+                }
+
+                Spacer(minLength: BoopSpacing.sm)
 
                 if badge.earned, let earnedAt = badge.earnedAt {
-                    Text("Earned \(earnedAt.formatted(.dateTime.month(.abbreviated).day()))")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.success)
+                    Text(earnedAt.formatted(.dateTime.month(.abbreviated).day()).uppercased())
+                        .font(BoopTypography.cineCaption)
+                        .tracking(1)
+                        .foregroundStyle(BoopColors.accentColor)
+                        .padding(.top, 2)
                 } else {
-                    Text("Locked")
-                        .font(BoopTypography.caption)
-                        .fontWeight(.medium)
+                    Text("LOCKED")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(2)
                         .foregroundStyle(BoopColors.textMuted)
-                        .padding(.horizontal, BoopSpacing.xs)
-                        .padding(.vertical, 2)
-                        .background(BoopColors.surfaceSecondary)
-                        .clipShape(Capsule())
+                        .padding(.top, 2)
                 }
             }
-            .frame(maxWidth: .infinity)
+            .padding(.vertical, BoopSpacing.md)
+            .opacity(badge.earned ? 1 : 0.7)
         }
-        .opacity(badge.earned ? 1 : 0.65)
     }
 
     private func categoryDisplayName(_ category: String) -> String {

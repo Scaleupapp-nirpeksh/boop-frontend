@@ -14,88 +14,61 @@ struct PersonalityRadarChartView: View {
 
     var body: some View {
         ZStack {
-            // Subtle radial glow behind chart
-            RadialGradient(
-                colors: [BoopColors.secondary.opacity(0.08), Color.clear],
-                center: .center,
-                startRadius: 0,
-                endRadius: radius * 1.2
-            )
-
-            // Background rings with subtle fill
+            // Concentric grid rings (white hairlines on near-black)
             ForEach(Array([0.25, 0.5, 0.75, 1.0].enumerated()), id: \.offset) { idx, scale in
                 polygonPath(scale: scale)
                     .stroke(
-                        BoopColors.border.opacity(idx == 3 ? 0.5 : 0.25),
+                        Color.white.opacity(idx == 3 ? 0.16 : 0.08),
                         style: StrokeStyle(lineWidth: idx == 3 ? 1 : 0.5, dash: idx < 3 ? [4, 4] : [])
                     )
             }
 
-            // Axis lines
+            // Axis spokes
             ForEach(0..<count, id: \.self) { i in
                 Path { path in
                     path.move(to: center)
                     path.addLine(to: point(for: i, scale: 1.0))
                 }
-                .stroke(BoopColors.border.opacity(0.2), lineWidth: 0.5)
+                .stroke(Color.white.opacity(0.07), lineWidth: 0.5)
             }
 
-            // Filled data area with animation
+            // Filled data area — tonal coral at low opacity
             dataPath(scale: appear ? 1.0 : 0.0)
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            BoopColors.primary.opacity(0.20),
-                            BoopColors.secondary.opacity(0.12)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .fill(BoopColors.accentColor.opacity(0.14))
 
-            // Stroke with glow
+            // Data outline — thin coral stroke
             dataPath(scale: appear ? 1.0 : 0.0)
-                .stroke(
-                    LinearGradient(
-                        colors: [BoopColors.primary, BoopColors.secondary],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 2.5
-                )
-                .shadow(color: BoopColors.primary.opacity(0.3), radius: 4, x: 0, y: 0)
+                .stroke(BoopColors.accentColor, lineWidth: 1.5)
 
-            // Data points with pulse effect
+            // Vertices — small coral nodes on a faint halo
             ForEach(0..<count, id: \.self) { i in
                 let scale = appear ? Double(facets[i].score) / 100.0 : 0.0
                 let pt = point(for: i, scale: scale)
 
                 ZStack {
                     Circle()
-                        .fill(facetColor(for: i).opacity(0.2))
-                        .frame(width: 14, height: 14)
-
+                        .fill(BoopColors.accentColor.opacity(0.18))
+                        .frame(width: 12, height: 12)
                     Circle()
-                        .fill(Color.white)
-                        .frame(width: 8, height: 8)
-
-                    Circle()
-                        .fill(facetColor(for: i))
-                        .frame(width: 6, height: 6)
+                        .fill(BoopColors.accentColor)
+                        .frame(width: 4, height: 4)
                 }
                 .position(pt)
             }
 
-            // Emoji labels with score underneath
+            // Axis labels — typeset facet title + score, no emoji
             ForEach(0..<count, id: \.self) { i in
-                let labelPoint = point(for: i, scale: 1.30)
+                let labelPoint = point(for: i, scale: 1.34)
                 VStack(spacing: 1) {
-                    Text(facets[i].emoji)
-                        .font(.system(size: 20))
+                    Text(facets[i].title)
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .lineLimit(1)
                     Text("\(facets[i].score)")
-                        .font(.system(size: 9, weight: .bold, design: .rounded))
-                        .foregroundStyle(BoopColors.textMuted)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundStyle(BoopColors.textPrimary)
                 }
+                .frame(width: 72)
                 .position(labelPoint)
             }
         }
@@ -140,18 +113,5 @@ struct PersonalityRadarChartView: View {
             x: center.x + radius * scale * Foundation.cos(angle),
             y: center.y + radius * scale * Foundation.sin(angle)
         )
-    }
-
-    private func facetColor(for index: Int) -> Color {
-        let colors: [Color] = [
-            BoopColors.primary,
-            Color(hex: "9B5DE5"),
-            BoopColors.secondary,
-            Color(hex: "2ECC71"),
-            Color(hex: "FF8C42"),
-            Color(hex: "00BBF9"),
-            BoopColors.accent
-        ]
-        return colors[index % colors.count]
     }
 }

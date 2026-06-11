@@ -7,32 +7,26 @@ struct VoiceReRecordView: View {
 
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: BoopSpacing.xl) {
-                BoopSectionIntro(
-                    title: "Voice intro",
-                    subtitle: "Record a short intro so people can hear the real you.",
-                    eyebrow: "Profile"
-                )
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+                header
 
-                BoopCard(padding: BoopSpacing.xl, radius: BoopRadius.xxl) {
-                    BoopVoiceRecorder(state: recorder)
-                }
+                BoopVoiceRecorder(state: recorder)
 
                 if let error = recorder.error {
                     Text(error)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.error)
                 }
 
                 if let error = viewModel.errorMessage {
                     Text(error)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.error)
                 }
 
                 if let success = viewModel.successMessage {
                     Text(success)
-                        .font(BoopTypography.footnote)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.success)
                 }
 
@@ -51,10 +45,26 @@ struct VoiceReRecordView: View {
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
         .boopBackground()
         .navigationTitle("Record Voice")
         .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Voice intro", color: BoopColors.accentColor)
+            AccentRule()
+            Text("Record the real you")
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text("A short intro so people can hear the real you.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
+
+            VoiceLine(duration: recorder.formattedDuration)
+                .padding(.top, BoopSpacing.xs)
+        }
     }
 }
