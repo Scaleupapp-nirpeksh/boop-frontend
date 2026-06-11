@@ -27,7 +27,9 @@ struct QuestionsProgressView: View {
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.xl)
+            .padding(.top, BoopSpacing.xl)
+            // Clear the floating tab bar so the last coverage row stays visible.
+            .padding(.bottom, 100)
         }
         .background(BoopColors.ground.ignoresSafeArea())
         .navigationTitle("Deepen your profile")
@@ -82,6 +84,8 @@ struct QuestionsProgressView: View {
     private func confidenceRing(_ progress: QuestionsProgressResponse) -> some View {
         let percent = viewModel.confidencePercent(progress)
         return VStack(spacing: BoopSpacing.lg) {
+            // Only the number lives inside the ring — the tracked eyebrow is
+            // wider than the ring's interior, so it sits below instead.
             ZStack {
                 Circle()
                     .stroke(Color.white.opacity(0.1), lineWidth: 2)
@@ -91,20 +95,20 @@ struct QuestionsProgressView: View {
                             style: StrokeStyle(lineWidth: 2, lineCap: .round))
                     .rotationEffect(.degrees(-90))
 
-                VStack(spacing: BoopSpacing.xs) {
-                    Text("\(percent)%")
-                        .font(BoopTypography.cineDisplayXL)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    EyebrowLabel(text: "Match confidence", color: BoopColors.textMuted)
-                }
+                Text("\(percent)%")
+                    .font(BoopTypography.cineDisplayXL)
+                    .foregroundStyle(BoopColors.textPrimary)
             }
             .frame(width: 150, height: 150)
 
-            Text(viewModel.nudgeText(progress))
-                .font(BoopTypography.cineBodyLight)
-                .foregroundStyle(BoopColors.textSecondary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: BoopSpacing.xs) {
+                EyebrowLabel(text: "Match confidence", color: BoopColors.textMuted)
+                Text(viewModel.nudgeText(progress))
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .frame(maxWidth: .infinity)
     }

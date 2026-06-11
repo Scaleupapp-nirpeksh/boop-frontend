@@ -67,10 +67,20 @@ struct MyAnswersView: View {
 
     // MARK: - Dimension section (eyebrow tag + hairline rows)
 
+    /// Display name for a dimension key. `seasonal` is the backend's catch-all
+    /// bucket for answers whose questions were retired; legacy payloads still
+    /// send `unknown` for those — show both as "Seasonal".
+    private static func dimensionDisplayName(_ key: String) -> String {
+        switch key {
+        case "seasonal", "unknown": return "Seasonal"
+        default: return key.replacingOccurrences(of: "_", with: " ")
+        }
+    }
+
     private func dimensionSection(key: String, items: [AnswerHistoryItem]) -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
             HStack {
-                EyebrowLabel(text: key.replacingOccurrences(of: "_", with: " "))
+                EyebrowLabel(text: Self.dimensionDisplayName(key))
                 Spacer()
                 Text("\(items.count)")
                     .font(BoopTypography.cineCaption)
@@ -124,6 +134,9 @@ struct MyAnswersView: View {
 
     @ViewBuilder
     private func voiceAnswer(_ item: AnswerHistoryItem) -> some View {
+        // Shipped responses carry the transcription in `textAnswer`, so fall
+        // back to it — the transcript should always read alongside the player.
+        let transcript = item.voiceAnswerTranscript ?? item.textAnswer
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
             if let url = item.voiceAnswerUrl {
                 let isActive = audioPlayer.currentURL == url && audioPlayer.isPlaying
@@ -137,7 +150,7 @@ struct MyAnswersView: View {
                 }
             }
 
-            if let transcript = item.voiceAnswerTranscript, !transcript.isEmpty {
+            if let transcript, !transcript.isEmpty {
                 Text(transcript)
                     .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
