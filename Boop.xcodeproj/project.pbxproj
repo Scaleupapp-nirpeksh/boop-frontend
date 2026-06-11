@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		04FC7281E12C9287FA60E072 /* OnboardingIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 864429D41708E46F3741698C /* OnboardingIntroView.swift */; };
-		05B5732C7B0EFF21B41CE60C /* BoopLogo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0606CC5A6407FD08137E3B9B /* BoopLogo.swift */; };
 		06D3B7766D1C9B04E1B93F4E /* BlurredPortrait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34EB1C2003C6FA6B86DC7EFD /* BlurredPortrait.swift */; };
 		086CDD0B4259FBB1A2562C18 /* BoopToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FD9EF89443D1BBB96EB6DE6 /* BoopToast.swift */; };
 		088E322E7453FB902A8419F8 /* GoneQuietCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7A0803A805D3BAC3F37F0B /* GoneQuietCard.swift */; };
@@ -177,7 +176,6 @@
 		03995C1D17FC41D3B6E90B3E /* Font+Boop.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Font+Boop.swift"; sourceTree = "<group>"; };
 		03C0955FF6BFF66D7EADB1C5 /* ConnectNoteSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectNoteSheet.swift; sourceTree = "<group>"; };
 		0450374F212748FF68D5E0B7 /* SkeletonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonView.swift; sourceTree = "<group>"; };
-		0606CC5A6407FD08137E3B9B /* BoopLogo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopLogo.swift; sourceTree = "<group>"; };
 		0ABCAC6C867129184B5CD20C /* LocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationView.swift; sourceTree = "<group>"; };
 		132CAFE422EF6ACBEB9C7048 /* BoopTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopTextField.swift; sourceTree = "<group>"; };
 		133FFB71B9AF10FF06C789AE /* Nunito-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-Medium.ttf"; sourceTree = "<group>"; };
@@ -593,14 +591,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		7BEEF23FD3E392127436B35A /* Logo */ = {
-			isa = PBXGroup;
-			children = (
-				0606CC5A6407FD08137E3B9B /* BoopLogo.swift */,
-			);
-			path = Logo;
-			sourceTree = "<group>";
-		};
 		7C1B1E0017A67E26E02F02F1 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -749,7 +739,6 @@
 			isa = PBXGroup;
 			children = (
 				141394AF913C0A03CCB611DC /* Components */,
-				7BEEF23FD3E392127436B35A /* Logo */,
 				B4238B9B4BEEBEFF160D0741 /* Theme */,
 			);
 			path = DesignSystem;
@@ -1124,7 +1113,6 @@
 				B7D86387BD9B398086F574DB /* BoopColors.swift in Sources */,
 				1B79FDE1432103778EA8617D /* BoopDatePicker.swift in Sources */,
 				7335DE0E207D66C769CFF39E /* BoopLoadingView.swift in Sources */,
-				05B5732C7B0EFF21B41CE60C /* BoopLogo.swift in Sources */,
 				47FBA73005A732CCEDB18823 /* BoopOTPField.swift in Sources */,
 				9CB117AD3206799A6191A33B /* BoopPhoneInput.swift in Sources */,
 				F468E5CFBA7B0EEECA550EA5 /* BoopPhotoGrid.swift in Sources */,
