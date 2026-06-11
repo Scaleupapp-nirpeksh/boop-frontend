@@ -1,6 +1,17 @@
 import SwiftUI
 import WidgetKit
 
+// MARK: - Cinematic Dark tokens (local — widget is an isolated target without the
+// main app's design system). Mirrors BoopColors / BoopTypography.
+private enum Cine {
+    static let ground = Color(red: 0.047, green: 0.031, blue: 0.063)   // #0C0810
+    static let accent = Color(red: 1.0, green: 0.302, blue: 0.427)     // #FF4D6D
+    static let textPrimary = Color(red: 0.957, green: 0.925, blue: 0.949) // #F4ECF2
+    static let textSecondary = Color.white.opacity(0.62)
+    static let textMuted = Color.white.opacity(0.40)
+    static let hairline = Color.white.opacity(0.11)
+}
+
 struct BoopWidgetEntryView: View {
     @Environment(\.widgetFamily) var family
     var entry: BoopWidgetEntry
@@ -19,123 +30,114 @@ struct BoopWidgetEntryView: View {
     // MARK: - Small Widget
 
     private var smallWidget: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Text("boop")
-                    .font(.system(size: 18, weight: .heavy, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color(red: 1.0, green: 0.42, blue: 0.42), Color(red: 0.31, green: 0.80, blue: 0.77)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                Spacer()
-            }
+        VStack(alignment: .leading, spacing: 0) {
+            // Tracked uppercase wordmark
+            Text("UNMUTEE")
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(2)
+                .foregroundStyle(Cine.textMuted)
+
+            // Coral section rule
+            Rectangle()
+                .fill(Cine.accent)
+                .frame(width: 24, height: 2)
+                .padding(.top, 6)
 
             Spacer()
 
-            // Connections count
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text("\(entry.connections)")
-                    .font(.system(size: 36, weight: .bold, design: .rounded))
-                    .foregroundStyle(Color(red: 0.31, green: 0.80, blue: 0.77))
-                Text("connections")
-                    .font(.system(size: 11, weight: .medium))
-                    .foregroundStyle(.secondary)
-            }
+            // Connections count — light-weight numeral
+            Text("\(entry.connections)")
+                .font(.system(size: 44, weight: .thin))
+                .foregroundStyle(Cine.textPrimary)
 
-            // Streak
+            Text("CONNECTIONS")
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(2)
+                .foregroundStyle(Cine.textSecondary)
+
+            // Streak — quiet line, no emoji
             if entry.streak > 0 {
-                HStack(spacing: 3) {
-                    Image(systemName: "flame.fill")
-                        .font(.system(size: 11))
-                        .foregroundStyle(.orange)
-                    Text("\(entry.streak)-day streak")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
+                Text("\(entry.streak)-DAY STREAK")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(1.5)
+                    .foregroundStyle(Cine.textMuted)
+                    .padding(.top, 4)
             }
         }
-        .padding(4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .widgetURL(URL(string: "boop://discover"))
     }
 
     // MARK: - Medium Widget
 
     private var mediumWidget: some View {
-        HStack(spacing: 16) {
-            // Left column — branding + connections
-            VStack(alignment: .leading, spacing: 8) {
-                Text("boop")
-                    .font(.system(size: 20, weight: .heavy, design: .rounded))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [Color(red: 1.0, green: 0.42, blue: 0.42), Color(red: 0.31, green: 0.80, blue: 0.77)],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
+        HStack(alignment: .top, spacing: 18) {
+            // Left column — wordmark + connections
+            VStack(alignment: .leading, spacing: 0) {
+                Text("UNMUTEE")
+                    .font(.system(size: 11, weight: .semibold))
+                    .tracking(2)
+                    .foregroundStyle(Cine.textMuted)
+
+                Rectangle()
+                    .fill(Cine.accent)
+                    .frame(width: 24, height: 2)
+                    .padding(.top, 6)
 
                 Spacer()
 
-                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                    Text("\(entry.connections)")
-                        .font(.system(size: 32, weight: .bold, design: .rounded))
-                        .foregroundStyle(Color(red: 0.31, green: 0.80, blue: 0.77))
-                    Text("connections")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(.secondary)
-                }
+                Text("\(entry.connections)")
+                    .font(.system(size: 40, weight: .thin))
+                    .foregroundStyle(Cine.textPrimary)
+
+                Text("CONNECTIONS")
+                    .font(.system(size: 10, weight: .semibold))
+                    .tracking(2)
+                    .foregroundStyle(Cine.textSecondary)
             }
 
+            // Hairline divider
+            Rectangle()
+                .fill(Cine.hairline)
+                .frame(width: 1)
+
             // Right column — stats
-            VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 0) {
+                statRow(value: "\(entry.unreadMessages)", label: "UNREAD")
+                hairline
                 statRow(
-                    icon: "envelope.fill",
-                    iconColor: Color(red: 1.0, green: 0.42, blue: 0.42),
-                    value: "\(entry.unreadMessages)",
-                    label: "unread"
-                )
-
-                statRow(
-                    icon: "flame.fill",
-                    iconColor: .orange,
                     value: "\(entry.streak)",
-                    label: entry.streakMatchName.map { "with \($0)" } ?? "day streak"
+                    label: entry.streakMatchName.map { "WITH \($0.uppercased())" } ?? "DAY STREAK"
                 )
-
-                statRow(
-                    icon: "questionmark.circle.fill",
-                    iconColor: Color(red: 1.0, green: 0.85, blue: 0.24),
-                    value: "\(entry.questionsAnswered)",
-                    label: "answered"
-                )
-
-                Spacer()
+                hairline
+                statRow(value: "\(entry.questionsAnswered)", label: "ANSWERED")
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(4)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .widgetURL(URL(string: "boop://home"))
     }
 
-    private func statRow(icon: String, iconColor: Color, value: String, label: String) -> some View {
-        HStack(spacing: 6) {
-            Image(systemName: icon)
-                .font(.system(size: 12))
-                .foregroundStyle(iconColor)
-                .frame(width: 16)
+    private var hairline: some View {
+        Rectangle()
+            .fill(Cine.hairline)
+            .frame(height: 1)
+    }
 
+    private func statRow(value: String, label: String) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(value)
-                .font(.system(size: 15, weight: .bold, design: .rounded))
-                .foregroundStyle(.primary)
+                .font(.system(size: 20, weight: .thin))
+                .foregroundStyle(Cine.textPrimary)
 
             Text(label)
-                .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(1.5)
+                .foregroundStyle(Cine.textMuted)
                 .lineLimit(1)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.vertical, 10)
     }
 }
 

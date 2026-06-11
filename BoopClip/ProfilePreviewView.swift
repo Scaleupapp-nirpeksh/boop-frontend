@@ -48,22 +48,27 @@ struct ProfilePreviewView: View {
     @State private var viewModel = ProfilePreviewViewModel()
     @State private var userId: String?
 
-    // Colors (matching Boop design)
-    private let coral = Color(red: 1.0, green: 0.42, blue: 0.42)
-    private let teal = Color(red: 0.31, green: 0.80, blue: 0.77)
-    private let bgColor = Color(red: 1.0, green: 0.976, blue: 0.961)
+    // Cinematic Dark tokens (local — App Clip is an isolated target without the
+    // main app's design system). Mirrors BoopColors / BoopTypography.
+    private let accent = Color(red: 1.0, green: 0.302, blue: 0.427)        // #FF4D6D
+    private let ground = Color(red: 0.047, green: 0.031, blue: 0.063)      // #0C0810
+    private let textPrimary = Color(red: 0.957, green: 0.925, blue: 0.949) // #F4ECF2
+    private let textSecondary = Color.white.opacity(0.62)
+    private let textMuted = Color.white.opacity(0.40)
+    private let hairline = Color.white.opacity(0.11)
 
     var body: some View {
         ZStack {
-            bgColor.ignoresSafeArea()
+            ground.ignoresSafeArea()
 
             if viewModel.isLoading {
                 VStack(spacing: 16) {
                     ProgressView()
-                        .tint(teal)
-                    Text("Loading profile...")
-                        .font(.system(size: 15, weight: .medium, design: .rounded))
-                        .foregroundStyle(.secondary)
+                        .tint(accent)
+                    Text("LOADING")
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(2)
+                        .foregroundStyle(textMuted)
                 }
             } else if let profile = viewModel.profile {
                 profileCard(profile)
@@ -71,6 +76,7 @@ struct ProfilePreviewView: View {
                 welcomeCard
             }
         }
+        .preferredColorScheme(.dark)
         .task {
             if let userId {
                 await viewModel.load(userId: userId)
@@ -79,144 +85,149 @@ struct ProfilePreviewView: View {
     }
 
     private func profileCard(_ profile: PublicProfile) -> some View {
-        VStack(spacing: 24) {
-            // Logo
-            Text("boop")
-                .font(.system(size: 32, weight: .heavy, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(colors: [coral, teal], startPoint: .leading, endPoint: .trailing)
-                )
+        VStack(alignment: .leading, spacing: 28) {
+            // Tracked wordmark
+            Text("UNMUTEE")
+                .font(.system(size: 11, weight: .semibold))
+                .tracking(3)
+                .foregroundStyle(textMuted)
 
-            // Blurred photo placeholder
-            ZStack {
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [coral.opacity(0.2), teal.opacity(0.2)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .frame(width: 120, height: 120)
+            // Blurred portrait — stays blurred until you connect
+            blurredPortrait(profile.photo)
 
-                if let photoURL = profile.photo, let url = URL(string: photoURL) {
-                    AsyncImage(url: url) { image in
-                        image
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 120, height: 120)
-                            .clipShape(Circle())
-                            .blur(radius: 15)
-                    } placeholder: {
-                        Image(systemName: "person.fill")
-                            .font(.system(size: 40))
-                            .foregroundStyle(teal.opacity(0.5))
-                    }
-                } else {
-                    Image(systemName: "person.fill")
-                        .font(.system(size: 40))
-                        .foregroundStyle(teal.opacity(0.5))
-                }
-            }
+            // Identity block
+            VStack(alignment: .leading, spacing: 12) {
+                Rectangle()
+                    .fill(accent)
+                    .frame(width: 24, height: 2)
 
-            VStack(spacing: 8) {
                 Text(profile.firstName)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(.primary)
+                    .font(.system(size: 34, weight: .thin))
+                    .foregroundStyle(textPrimary)
 
                 if let city = profile.city {
-                    HStack(spacing: 4) {
-                        Image(systemName: "mappin")
-                            .font(.system(size: 12))
-                        Text(city)
-                    }
-                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
+                    Text(city.uppercased())
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(2)
+                        .foregroundStyle(textSecondary)
                 }
 
-                HStack(spacing: 16) {
-                    statPill(value: "\(profile.questionsAnswered)", label: "answers", color: coral)
+                HStack(spacing: 24) {
+                    statColumn(value: "\(profile.questionsAnswered)", label: "ANSWERS")
                     if profile.profileReady {
-                        statPill(value: "Ready", label: "profile", color: teal)
+                        statColumn(value: "READY", label: "PROFILE")
                     }
                 }
                 .padding(.top, 4)
             }
 
-            VStack(spacing: 12) {
-                Text("Photos are blurred until you connect.")
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
+            // Note + CTA
+            VStack(alignment: .leading, spacing: 16) {
+                Rectangle()
+                    .fill(hairline)
+                    .frame(height: 1)
+
+                Text("Photos stay blurred until you connect.")
+                    .font(.system(size: 13, weight: .light))
+                    .foregroundStyle(textSecondary)
 
                 Link(destination: URL(string: "https://apps.apple.com/app/boop/id000000000")!) {
-                    Text("Download Boop to connect")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
+                    Text("INSTALL TO CONNECT")
+                        .font(.system(size: 13, weight: .semibold))
+                        .tracking(1.5)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(
-                            LinearGradient(colors: [coral, teal], startPoint: .leading, endPoint: .trailing)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                        .padding(.vertical, 16)
+                        .background(accent)
+                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
             }
         }
-        .padding(32)
-        .background(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .fill(.white)
-                .shadow(color: .black.opacity(0.08), radius: 20, y: 10)
-        )
+        .padding(28)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 24)
     }
 
-    private var welcomeCard: some View {
-        VStack(spacing: 20) {
-            Text("boop")
-                .font(.system(size: 36, weight: .heavy, design: .rounded))
-                .foregroundStyle(
-                    LinearGradient(colors: [coral, teal], startPoint: .leading, endPoint: .trailing)
-                )
+    private func blurredPortrait(_ photoURL: String?) -> some View {
+        ZStack {
+            if let photoURL, let url = URL(string: photoURL) {
+                AsyncImage(url: url) { image in
+                    image
+                        .resizable()
+                        .scaledToFill()
+                        .blur(radius: 18)
+                } placeholder: {
+                    accent.opacity(0.18)
+                }
+            } else {
+                accent.opacity(0.18)
+                Image(systemName: "person.fill")
+                    .font(.system(size: 44, weight: .thin))
+                    .foregroundStyle(textMuted)
+            }
 
-            Text("Personality-first dating")
-                .font(.system(size: 17, weight: .medium, design: .rounded))
-                .foregroundStyle(.secondary)
+            // Bottom scrim into ground
+            LinearGradient(
+                colors: [.clear, ground.opacity(0.5)],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+        }
+        .frame(height: 260)
+        .frame(maxWidth: .infinity)
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(hairline, lineWidth: 1)
+        )
+    }
+
+    private var welcomeCard: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            Text("UNMUTEE")
+                .font(.system(size: 13, weight: .semibold))
+                .tracking(4)
+                .foregroundStyle(textPrimary)
+
+            Rectangle()
+                .fill(accent)
+                .frame(width: 56, height: 2)
+
+            Text("Personality before pixels")
+                .font(.system(size: 17, weight: .light))
+                .foregroundStyle(textSecondary)
 
             if let error = viewModel.errorMessage {
                 Text(error)
-                    .font(.system(size: 14, weight: .medium, design: .rounded))
-                    .foregroundStyle(.red)
+                    .font(.system(size: 13, weight: .light))
+                    .foregroundStyle(accent)
             }
 
             Link(destination: URL(string: "https://apps.apple.com/app/boop/id000000000")!) {
-                Text("Get Boop")
-                    .font(.system(size: 16, weight: .bold, design: .rounded))
+                Text("GET UNMUTEE")
+                    .font(.system(size: 13, weight: .semibold))
+                    .tracking(1.5)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 14)
-                    .background(
-                        LinearGradient(colors: [coral, teal], startPoint: .leading, endPoint: .trailing)
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .padding(.vertical, 16)
+                    .background(accent)
+                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             }
-            .padding(.horizontal, 40)
+            .padding(.top, 8)
         }
+        .padding(.horizontal, 40)
     }
 
-    private func statPill(value: String, label: String, color: Color) -> some View {
-        HStack(spacing: 4) {
+    private func statColumn(value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
             Text(value)
-                .font(.system(size: 14, weight: .bold, design: .rounded))
-                .foregroundStyle(color)
+                .font(.system(size: 20, weight: .thin))
+                .foregroundStyle(accent)
             Text(label)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 10, weight: .semibold))
+                .tracking(1.5)
+                .foregroundStyle(textMuted)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background(color.opacity(0.1))
-        .clipShape(Capsule())
     }
 
     // MARK: - URL Parsing

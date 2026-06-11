@@ -15,7 +15,7 @@ struct BoopWidget: Widget {
         StaticConfiguration(kind: kind, provider: BoopWidgetProvider()) { entry in
             BoopWidgetEntryView(entry: entry)
                 .containerBackground(for: .widget) {
-                    Color(red: 1.0, green: 0.976, blue: 0.961) // #FFF9F5
+                    Color(red: 0.047, green: 0.031, blue: 0.063) // #0C0810 — cinematic ground
                 }
         }
         .configurationDisplayName("Boop")

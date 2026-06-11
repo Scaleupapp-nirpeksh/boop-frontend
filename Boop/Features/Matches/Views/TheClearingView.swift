@@ -18,7 +18,7 @@ struct TheClearingView: View {
             BoopColors.ground.ignoresSafeArea()
 
             BoopRemoteImage(urlString: photoURL) {
-                BoopColors.brandGradient
+                BoopColors.accentColor.opacity(0.35)
             }
             .blur(radius: blur, opaque: true)
             .ignoresSafeArea()
