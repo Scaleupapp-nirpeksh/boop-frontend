@@ -5,51 +5,51 @@ struct PhotoUploadView: View {
     @State private var viewModel = PhotoUploadViewModel()
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                BoopSectionIntro(
-                    title: "Add photos",
-                    eyebrow: "Photos"
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    AccentRule()
+                    EyebrowLabel(text: "Photos", color: BoopColors.textMuted)
+                    Text("Show your best self.")
+                        .font(BoopTypography.cineTitle)
+                        .foregroundStyle(BoopColors.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                BoopPhotoGrid(
+                    slots: $viewModel.slots,
+                    onAddPhoto: { image in
+                        viewModel.addPhoto(image)
+                    },
+                    onDeletePhoto: { index in
+                        viewModel.removePhoto(at: index)
+                    }
                 )
 
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                        BoopPhotoGrid(
-                            slots: $viewModel.slots,
-                            onAddPhoto: { image in
-                                viewModel.addPhoto(image)
-                            },
-                            onDeletePhoto: { index in
-                                viewModel.removePhoto(at: index)
-                            }
-                        )
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.error)
+                }
 
-                        if let error = viewModel.errorMessage {
-                            Text(error)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.error)
-                        }
-
-                        BoopButton(
-                            title: "Upload & Continue",
-                            isLoading: viewModel.isUploading,
-                            isDisabled: !viewModel.canSubmit
-                        ) {
-                            Task {
-                                if let user = await viewModel.uploadAllPhotos() {
-                                    await MainActor.run {
-                                        AuthManager.shared.updateUser(user)
-                                        onboardingVM.advanceStep()
-                                    }
-                                }
+                BoopButton(
+                    title: "Upload & Continue",
+                    isLoading: viewModel.isUploading,
+                    isDisabled: !viewModel.canSubmit
+                ) {
+                    Task {
+                        if let user = await viewModel.uploadAllPhotos() {
+                            await MainActor.run {
+                                AuthManager.shared.updateUser(user)
+                                onboardingVM.advanceStep()
                             }
                         }
                     }
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
-        .boopBackground()
+        .background(BoopColors.ground.ignoresSafeArea())
     }
 }

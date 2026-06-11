@@ -4,59 +4,61 @@ struct BasicInfoView: View {
     @Bindable var viewModel: OnboardingViewModel
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                BoopSectionIntro(
-                    title: "About you",
-                    eyebrow: "About You"
-                )
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    AccentRule()
+                    EyebrowLabel(text: "About You", color: BoopColors.textMuted)
+                    Text("Tell us who you are.")
+                        .font(BoopTypography.cineTitle)
+                        .foregroundStyle(BoopColors.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                        BoopTextField(
-                            label: "First Name",
-                            text: $viewModel.firstName,
-                            placeholder: "What should we call you?",
-                            textContentType: .givenName
-                        )
+                VStack(alignment: .leading, spacing: BoopSpacing.xl) {
+                    BoopTextField(
+                        label: "First Name",
+                        text: $viewModel.firstName,
+                        placeholder: "What should we call you?",
+                        textContentType: .givenName
+                    )
 
-                        BoopDatePicker(
-                            label: "Date of Birth",
-                            date: $viewModel.dateOfBirth
-                        )
+                    BoopDatePicker(
+                        label: "Date of Birth",
+                        date: $viewModel.dateOfBirth
+                    )
 
-                        BoopSegmentedPicker(
-                            label: "I identify as",
-                            options: Gender.allCases.map { ($0, $0.displayName) },
-                            selected: $viewModel.gender
-                        )
+                    BoopSegmentedPicker(
+                        label: "I identify as",
+                        options: Gender.allCases.map { ($0, $0.displayName) },
+                        selected: $viewModel.gender
+                    )
 
-                        BoopSegmentedPicker(
-                            label: "I'm interested in",
-                            options: InterestedIn.allCases.map { ($0, $0.displayName) },
-                            selected: $viewModel.interestedIn
-                        )
+                    BoopSegmentedPicker(
+                        label: "I'm interested in",
+                        options: InterestedIn.allCases.map { ($0, $0.displayName) },
+                        selected: $viewModel.interestedIn
+                    )
+                }
 
-                        if let error = viewModel.errorMessage {
-                            Text(error)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.error)
-                        }
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.error)
+                }
 
-                        BoopButton(
-                            title: "Continue",
-                            isLoading: viewModel.isLoading,
-                            isDisabled: !viewModel.canProceedBasicInfo
-                        ) {
-                            Task { await viewModel.submitBasicInfo() }
-                        }
-                    }
+                BoopButton(
+                    title: "Continue",
+                    isLoading: viewModel.isLoading,
+                    isDisabled: !viewModel.canProceedBasicInfo
+                ) {
+                    Task { await viewModel.submitBasicInfo() }
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
-        .boopBackground()
+        .background(BoopColors.ground.ignoresSafeArea())
         .onTapGesture { hideKeyboard() }
     }
 }

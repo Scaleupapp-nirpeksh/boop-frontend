@@ -14,10 +14,11 @@ struct BoopDatePicker: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-            Text(label)
-                .font(BoopTypography.subheadline)
-                .foregroundStyle(BoopColors.textSecondary)
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(BoopColors.textMuted)
 
             DatePicker(
                 "",
@@ -27,21 +28,17 @@ struct BoopDatePicker: View {
             )
             .datePickerStyle(.wheel)
             .labelsHidden()
+            .tint(BoopColors.accentColor)
             .frame(maxHeight: 150)
             .clipped()
-            .background(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .fill(BoopColors.surfaceElevated)
-            )
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .stroke(BoopColors.border.opacity(0.8), lineWidth: 1)
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(BoopColors.hairline, lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 6)
 
             if let errorMessage {
                 Text(errorMessage)
-                    .font(BoopTypography.caption)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.error)
             }
         }

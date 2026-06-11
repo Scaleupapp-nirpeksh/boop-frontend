@@ -29,40 +29,32 @@ struct OnboardingContainerView: View {
             .tabViewStyle(.page(indexDisplayMode: .never))
             .animation(.easeInOut(duration: 0.25), value: viewModel.currentStep)
         }
-        .boopBackground()
+        .background(BoopColors.ground.ignoresSafeArea())
         .navigationBarHidden(true)
     }
 
     private var topChrome: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Build your profile")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-
-                    Text("Step \(viewModel.currentStepNumber) of \(viewModel.totalSteps)")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textMuted)
-                }
-
-                Spacer()
-
-                BoopStatPill(
-                    icon: "sparkles",
-                    value: viewModel.currentStep.title,
-                    label: "Current focus",
-                    tint: BoopColors.primary
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(
+                    text: "Step \(String(format: "%02d", viewModel.currentStepNumber)) of \(String(format: "%02d", viewModel.totalSteps))",
+                    color: BoopColors.accentColor
                 )
+                Spacer()
+                EyebrowLabel(text: viewModel.currentStep.title, color: BoopColors.textMuted)
             }
 
-            BoopProgressBar(
-                currentStep: viewModel.currentStepNumber,
-                totalSteps: viewModel.totalSteps
+            Text("Build your profile")
+                .font(BoopTypography.cineHeadline)
+                .foregroundStyle(BoopColors.textPrimary)
+
+            HairlineProgress(
+                progress: Double(viewModel.currentStepNumber) / Double(viewModel.totalSteps)
             )
+            .animation(.easeInOut(duration: 0.3), value: viewModel.currentStep)
         }
         .padding(.horizontal, BoopSpacing.xl)
         .padding(.top, BoopSpacing.md)
-        .padding(.bottom, BoopSpacing.sm)
+        .padding(.bottom, BoopSpacing.md)
     }
 }

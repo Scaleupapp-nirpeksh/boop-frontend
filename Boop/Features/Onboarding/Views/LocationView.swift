@@ -6,60 +6,62 @@ struct LocationView: View {
     @State private var locationManager = LocationHelper()
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                BoopSectionIntro(
-                    title: "Your city",
-                    eyebrow: "Location"
-                )
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    AccentRule()
+                    EyebrowLabel(text: "Location", color: BoopColors.textMuted)
+                    Text("Where are you based?")
+                        .font(BoopTypography.cineTitle)
+                        .foregroundStyle(BoopColors.textPrimary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
 
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                        BoopTextField(
-                            label: "City",
-                            text: $viewModel.city,
-                            placeholder: "Mumbai, Delhi, Bangalore..."
-                        )
+                VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                    BoopTextField(
+                        label: "City",
+                        text: $viewModel.city,
+                        placeholder: "Mumbai, Delhi, Bangalore..."
+                    )
 
-                        Button {
-                            locationManager.requestLocation { city, coords in
-                                viewModel.city = city
-                                viewModel.coordinates = coords
-                            }
-                        } label: {
-                            HStack(spacing: BoopSpacing.xs) {
-                                Image(systemName: "location.fill")
-                                    .foregroundStyle(BoopColors.secondary)
-                                Text("Use my current location")
-                                    .font(BoopTypography.callout)
-                                    .foregroundStyle(BoopColors.secondary)
-                            }
-                            .padding(.vertical, BoopSpacing.sm)
-                            .padding(.horizontal, BoopSpacing.md)
-                            .background(BoopColors.secondary.opacity(0.1))
-                            .clipShape(Capsule())
+                    Button {
+                        locationManager.requestLocation { city, coords in
+                            viewModel.city = city
+                            viewModel.coordinates = coords
                         }
-
-                        if let error = locationManager.error {
-                            Text(error)
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.error)
+                    } label: {
+                        HStack(spacing: BoopSpacing.sm) {
+                            Image(systemName: "location")
+                                .font(.system(size: 13, weight: .thin))
+                            Text("Use my current location")
+                                .font(BoopTypography.cineLabel)
+                                .tracking(2)
+                            Spacer()
                         }
-
-                        BoopButton(
-                            title: "Continue",
-                            isLoading: viewModel.isLoading,
-                            isDisabled: !viewModel.canProceedLocation
-                        ) {
-                            viewModel.advanceStep()
-                        }
+                        .foregroundStyle(BoopColors.accentColor)
+                        .padding(.vertical, BoopSpacing.sm)
                     }
+                    .buttonStyle(.plain)
+
+                    if let error = locationManager.error {
+                        Text(error)
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.error)
+                    }
+                }
+
+                BoopButton(
+                    title: "Continue",
+                    isLoading: viewModel.isLoading,
+                    isDisabled: !viewModel.canProceedLocation
+                ) {
+                    viewModel.advanceStep()
                 }
             }
             .padding(.horizontal, BoopSpacing.xl)
-            .padding(.vertical, BoopSpacing.lg)
+            .padding(.vertical, BoopSpacing.xl)
         }
-        .boopBackground()
+        .background(BoopColors.ground.ignoresSafeArea())
         .onTapGesture { hideKeyboard() }
     }
 }

@@ -7,10 +7,11 @@ struct BoopSegmentedPicker<T: Hashable>: View {
     var errorMessage: String? = nil
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-            Text(label)
-                .font(BoopTypography.subheadline)
-                .foregroundStyle(BoopColors.textSecondary)
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
+                .foregroundStyle(BoopColors.textMuted)
 
             FlowLayout(spacing: BoopSpacing.xs) {
                 ForEach(options, id: \.value) { option in
@@ -20,7 +21,7 @@ struct BoopSegmentedPicker<T: Hashable>: View {
 
             if let errorMessage {
                 Text(errorMessage)
-                    .font(BoopTypography.caption)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.error)
             }
         }
@@ -35,15 +36,17 @@ struct BoopSegmentedPicker<T: Hashable>: View {
             selected = option.value
         } label: {
             Text(option.label)
-                .font(BoopTypography.callout)
-                .foregroundStyle(isSelected ? .white : BoopColors.textPrimary)
-                .padding(.horizontal, BoopSpacing.lg)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(isSelected ? .white : BoopColors.textSecondary)
+                .padding(.horizontal, BoopSpacing.md)
                 .padding(.vertical, BoopSpacing.sm)
-                .background(isSelected ? BoopColors.primary : BoopColors.surfaceSecondary)
-                .clipShape(Capsule())
+                .background(
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .fill(isSelected ? BoopColors.accentColor : Color.clear)
+                )
                 .overlay(
-                    Capsule()
-                        .stroke(isSelected ? Color.clear : BoopColors.border, lineWidth: 1)
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .stroke(isSelected ? Color.clear : BoopColors.hairline, lineWidth: 1)
                 )
         }
         .animation(.easeInOut(duration: 0.2), value: isSelected)

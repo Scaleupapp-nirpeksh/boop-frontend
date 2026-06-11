@@ -25,9 +25,10 @@ struct BoopPhotoGrid: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text("\(slots.filter { $0.image != nil }.count)/\(maxPhotos) photos (min \(minPhotos))")
-                .font(BoopTypography.caption)
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            Text("\(slots.filter { $0.image != nil }.count) / \(maxPhotos) PHOTOS · MIN \(minPhotos)")
+                .font(BoopTypography.cineLabel)
+                .tracking(2)
                 .foregroundStyle(BoopColors.textMuted)
 
             LazyVGrid(columns: columns, spacing: BoopSpacing.sm) {
@@ -48,40 +49,50 @@ struct BoopPhotoGrid: View {
                 .resizable()
                 .scaledToFill()
                 .frame(height: 140)
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
 
             if slots[index].isUploading {
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .fill(Color.black.opacity(0.4))
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .fill(BoopColors.ground.opacity(0.55))
                 ProgressView()
-                    .tint(.white)
+                    .tint(BoopColors.accentColor)
             }
+
+            // 1px hairline frame
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
 
             // Delete button
             Button {
                 onDeletePhoto?(index)
             } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 22))
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.white)
-                    .shadow(radius: 2)
+                    .frame(width: 26, height: 26)
+                    .background(BoopColors.ground.opacity(0.7))
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
             }
-            .padding(BoopSpacing.xxs)
+            .padding(BoopSpacing.xs)
 
-            // "Main" badge on first photo
+            // "Main" marker on first photo
             if index == 0 {
                 VStack {
                     Spacer()
-                    Text("Main")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, BoopSpacing.xs)
-                        .padding(.vertical, BoopSpacing.xxxs)
-                        .background(BoopColors.primary.opacity(0.8))
-                        .clipShape(Capsule())
-                        .padding(BoopSpacing.xxs)
+                    HStack {
+                        Text("MAIN")
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, BoopSpacing.xs)
+                            .padding(.vertical, BoopSpacing.xxs)
+                            .background(BoopColors.accentColor)
+                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                        Spacer()
+                    }
+                    .padding(BoopSpacing.xs)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
         .frame(height: 140)
@@ -107,16 +118,17 @@ struct BoopPhotoGrid: View {
             maxSelectionCount: maxPhotos - slots.filter({ $0.image != nil }).count,
             matching: .images
         ) {
-            RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                .strokeBorder(BoopColors.border, style: StrokeStyle(lineWidth: 2, dash: [8, 4]))
+            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
                 .frame(height: 140)
                 .overlay(
-                    VStack(spacing: BoopSpacing.xxs) {
+                    VStack(spacing: BoopSpacing.xs) {
                         Image(systemName: "plus")
-                            .font(.system(size: 24, weight: .medium))
+                            .font(.system(size: 20, weight: .thin))
                             .foregroundStyle(BoopColors.textMuted)
-                        Text("Add")
-                            .font(BoopTypography.caption)
+                        Text("ADD")
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
                             .foregroundStyle(BoopColors.textMuted)
                     }
                 )
