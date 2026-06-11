@@ -3,83 +3,85 @@ import SwiftUI
 struct WelcomeView: View {
     @State private var appeared = false
 
+    private let callouts: [(label: String, detail: String)] = [
+        ("Voice-first", "Real intros, not selfies"),
+        ("Thoughtful", "Guided prompts, slow burn"),
+        ("Private", "Blurred until you're ready"),
+    ]
+
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(spacing: BoopSpacing.xxl) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
                 Spacer(minLength: 40)
 
-                VStack(spacing: BoopSpacing.lg) {
-                    BoopLogo(size: 140, animated: true)
+                // Wordmark + headline
+                VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                    Text("UnMutee")
+                        .font(BoopTypography.cineTitle)
+                        .tracking(4)
+                        .foregroundStyle(BoopColors.textPrimary)
 
-                    BoopSectionIntro(
-                        title: "Connection before appearance",
-                        subtitle: "Voice and chemistry first.",
-                        eyebrow: "Welcome",
-                        alignment: .center
-                    )
+                    VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                        EyebrowLabel(text: "Welcome")
+
+                        Text("Connection before appearance")
+                            .font(BoopTypography.cineDisplay)
+                            .foregroundStyle(BoopColors.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        AccentRule()
+
+                        Text("Voice and chemistry first.")
+                            .font(BoopTypography.cineBodyLight)
+                            .foregroundStyle(BoopColors.textSecondary)
+                    }
                 }
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 12)
 
-                VStack(spacing: BoopSpacing.sm) {
-                    HStack(spacing: BoopSpacing.sm) {
-                        BoopStatPill(
-                            icon: "waveform",
-                            value: "Voice-first",
-                            label: "Real intros",
-                            tint: BoopColors.secondary
-                        )
-
-                        BoopStatPill(
-                            icon: "sparkles",
-                            value: "Thoughtful",
-                            label: "Guided prompts",
-                            tint: BoopColors.accent
-                        )
+                // Feature callouts as tracked hairline rows
+                VStack(spacing: 0) {
+                    ForEach(callouts, id: \.label) { item in
+                        HairlineRow(item.label) {
+                            Text(item.detail.uppercased())
+                                .font(BoopTypography.cineLabel)
+                                .tracking(1.5)
+                                .foregroundStyle(BoopColors.textMuted)
+                        }
                     }
-
-                    BoopStatPill(
-                        icon: "eye.slash",
-                        value: "Private",
-                        label: "Blurred by default",
-                        tint: BoopColors.primary
-                    )
                 }
-                .padding(.horizontal, BoopSpacing.xl)
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 18)
 
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                        Text("Start simple")
-                            .font(BoopTypography.headline)
-                            .foregroundStyle(BoopColors.textPrimary)
+                // Start block
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    EyebrowLabel(text: "Start simple")
 
-                        Text("Number, profile, voice, photos.")
-                            .font(BoopTypography.body)
-                            .foregroundStyle(BoopColors.textSecondary)
+                    Text("Number, profile, voice, photos.")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
 
-                        NavigationLink {
-                            PhoneInputView()
-                        } label: {
-                            Text("Get Started")
-                                .font(BoopTypography.headline)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 54)
-                                .foregroundStyle(.white)
-                                .background(BoopColors.primaryGradient)
-                                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                                .shadow(color: BoopColors.primary.opacity(0.24), radius: 14, x: 0, y: 8)
-                        }
-
+                    NavigationLink {
+                        PhoneInputView()
+                    } label: {
+                        Text("GET STARTED")
+                            .font(.system(size: 15, weight: .semibold))
+                            .tracking(0.5)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 52)
+                            .foregroundStyle(.white)
+                            .background(BoopColors.accentColor)
+                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                            .shadow(color: BoopColors.accentColor.opacity(0.25), radius: 8, x: 0, y: 4)
                     }
+                    .padding(.top, BoopSpacing.xs)
                 }
-                .padding(.horizontal, BoopSpacing.xl)
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 24)
 
                 Spacer(minLength: BoopSpacing.xxl)
             }
+            .padding(.horizontal, BoopSpacing.xl)
         }
         .boopBackground()
         .navigationBarHidden(true)

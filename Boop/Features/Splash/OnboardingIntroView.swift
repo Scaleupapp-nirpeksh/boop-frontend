@@ -7,35 +7,34 @@ struct OnboardingIntroView: View {
 
     private let pages: [IntroPage] = [
         IntroPage(
-            icon: "waveform.circle.fill",
-            iconColor: BoopColors.secondary,
+            eyebrow: "How it works",
+            symbol: "waveform",
             title: "Personality before pixels",
-            subtitle: "On Boop, photos stay blurred until you both feel ready. Your voice, your words, and who you really are come first.",
-            illustrationColors: (BoopColors.secondary, BoopColors.primary)
+            subtitle: "On UnMutee, photos stay blurred until you both feel ready. Your voice, your words, and who you really are come first."
         ),
         IntroPage(
-            icon: "heart.circle.fill",
-            iconColor: BoopColors.primary,
+            eyebrow: "No swiping",
+            symbol: "circle.grid.cross",
             title: "Real connection, not a race",
-            subtitle: "No swiping. Each day, we handpick a few people who truly match your personality. Play games, chat, and let chemistry build naturally.",
-            illustrationColors: (BoopColors.primary, BoopColors.accent)
+            subtitle: "No swiping. Each day, we handpick a few people who truly match your personality. Play games, chat, and let chemistry build naturally."
         ),
     ]
 
     var body: some View {
         ZStack {
-            BoopColors.background.ignoresSafeArea()
+            BoopColors.ground.ignoresSafeArea()
 
             VStack(spacing: 0) {
-                // Skip button
+                // Skip
                 HStack {
                     Spacer()
                     Button {
                         withAnimation { isFinished = true }
                     } label: {
-                        Text("Skip")
-                            .font(BoopTypography.callout)
-                            .foregroundStyle(BoopColors.textSecondary)
+                        Text("SKIP")
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
+                            .foregroundStyle(BoopColors.textMuted)
                             .padding(.horizontal, BoopSpacing.md)
                             .padding(.vertical, BoopSpacing.xs)
                     }
@@ -54,33 +53,25 @@ struct OnboardingIntroView: View {
                 .animation(.spring(response: 0.5, dampingFraction: 0.8), value: currentPage)
 
                 // Bottom section
-                VStack(spacing: BoopSpacing.lg) {
-                    // Page dots
+                VStack(spacing: BoopSpacing.xl) {
+                    // Hairline tick indicator — thin coral mark for current page
                     HStack(spacing: BoopSpacing.xs) {
                         ForEach(0..<pages.count, id: \.self) { index in
-                            Capsule()
-                                .fill(index == currentPage ? BoopColors.primary : BoopColors.border)
-                                .frame(width: index == currentPage ? 24 : 8, height: 8)
+                            Rectangle()
+                                .fill(index == currentPage ? BoopColors.accentColor : BoopColors.hairline)
+                                .frame(width: index == currentPage ? 28 : 14, height: 2)
                                 .animation(.spring(response: 0.3, dampingFraction: 0.7), value: currentPage)
                         }
                     }
 
-                    // Button
-                    Button {
+                    BoopButton(
+                        title: currentPage < pages.count - 1 ? "Continue" : "Let's go"
+                    ) {
                         if currentPage < pages.count - 1 {
                             withAnimation { currentPage += 1 }
                         } else {
                             withAnimation { isFinished = true }
                         }
-                    } label: {
-                        Text(currentPage < pages.count - 1 ? "Next" : "Let's go")
-                            .font(BoopTypography.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 54)
-                            .foregroundStyle(.white)
-                            .background(BoopColors.primaryGradient)
-                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                            .shadow(color: BoopColors.primary.opacity(0.24), radius: 14, x: 0, y: 8)
                     }
                     .padding(.horizontal, BoopSpacing.xl)
                 }
@@ -97,85 +88,46 @@ struct OnboardingIntroView: View {
 
     @ViewBuilder
     private func introPageView(_ page: IntroPage) -> some View {
-        VStack(spacing: BoopSpacing.xxl) {
+        VStack(alignment: .leading, spacing: BoopSpacing.xl) {
             Spacer()
 
-            // Illustration
-            ZStack {
-                // Background circles
-                Circle()
-                    .fill(page.illustrationColors.0.opacity(0.08))
-                    .frame(width: 260, height: 260)
+            // Quiet thin-stroke mark
+            Image(systemName: page.symbol)
+                .font(.system(size: 64, weight: .thin))
+                .foregroundStyle(BoopColors.accentColor)
 
-                Circle()
-                    .fill(page.illustrationColors.1.opacity(0.06))
-                    .frame(width: 200, height: 200)
-                    .offset(x: 30, y: -20)
+            VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                EyebrowLabel(text: page.eyebrow)
 
-                // Icon
-                Image(systemName: page.icon)
-                    .font(.system(size: 80))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [page.illustrationColors.0, page.illustrationColors.1],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .symbolEffect(.pulse, options: .repeating.speed(0.5))
-
-                // Decorative small circles
-                Circle()
-                    .fill(page.illustrationColors.0.opacity(0.3))
-                    .frame(width: 12, height: 12)
-                    .offset(x: -100, y: -60)
-
-                Circle()
-                    .fill(page.illustrationColors.1.opacity(0.25))
-                    .frame(width: 8, height: 8)
-                    .offset(x: 110, y: 40)
-
-                Circle()
-                    .fill(page.iconColor.opacity(0.2))
-                    .frame(width: 16, height: 16)
-                    .offset(x: -70, y: 80)
-
-                Circle()
-                    .fill(BoopColors.accent.opacity(0.3))
-                    .frame(width: 10, height: 10)
-                    .offset(x: 90, y: -80)
-            }
-            .frame(height: 280)
-
-            // Text
-            VStack(spacing: BoopSpacing.md) {
                 Text(page.title)
-                    .font(BoopTypography.title1)
+                    .font(BoopTypography.cineDisplay)
                     .foregroundStyle(BoopColors.textPrimary)
-                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                AccentRule()
 
                 Text(page.subtitle)
-                    .font(BoopTypography.body)
+                    .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
-                    .multilineTextAlignment(.center)
-                    .lineSpacing(4)
+                    .lineSpacing(5)
+                    .fixedSize(horizontal: false, vertical: true)
             }
-            .padding(.horizontal, BoopSpacing.xxl)
 
             Spacer()
             Spacer()
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, BoopSpacing.xxl)
     }
 }
 
 // MARK: - Model
 
 private struct IntroPage {
-    let icon: String
-    let iconColor: Color
+    let eyebrow: String
+    let symbol: String
     let title: String
     let subtitle: String
-    let illustrationColors: (Color, Color)
 }
 
 #Preview {

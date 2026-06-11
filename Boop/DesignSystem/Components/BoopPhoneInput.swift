@@ -7,28 +7,26 @@ struct BoopPhoneInput: View {
     @FocusState private var isFocused: Bool
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-            Text("Phone Number")
-                .font(BoopTypography.subheadline)
-                .foregroundStyle(BoopColors.textSecondary)
+        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+            EyebrowLabel(text: "Phone Number")
 
             HStack(spacing: BoopSpacing.sm) {
-                // Country code pill
-                HStack(spacing: BoopSpacing.xxs) {
-                    Text("🇮🇳")
-                        .font(.system(size: 20))
-                    Text("+91")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                }
-                .padding(.horizontal, BoopSpacing.sm)
-                .padding(.vertical, BoopSpacing.xs)
-                .background(BoopColors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sm, style: .continuous))
+                // Country code — tracked text, no emoji
+                Text("+91")
+                    .font(BoopTypography.cineHeadline)
+                    .tracking(1)
+                    .foregroundStyle(BoopColors.textPrimary)
+                    .padding(.trailing, BoopSpacing.sm)
+                    .overlay(alignment: .trailing) {
+                        Rectangle()
+                            .fill(BoopColors.hairline)
+                            .frame(width: 1, height: 24)
+                    }
 
                 // Phone number field
                 TextField("98765 43210", text: $phoneNumber)
-                    .font(BoopTypography.title3)
+                    .font(BoopTypography.cineTitle)
+                    .foregroundStyle(BoopColors.textPrimary)
                     .keyboardType(.numberPad)
                     .textContentType(.telephoneNumber)
                     .focused($isFocused)
@@ -44,18 +42,17 @@ struct BoopPhoneInput: View {
             .padding(.horizontal, BoopSpacing.md)
             .padding(.vertical, BoopSpacing.sm)
             .background(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .fill(BoopColors.surfaceElevated)
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .fill(BoopColors.surface)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
-                    .stroke(borderColor, lineWidth: isFocused ? 2 : 1)
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(borderColor, lineWidth: 1)
             )
-            .shadow(color: Color.black.opacity(0.03), radius: 10, x: 0, y: 6)
 
             if let errorMessage {
                 Text(errorMessage)
-                    .font(BoopTypography.caption)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.error)
             }
         }
@@ -63,7 +60,7 @@ struct BoopPhoneInput: View {
 
     private var borderColor: Color {
         if errorMessage != nil { return BoopColors.error }
-        if isFocused { return BoopColors.primary }
-        return BoopColors.border
+        if isFocused { return BoopColors.accentColor }
+        return BoopColors.hairline
     }
 }

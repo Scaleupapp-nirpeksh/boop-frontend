@@ -48,24 +48,25 @@ struct BoopOTPField: View {
         let digit = index < code.count
             ? String(code[code.index(code.startIndex, offsetBy: index)])
             : ""
-        let isCurrentIndex = index == code.count
+        let isCurrentIndex = index == code.count && isFocused
         let isFilled = !digit.isEmpty
 
         return Text(digit)
-            .font(BoopTypography.title1)
+            .font(BoopTypography.cineTitle)
             .foregroundStyle(BoopColors.textPrimary)
             .frame(width: 48, height: 56)
-            .background(isFilled ? BoopColors.surfaceSecondary : BoopColors.surfaceElevated)
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
+            .background(
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .fill(BoopColors.surface)
+            )
             .overlay(
-                RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous)
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
                     .stroke(
-                        isCurrentIndex ? BoopColors.primary : (isFilled ? BoopColors.secondary : BoopColors.border),
-                        lineWidth: isCurrentIndex ? 2 : 1
+                        isCurrentIndex ? BoopColors.accentColor : (isFilled ? BoopColors.textMuted : BoopColors.hairline),
+                        lineWidth: isCurrentIndex ? 1.5 : 1
                     )
             )
-            .shadow(color: Color.black.opacity(0.03), radius: 8, x: 0, y: 4)
-            .scaleEffect(isFilled ? 1.05 : 1.0)
-            .animation(.spring(response: 0.2, dampingFraction: 0.7), value: isFilled)
+            .animation(.easeInOut(duration: 0.2), value: isFilled)
+            .animation(.easeInOut(duration: 0.2), value: isCurrentIndex)
     }
 }

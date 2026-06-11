@@ -7,30 +7,36 @@ struct PhoneInputView: View {
         ZStack {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: BoopSpacing.xl) {
-                    BoopSectionIntro(
-                        title: "Your number",
-                        subtitle: "We’ll send a 6-digit code.",
-                        eyebrow: "Sign In"
-                    )
+                    VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                        EyebrowLabel(text: "Sign In")
 
-                    BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                        VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                            BoopPhoneInput(
-                                phoneNumber: $viewModel.phoneNumber,
-                                errorMessage: viewModel.errorMessage
-                            )
+                        Text("Your number")
+                            .font(BoopTypography.cineDisplay)
+                            .foregroundStyle(BoopColors.textPrimary)
 
-                            Text("India numbers only in this build.")
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.textSecondary)
+                        AccentRule()
 
-                            BoopButton(
-                                title: "Continue",
-                                isLoading: viewModel.isLoading,
-                                isDisabled: !viewModel.isPhoneValid
-                            ) {
-                                Task { await viewModel.sendOTP() }
-                            }
+                        Text("We'll send a 6-digit code.")
+                            .font(BoopTypography.cineBodyLight)
+                            .foregroundStyle(BoopColors.textSecondary)
+                    }
+
+                    VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                        BoopPhoneInput(
+                            phoneNumber: $viewModel.phoneNumber,
+                            errorMessage: viewModel.errorMessage
+                        )
+
+                        Text("India numbers only in this build.")
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textMuted)
+
+                        BoopButton(
+                            title: "Continue",
+                            isLoading: viewModel.isLoading,
+                            isDisabled: !viewModel.isPhoneValid
+                        ) {
+                            Task { await viewModel.sendOTP() }
                         }
                     }
 
@@ -52,7 +58,10 @@ struct PhoneInputView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                BoopLogo(size: 32, showText: false)
+                Text("UnMutee")
+                    .font(BoopTypography.cineCaption)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textPrimary)
             }
         }
         .boopBackground()

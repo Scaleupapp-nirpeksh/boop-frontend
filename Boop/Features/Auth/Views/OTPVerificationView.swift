@@ -7,69 +7,74 @@ struct OTPVerificationView: View {
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: BoopSpacing.xl) {
-                BoopSectionIntro(
-                    title: "Enter code",
-                    subtitle: viewModel.formattedPhone,
-                    eyebrow: "Verify"
-                )
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    EyebrowLabel(text: "Verify")
+
+                    Text("Enter code")
+                        .font(BoopTypography.cineDisplay)
+                        .foregroundStyle(BoopColors.textPrimary)
+
+                    AccentRule()
+
+                    Text(viewModel.formattedPhone)
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .monospacedDigit()
+                }
 
                 HStack {
-                    BoopStatPill(
-                        icon: "message.badge.fill",
-                        value: "6 digits",
-                        label: "SMS verification",
-                        tint: BoopColors.primary
-                    )
+                    EyebrowLabel(text: "6-digit SMS code")
 
                     Spacer()
 
                     Button("Change number") {
                         viewModel.reset()
                     }
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.primary)
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1)
+                    .foregroundStyle(BoopColors.accentColor)
                 }
 
-                BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                    VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                        BoopOTPField(code: $viewModel.otpCode) { _ in
-                            Task { await viewModel.verifyOTP() }
-                        }
-                        .shakeEffect(trigger: shakeError)
+                VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                    BoopOTPField(code: $viewModel.otpCode) { _ in
+                        Task { await viewModel.verifyOTP() }
+                    }
+                    .shakeEffect(trigger: shakeError)
 
-                        if let error = viewModel.errorMessage {
-                            Text(error)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.error)
-                                .multilineTextAlignment(.center)
-                                .frame(maxWidth: .infinity)
-                                .onAppear {
-                                    shakeError.toggle()
-                                }
-                        }
-
-                        HStack {
-                            if viewModel.resendCountdown > 0 {
-                                Text("Resend code in \(viewModel.resendCountdown)s")
-                                    .font(BoopTypography.callout)
-                                    .foregroundStyle(BoopColors.textMuted)
-                                    .monospacedDigit()
-                            } else {
-                                Button {
-                                    Task { await viewModel.resendOTP() }
-                                } label: {
-                                    Text("Resend code")
-                                        .font(BoopTypography.callout)
-                                        .foregroundStyle(BoopColors.primary)
-                                }
+                    if let error = viewModel.errorMessage {
+                        Text(error)
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.error)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                            .onAppear {
+                                shakeError.toggle()
                             }
+                    }
 
-                            Spacer()
-
-                            if viewModel.isLoading {
-                                ProgressView()
-                                    .tint(BoopColors.primary)
+                    HStack {
+                        if viewModel.resendCountdown > 0 {
+                            Text("RESEND IN \(viewModel.resendCountdown)S")
+                                .font(BoopTypography.cineCaption)
+                                .tracking(1.5)
+                                .foregroundStyle(BoopColors.textMuted)
+                                .monospacedDigit()
+                        } else {
+                            Button {
+                                Task { await viewModel.resendOTP() }
+                            } label: {
+                                Text("RESEND CODE")
+                                    .font(BoopTypography.cineCaption)
+                                    .tracking(1.5)
+                                    .foregroundStyle(BoopColors.accentColor)
                             }
+                        }
+
+                        Spacer()
+
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .tint(BoopColors.accentColor)
                         }
                     }
                 }
