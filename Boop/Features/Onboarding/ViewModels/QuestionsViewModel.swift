@@ -9,8 +9,15 @@ class QuestionsViewModel {
     var isSubmitting = false
     var errorMessage: String?
     var answeredCount = 0
-    var isComplete = false
     var allBatchDone = false
+
+    /// Onboarding is complete once the 8 onboarding questions are answered.
+    /// This drives the terminal Reveal screen — it is derived from the answer
+    /// count / batch state, NOT from a backend `profileStage` string, so the
+    /// flow is robust even if the async `preview`/`ready` signal lags.
+    var isOnboardingComplete: Bool {
+        allBatchDone || answeredCount >= Self.onboardingTarget
+    }
 
     // Current answer
     var textAnswer = ""
@@ -163,24 +170,20 @@ class QuestionsViewModel {
             let response: SubmitAnswerResponse = try await APIClient.shared.request(.answerQuestion(request))
             answeredCount = response.questionsAnswered
 
-            // Check if profile stage just changed to ready (onboarding completion)
-            let wasAlreadyReady = AuthManager.shared.currentUser?.profileStage == .ready
-            if response.profileStage == "ready" && !wasAlreadyReady {
-                isComplete = true
-                Analytics.capture("profile_ready", ["answers": answeredCount])
+            // The onboarding-complete signal: the backend reports `preview`
+            // (8 answers) or `ready` (15+). Treat either as terminal so the
+            // Reveal shows even if this fires before we run out of questions.
+            let isOnboardingDoneStage = response.profileStage == "preview" || response.profileStage == "ready"
+            if isOnboardingDoneStage {
+                allBatchDone = true
+                Analytics.capture("onboarding_complete", [
+                    "answers": answeredCount,
+                    "stage": response.profileStage
+                ])
                 if let wrapper: UserWrapper = try? await APIClient.shared.request(.me) {
                     AuthManager.shared.updateUser(wrapper.user)
                 }
                 return
-            }
-
-            // Update user data in background (don't block)
-            if response.profileStage == "ready" {
-                Task {
-                    if let wrapper: UserWrapper = try? await APIClient.shared.request(.me) {
-                        AuthManager.shared.updateUser(wrapper.user)
-                    }
-                }
             }
 
             advanceToNext()
@@ -218,10 +221,11 @@ class QuestionsViewModel {
                 )
                 await MainActor.run {
                     self?.pendingVoiceUploads -= 1
-                    // Check if backend says profile is ready
-                    if response.profileStage == "ready" {
-                        self?.isComplete = true
-                        Analytics.capture("profile_ready")
+                    // Onboarding-complete signal from the backend (preview at 8,
+                    // ready at 15+). Either flips into the terminal Reveal.
+                    if response.profileStage == "preview" || response.profileStage == "ready" {
+                        self?.allBatchDone = true
+                        Analytics.capture("onboarding_complete", ["stage": response.profileStage])
                         Task {
                             let wrapper: UserWrapper = try await APIClient.shared.request(.me)
                             AuthManager.shared.updateUser(wrapper.user)

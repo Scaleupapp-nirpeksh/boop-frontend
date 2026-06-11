@@ -195,10 +195,20 @@ struct PersonalityAnalysis: Decodable, Identifiable {
     let isPreliminary: Bool
     let createdAt: Date?
 
+    // Fixed-archetype classification ("Coded & Rare" treatment). Resolved
+    // from the backend catalog at read time; all optional so older payloads
+    // (and Task 10's fuller model work) decode cleanly.
+    let archetypeCode: String?
+    let archetypeNumber: Int?
+    let archetypeName: String?
+    let essence: String?
+    let rarityPercent: Int?
+
     enum CodingKeys: String, CodingKey {
         case id = "_id"
         case personalityType, summary, facets, numerology
         case questionsAnalyzed, isPreliminary, createdAt
+        case archetypeCode, archetypeNumber, archetypeName, essence, rarityPercent
     }
 }
 

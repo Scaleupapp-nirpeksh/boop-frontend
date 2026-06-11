@@ -127,6 +127,7 @@
 		CDCC247BBA4B191F90723A39 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B20020C58661A7DC2987D88F /* AuthManager.swift */; };
 		D083B9B0B692B069908D435C /* BioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B492A47A12697F27111744 /* BioView.swift */; };
 		D1EE312176D59D9CAB002420 /* QuestionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9652C3F10C7CE8DE60D3748A /* QuestionsView.swift */; };
+		D4850268D9F059D352726EFC /* RevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A043A9247D2285F5981723 /* RevealView.swift */; };
 		D6D64FC60406210B419C7DE0 /* BoopVoiceRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894D0C09E20C3C291A0909EB /* BoopVoiceRecorder.swift */; };
 		D7FFC02C1A7AA1D3091EC5BC /* NotificationInboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 305E515B0BE01E9348E62DAA /* NotificationInboxViewModel.swift */; };
 		D984558F43DA09D6C901F165 /* TheClearingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAC26BC2010C4AB69F7B717 /* TheClearingView.swift */; };
@@ -299,6 +300,7 @@
 		E498951D5D24ADC10A070A7D /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		E4B87E1BC6BCE1099FC7D651 /* BoopClip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BoopClip.entitlements; sourceTree = "<group>"; };
 		E4EFC0FDEF3A0998696D7A72 /* Nunito[wght].ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito[wght].ttf"; sourceTree = "<group>"; };
+		E7A043A9247D2285F5981723 /* RevealView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RevealView.swift; sourceTree = "<group>"; };
 		E97706FC8E64AA6E6A8F1F1B /* MyAnswersViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyAnswersViewModel.swift; sourceTree = "<group>"; };
 		E9C551F76DC11AA967EE0436 /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		EA8BD2A5881D210A06A5888D /* BoopPhoneInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopPhoneInput.swift; sourceTree = "<group>"; };
@@ -761,6 +763,7 @@
 				8EF23B3EDF50A557CDCE95D4 /* OnboardingContainerView.swift */,
 				62207F99BBB7A440846C28FA /* PhotoUploadView.swift */,
 				9652C3F10C7CE8DE60D3748A /* QuestionsView.swift */,
+				E7A043A9247D2285F5981723 /* RevealView.swift */,
 				D436A6FB3C25F4E0F3F9CB9A /* VoiceIntroView.swift */,
 			);
 			path = Views;
@@ -1195,6 +1198,7 @@
 				5A5ACEFC2AD08F4E1655D671 /* RelationshipInsightsView.swift in Sources */,
 				F4298253C11897848365328E /* RemoteAudioPlayer.swift in Sources */,
 				1302EEC78AB972601B02E2E0 /* ReportUserSheet.swift in Sources */,
+				D4850268D9F059D352726EFC /* RevealView.swift in Sources */,
 				3978197C5E8EA2A14F5C85EB /* RootView.swift in Sources */,
 				91AE9C9DAF46C422D9EE1241 /* SafetyModels.swift in Sources */,
 				341991B1E283A3D2DEFB9E71 /* ScoreProgressView.swift in Sources */,

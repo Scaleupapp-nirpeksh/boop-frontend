@@ -27,12 +27,12 @@ struct QuestionsView: View {
                 ProgressView()
                     .tint(BoopColors.accentColor)
                 Spacer()
-            } else if viewModel.isComplete {
-                // Profile stage is ready (15+ answers)
-                fullCompletionView
-            } else if viewModel.allBatchDone {
-                // All available questions answered but profile not yet ready
-                batchCompletionView
+            } else if viewModel.isOnboardingComplete {
+                // The 8 onboarding questions are answered — show the reward-first
+                // personality Reveal (the new terminal state for onboarding).
+                RevealView(onboardingVM: onboardingVM) {
+                    await viewModel.goToHomepage()
+                }
             } else if let question = viewModel.currentQuestion {
                 questionContent(question)
             } else {
@@ -136,7 +136,7 @@ struct QuestionsView: View {
                 .animation(.easeInOut(duration: 0.3), value: viewModel.answeredCount)
 
             if viewModel.answeredCount < target {
-                Text("\(viewModel.answeredCount) of \(target) to unlock your profile")
+                Text("\(viewModel.answeredCount) of \(target) to reveal your type")
                     .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textMuted)
             } else {
@@ -262,119 +262,24 @@ struct QuestionsView: View {
         .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 
-    // MARK: - Full Completion (profile ready, 15+ answers)
-
-    private var fullCompletionView: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Spacer()
-
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                EyebrowLabel(text: "Profile Complete", color: BoopColors.accentColor)
-                AccentRule()
-                Text("You're all set.")
-                    .font(BoopTypography.cineDisplay)
-                    .foregroundStyle(BoopColors.textPrimary)
-                Text("Your personality profile is complete. Time to find your connections.")
-                    .font(BoopTypography.cineBodyLight)
-                    .foregroundStyle(BoopColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-
-            Spacer()
-
-            BoopButton(title: "Start Discovering") {
-                onboardingVM.markComplete()
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, BoopSpacing.xl)
-        .padding(.vertical, BoopSpacing.xl)
-    }
-
-    // MARK: - Batch Completion (answered all available but < 15 total)
-
-    private var batchCompletionView: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            Spacer()
-
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                EyebrowLabel(text: "All Set", color: BoopColors.accentColor)
-                AccentRule()
-                Text("\(viewModel.answeredCount) answered")
-                    .font(BoopTypography.cineDisplay)
-                    .foregroundStyle(BoopColors.textPrimary)
-
-                Text("That's everything we need to get you started. Step inside and start connecting.")
-                    .font(BoopTypography.cineBodyLight)
-                    .foregroundStyle(BoopColors.textSecondary)
-                    .fixedSize(horizontal: false, vertical: true)
-
-                Text("More questions unlock as you go — they deepen your profile and matches.")
-                    .font(BoopTypography.cineCaption)
-                    .foregroundStyle(BoopColors.textMuted)
-            }
-
-            Spacer()
-
-            VStack(spacing: BoopSpacing.md) {
-                BoopButton(title: "Enter UnMutee") {
-                    Task {
-                        await viewModel.goToHomepage()
-                        onboardingVM.markComplete()
-                    }
-                }
-
-                Text("You can keep answering from your profile anytime.")
-                    .font(BoopTypography.cineCaption)
-                    .foregroundStyle(BoopColors.textMuted)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: .infinity)
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, BoopSpacing.xl)
-        .padding(.vertical, BoopSpacing.xl)
-    }
-
+    // Onboarding-complete is handled by the Reveal branch in `body`; this is
+    // only reached when there are genuinely no questions to show.
     private var emptyView: some View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer()
 
-            if viewModel.answeredCount >= target {
-                VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                    EyebrowLabel(text: "All Set", color: BoopColors.accentColor)
-                    AccentRule()
-                    Text("You're all set.")
-                        .font(BoopTypography.cineDisplay)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Text("Step inside and start connecting.")
-                        .font(BoopTypography.cineBodyLight)
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                Spacer()
-
-                BoopButton(title: "Enter UnMutee") {
-                    Task {
-                        await viewModel.goToHomepage()
-                        onboardingVM.markComplete()
-                    }
-                }
-            } else {
-                VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                    EyebrowLabel(text: "No Questions", color: BoopColors.textMuted)
-                    AccentRule()
-                    Text("No questions available right now.")
-                        .font(BoopTypography.cineHeadline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Text("Check back tomorrow for more.")
-                        .font(BoopTypography.cineBodyLight)
-                        .foregroundStyle(BoopColors.textMuted)
-                }
-
-                Spacer()
+            VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                EyebrowLabel(text: "No Questions", color: BoopColors.textMuted)
+                AccentRule()
+                Text("No questions available right now.")
+                    .font(BoopTypography.cineHeadline)
+                    .foregroundStyle(BoopColors.textPrimary)
+                Text("Check back tomorrow for more.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textMuted)
             }
+
+            Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, BoopSpacing.xl)
