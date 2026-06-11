@@ -22,11 +22,12 @@ struct ChatInboxView: View {
             } else {
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: BoopSpacing.lg) {
-                        BoopSectionIntro(
-                            title: "Inbox",
-                            subtitle: "Your active conversations.",
-                            eyebrow: "Chat"
-                        )
+                        VStack(alignment: .leading, spacing: 4) {
+                            EyebrowLabel(text: "Chat")
+                            Text("Inbox")
+                                .font(BoopTypography.cineDisplay)
+                                .foregroundStyle(BoopColors.textPrimary)
+                        }
 
                         RealtimeStatusBanner()
 
@@ -36,20 +37,23 @@ struct ChatInboxView: View {
                             }
                         }
                         .pickerStyle(.segmented)
+                        .tint(BoopColors.accentColor)
 
                         if filteredConversations.isEmpty {
-                            BoopCard(padding: BoopSpacing.xl, radius: BoopRadius.xxl) {
-                                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                                    Text(searchText.isEmpty ? "No conversations yet" : "No results")
-                                        .font(BoopTypography.headline)
-                                        .foregroundStyle(BoopColors.textPrimary)
-                                    Text(searchText.isEmpty ? "New chats will appear after mutual matches." : "Try a different name or filter.")
-                                        .font(BoopTypography.body)
-                                        .foregroundStyle(BoopColors.textSecondary)
-                                }
+                            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                                AccentRule()
+                                Text(searchText.isEmpty ? "No conversations yet" : "No results")
+                                    .font(BoopTypography.cineHeadline)
+                                    .foregroundStyle(BoopColors.textPrimary)
+                                Text(searchText.isEmpty ? "New chats appear here after a mutual match." : "Try a different name or filter.")
+                                    .font(BoopTypography.cineBodyLight)
+                                    .foregroundStyle(BoopColors.textSecondary)
                             }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(BoopSpacing.xl)
+                            .boopCard(radius: BoopRadius.sharp, shadow: false)
                         } else {
-                            LazyVStack(spacing: BoopSpacing.sm) {
+                            LazyVStack(spacing: 0) {
                                 ForEach(filteredConversations) { conversation in
                                     NavigationLink {
                                         ChatConversationView(conversation: conversation)
@@ -134,81 +138,76 @@ private struct ChatInboxRow: View {
     let conversation: ConversationInfo
 
     var body: some View {
-        HStack(spacing: BoopSpacing.md) {
-            avatar
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
 
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(conversation.otherUser.firstName ?? "Conversation")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
+            HStack(spacing: BoopSpacing.md) {
+                avatar
 
-                    Spacer()
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(conversation.otherUser.firstName ?? "Conversation")
+                            .font(BoopTypography.cineBody)
+                            .foregroundStyle(BoopColors.textPrimary)
 
-                    if let sentAt = conversation.lastMessage?.sentAt {
-                        Text(sentAt.chatTimestamp)
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.textMuted)
+                        Spacer()
+
+                        if let sentAt = conversation.lastMessage?.sentAt {
+                            Text(sentAt.chatTimestamp)
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textMuted)
+                        }
                     }
-                }
 
-                Text(conversation.lastMessage?.text ?? "Start the conversation")
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.textSecondary)
-                    .lineLimit(1)
+                    Text(conversation.lastMessage?.text ?? "Start the conversation")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textMuted)
+                        .lineLimit(1)
 
-                HStack(spacing: BoopSpacing.xs) {
-                    stageChip
+                    HStack(spacing: BoopSpacing.sm) {
+                        stageChip
 
-                    if conversation.unreadCount > 0 {
-                        Text("\(conversation.unreadCount) new")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, BoopSpacing.xs)
-                            .padding(.vertical, BoopSpacing.xxxs)
-                            .background(BoopColors.primary)
-                            .clipShape(Capsule())
+                        if conversation.unreadCount > 0 {
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(BoopColors.accentColor)
+                                    .frame(width: 6, height: 6)
+                                Text("\(conversation.unreadCount) new")
+                                    .font(BoopTypography.cineCaption)
+                                    .foregroundStyle(BoopColors.accentColor)
+                            }
+                        }
                     }
                 }
             }
+            .padding(.vertical, BoopSpacing.md)
         }
-        .padding(BoopSpacing.md)
-        .boopCard(radius: BoopRadius.xl)
     }
 
     private var avatar: some View {
         ZStack(alignment: .bottomTrailing) {
-            AsyncImage(url: URL(string: conversation.otherUser.photo ?? "")) { image in
-                image.resizable().scaledToFill()
-            } placeholder: {
-                Circle()
-                    .fill(BoopColors.secondary.opacity(0.12))
-                    .overlay(
-                        Text(String((conversation.otherUser.firstName ?? "?").prefix(1)))
-                            .font(BoopTypography.title3)
-                            .foregroundStyle(BoopColors.secondary)
-                    )
-            }
-            .frame(width: 56, height: 56)
-            .clipShape(Circle())
+            BlurredPortrait(
+                urlString: conversation.otherUser.photo,
+                blurRadius: 0,
+                shape: .circle,
+                scrim: false
+            )
+            .frame(width: 52, height: 52)
 
             if conversation.otherUser.isOnline == true {
                 Circle()
-                    .fill(BoopColors.success)
-                    .frame(width: 12, height: 12)
-                    .overlay(Circle().stroke(.white, lineWidth: 2))
+                    .fill(BoopColors.accentColor)
+                    .frame(width: 11, height: 11)
+                    .overlay(Circle().stroke(BoopColors.ground, lineWidth: 2))
             }
         }
     }
 
     private var stageChip: some View {
-        Text((conversation.matchStage ?? "mutual").replacingOccurrences(of: "_", with: " ").capitalized)
-            .font(BoopTypography.caption)
-            .foregroundStyle(BoopColors.secondary)
-            .padding(.horizontal, BoopSpacing.xs)
-            .padding(.vertical, BoopSpacing.xxxs)
-            .background(BoopColors.secondary.opacity(0.1))
-            .clipShape(Capsule())
+        Text((conversation.matchStage ?? "mutual").replacingOccurrences(of: "_", with: " ").uppercased())
+            .font(BoopTypography.cineLabel)
+            .tracking(1.5)
+            .foregroundStyle(BoopColors.textSecondary)
     }
 }
 
@@ -255,10 +254,10 @@ struct ChatConversationView: View {
                 .clipped()
                 .blur(radius: radius, opaque: true)
                 .animation(.easeInOut(duration: 0.6), value: radius)
-                .overlay(BoopColors.chatBackground.opacity(scrimOpacity))
+                .overlay(BoopColors.ground.opacity(scrimOpacity))
                 .ignoresSafeArea()
         } else {
-            BoopColors.chatBackground.ignoresSafeArea()
+            BoopColors.ground.ignoresSafeArea()
         }
     }
 
@@ -270,10 +269,10 @@ struct ChatConversationView: View {
            conversation.matchStage != "revealed",
            conversation.matchStage != "dating" {
             HStack(spacing: BoopSpacing.xs) {
-                nudgeChip(icon: "mic.fill", label: "Voice note") {
+                nudgeChip(icon: "mic", label: "Voice note") {
                     isVoiceSheetPresented = true
                 }
-                nudgeChip(icon: "gamecontroller.fill", label: "Play a game") {
+                nudgeChip(icon: "gamecontroller", label: "Play a game") {
                     showGames = true
                 }
             }
@@ -284,15 +283,21 @@ struct ChatConversationView: View {
 
     private func nudgeChip(icon: String, label: String, action: @escaping () -> Void) -> some View {
         Button(action: { Haptics.light(); action() }) {
-            HStack(spacing: 4) {
-                Image(systemName: icon).font(.system(size: 10, weight: .bold))
-                Text(label).font(.nunito(.bold, size: 11))
+            HStack(spacing: 6) {
+                Image(systemName: icon).font(.system(size: 11, weight: .thin))
+                Text(label).font(BoopTypography.cineCaption)
             }
-            .foregroundStyle(BoopColors.brandViolet)
+            .foregroundStyle(BoopColors.textPrimary)
             .padding(.horizontal, BoopSpacing.sm)
-            .padding(.vertical, 6)
-            .background(BoopColors.backgroundMint)
-            .clipShape(Capsule())
+            .padding(.vertical, 7)
+            .background(
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .fill(BoopColors.surface)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .stroke(BoopColors.hairline, lineWidth: 1)
+            )
         }
     }
 
@@ -307,44 +312,48 @@ struct ChatConversationView: View {
             ToolbarItem(placement: .principal) {
                 HStack(spacing: BoopSpacing.sm) {
                     ZStack(alignment: .bottomTrailing) {
-                        AsyncImage(url: URL(string: conversation.otherUser.photo ?? "")) { image in
-                            image.resizable().scaledToFill()
-                        } placeholder: {
-                            Circle()
-                                .fill(BoopColors.secondary.opacity(0.12))
-                                .overlay(
-                                    Text(String((conversation.otherUser.firstName ?? "?").prefix(1)))
-                                        .font(BoopTypography.caption)
-                                        .foregroundStyle(BoopColors.secondary)
-                                )
-                        }
-                        .frame(width: 36, height: 36)
-                        .clipShape(Circle())
+                        BlurredPortrait(
+                            urlString: conversation.otherUser.photo,
+                            blurRadius: 0,
+                            shape: .circle,
+                            scrim: false
+                        )
+                        .frame(width: 34, height: 34)
 
                         if conversation.otherUser.isOnline == true {
                             Circle()
-                                .fill(BoopColors.success)
-                                .frame(width: 10, height: 10)
-                                .overlay(Circle().stroke(.white, lineWidth: 1.5))
+                                .fill(BoopColors.accentColor)
+                                .frame(width: 9, height: 9)
+                                .overlay(Circle().stroke(BoopColors.ground, lineWidth: 1.5))
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 1) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(conversation.otherUser.firstName ?? "Chat")
-                            .font(BoopTypography.headline)
+                            .font(BoopTypography.cineHeadline)
                             .foregroundStyle(BoopColors.textPrimary)
-                        Text(conversation.otherUser.isOnline == true ? "Online" : "Offline")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(conversation.otherUser.isOnline == true ? BoopColors.success : BoopColors.textMuted)
+
+                        HStack(spacing: 4) {
+                            Image(systemName: "circle.fill")
+                                .font(.system(size: 5, weight: .thin))
+                            Text(conversation.otherUser.isOnline == true ? "ONLINE" : "OFFLINE")
+                                .font(BoopTypography.cineCaption)
+                                .tracking(1.5)
+                        }
+                        .foregroundStyle(conversation.otherUser.isOnline == true ? BoopColors.accentColor : BoopColors.textMuted)
 
                         if let comfort = viewModel.comfortScore,
                            conversation.matchId != nil,
                            conversation.matchStage != "revealed",
                            conversation.matchStage != "dating" {
                             Button { showComfortDetail = true } label: {
-                                Text("the fog is lifting · \(comfort)/70")
-                                    .font(.nunito(.semiBold, size: 11))
-                                    .foregroundStyle(BoopColors.brand)
+                                VStack(alignment: .leading, spacing: 3) {
+                                    AccentRule(width: 18)
+                                    Text("THE FOG IS LIFTING · \(comfort)/70")
+                                        .font(BoopTypography.cineLabel)
+                                        .tracking(1.5)
+                                        .foregroundStyle(BoopColors.accentColor)
+                                }
                             }
                         }
                     }
@@ -359,7 +368,7 @@ struct ChatConversationView: View {
                     )
                 } label: {
                     Image(systemName: "photo.stack")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 15, weight: .thin))
                         .foregroundStyle(BoopColors.textSecondary)
                 }
             }
@@ -377,7 +386,9 @@ struct ChatConversationView: View {
                         Label("Block", systemImage: "hand.raised")
                     }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 15, weight: .thin))
+                        .foregroundStyle(BoopColors.textSecondary)
                 }
                 .accessibilityLabel("Conversation options")
             }
@@ -514,8 +525,9 @@ struct ChatConversationView: View {
         VStack(spacing: 0) {
             if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 HStack {
-                    Text("\(filteredMessages.count) result\(filteredMessages.count == 1 ? "" : "s")")
-                        .font(BoopTypography.caption)
+                    Text("\(filteredMessages.count) RESULT\(filteredMessages.count == 1 ? "" : "S")")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(1.5)
                         .foregroundStyle(BoopColors.textSecondary)
                     Spacer()
                 }
@@ -596,8 +608,9 @@ struct ChatConversationView: View {
                 HStack(spacing: 8) {
                     ProgressView()
                         .scaleEffect(0.8)
+                        .tint(BoopColors.textMuted)
                     Text("\(conversation.otherUser.firstName ?? "Someone") is typing")
-                        .font(BoopTypography.caption)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.textSecondary)
                     Spacer()
                 }
@@ -646,17 +659,16 @@ struct ChatConversationView: View {
             // Reply-to preview bar
             if let replyMsg = viewModel.replyingTo {
                 HStack(spacing: BoopSpacing.sm) {
-                    RoundedRectangle(cornerRadius: 2)
-                        .fill(BoopColors.secondary)
-                        .frame(width: 3)
+                    Rectangle()
+                        .fill(BoopColors.accentColor)
+                        .frame(width: 2)
 
                     VStack(alignment: .leading, spacing: 2) {
                         Text(replyMsg.senderId.firstName ?? "Someone")
-                            .font(BoopTypography.caption)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(BoopColors.secondary)
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.accentColor)
                         Text(replyMsg.content.text ?? (replyMsg.type == "voice" ? "Voice note" : replyMsg.type == "image" ? "Photo" : "Message"))
-                            .font(BoopTypography.caption)
+                            .font(BoopTypography.cineCaption)
                             .foregroundStyle(BoopColors.textSecondary)
                             .lineLimit(1)
                     }
@@ -666,19 +678,22 @@ struct ChatConversationView: View {
                     Button {
                         viewModel.replyingTo = nil
                     } label: {
-                        Image(systemName: "xmark.circle.fill")
+                        Image(systemName: "xmark")
+                            .font(.system(size: 13, weight: .thin))
                             .foregroundStyle(BoopColors.textMuted)
                     }
                 }
                 .padding(.horizontal, BoopSpacing.md)
                 .padding(.vertical, BoopSpacing.xs)
-                .background(BoopColors.surfaceSecondary)
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
+                .background(
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .fill(BoopColors.surfaceSecondary)
+                )
             }
 
             if let error = viewModel.errorMessage {
                 Text(error)
-                    .font(BoopTypography.caption)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.error)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -686,20 +701,32 @@ struct ChatConversationView: View {
             HStack(alignment: .bottom, spacing: BoopSpacing.sm) {
                 PhotosPicker(selection: $selectedMediaItem, matching: .images) {
                     Image(systemName: "photo")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 16, weight: .thin))
                         .foregroundStyle(BoopColors.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .background(BoopColors.surface)
-                        .clipShape(Circle())
+                        .frame(width: 42, height: 42)
+                        .background(
+                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                .fill(BoopColors.surface)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                .stroke(BoopColors.hairline, lineWidth: 1)
+                        )
                 }
                 .accessibilityLabel("Send photo")
 
                 TextField("Write a message", text: $viewModel.draft, axis: .vertical)
-                    .font(BoopTypography.body)
+                    .font(BoopTypography.cineBody)
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.sm)
-                    .background(BoopColors.surface)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+                    .background(
+                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            .fill(BoopColors.surface)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                            .stroke(BoopColors.hairline, lineWidth: 1)
+                    )
                     .onChange(of: viewModel.draft) { _, newValue in
                         let hasText = !newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                         if hasText, !hasSentTyping {
@@ -714,12 +741,18 @@ struct ChatConversationView: View {
                 Button {
                     isVoiceSheetPresented = true
                 } label: {
-                    Image(systemName: "mic.fill")
-                        .font(.system(size: 16, weight: .semibold))
+                    Image(systemName: "mic")
+                        .font(.system(size: 16, weight: .thin))
                         .foregroundStyle(BoopColors.textPrimary)
-                        .frame(width: 40, height: 40)
-                        .background(BoopColors.surface)
-                        .clipShape(Circle())
+                        .frame(width: 42, height: 42)
+                        .background(
+                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                .fill(BoopColors.surface)
+                        )
+                        .overlay(
+                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                .stroke(BoopColors.hairline, lineWidth: 1)
+                        )
                 }
                 .accessibilityLabel("Record voice note")
 
@@ -730,11 +763,13 @@ struct ChatConversationView: View {
                     Task { await viewModel.sendDraft() }
                 } label: {
                     Image(systemName: "arrow.up")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
-                        .background(BoopColors.primaryGradient)
-                        .clipShape(Circle())
+                        .frame(width: 42, height: 42)
+                        .background(
+                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                .fill(BoopColors.accentColor)
+                        )
                 }
                 .disabled(viewModel.isSending || viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 .opacity(viewModel.isSending || viewModel.draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
@@ -744,7 +779,13 @@ struct ChatConversationView: View {
         .padding(.horizontal, BoopSpacing.md)
         .padding(.top, BoopSpacing.sm)
         .padding(.bottom, BoopSpacing.md)
-        .background(BoopColors.surface.shadow(color: .black.opacity(0.05), radius: 12, y: -4))
+        .background(
+            BoopColors.surface
+                .overlay(alignment: .top) {
+                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                }
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }
 
@@ -769,7 +810,7 @@ private struct ChatMessageBubble: View {
             HStack {
                 Spacer()
                 Text(message.content.text ?? "")
-                    .font(BoopTypography.caption)
+                    .font(BoopTypography.cineCaption)
                     .foregroundStyle(BoopColors.textMuted)
                     .multilineTextAlignment(.center)
                     .padding(.vertical, BoopSpacing.xs)
@@ -784,23 +825,22 @@ private struct ChatMessageBubble: View {
                         // Reply-to quoted block
                         if let reply = message.replyTo, let replyContent = reply.content {
                             HStack(spacing: BoopSpacing.xs) {
-                                RoundedRectangle(cornerRadius: 2)
-                                    .fill(BoopColors.secondary)
-                                    .frame(width: 3)
+                                Rectangle()
+                                    .fill(isCurrentUser ? Color.white.opacity(0.7) : BoopColors.accentColor)
+                                    .frame(width: 2)
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(reply.senderId?.firstName ?? "Someone")
-                                        .font(BoopTypography.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundStyle(BoopColors.secondary)
+                                        .font(BoopTypography.cineCaption)
+                                        .foregroundStyle(isCurrentUser ? Color.white.opacity(0.85) : BoopColors.accentColor)
                                     Text(replyContent.text ?? (reply.type == "voice" ? "Voice note" : reply.type == "image" ? "Photo" : "Message"))
-                                        .font(BoopTypography.caption)
+                                        .font(BoopTypography.cineCaption)
                                         .foregroundStyle(isCurrentUser ? Color.white.opacity(0.7) : BoopColors.textSecondary)
                                         .lineLimit(2)
                                 }
                             }
                             .padding(BoopSpacing.xs)
-                            .background(isCurrentUser ? Color.white.opacity(0.1) : Color.white.opacity(0.06))
-                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sm, style: .continuous))
+                            .background(isCurrentUser ? Color.white.opacity(0.12) : BoopColors.overlayLight)
+                            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
                         }
 
                         content
@@ -812,8 +852,10 @@ private struct ChatMessageBubble: View {
                                         .font(.system(size: 13))
                                         .padding(.horizontal, BoopSpacing.xs)
                                         .padding(.vertical, 3)
-                                        .background(BoopColors.overlayLight)
-                                        .clipShape(Capsule())
+                                        .background(
+                                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                                .fill(isCurrentUser ? Color.white.opacity(0.18) : BoopColors.overlayLight)
+                                        )
                                 }
                             }
                         }
@@ -821,11 +863,11 @@ private struct ChatMessageBubble: View {
                     .padding(.horizontal, BoopSpacing.md)
                     .padding(.vertical, BoopSpacing.sm)
                     .background {
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
                             .fill(bubbleBackground)
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-                    // Subtle shadow so white received bubbles stay visible on bright fog in light mode.
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
+                    // Subtle shadow so received bubbles stay legible over bright fog in light mode.
                     .shadow(color: isCurrentUser ? .clear : Color.black.opacity(0.06), radius: 4, x: 0, y: 1)
                     .contextMenu {
                         // Full 8-emoji reaction picker
@@ -856,14 +898,16 @@ private struct ChatMessageBubble: View {
                     }
 
                     if isCurrentUser {
-                        Text(deliveryLabel)
-                            .font(BoopTypography.caption)
+                        Text(deliveryLabel.uppercased())
+                            .font(BoopTypography.cineCaption)
+                            .tracking(1)
                             .foregroundStyle(deliveryColor)
 
                         if deliveryState == .failed && message.type == "text" {
-                            Button("Retry") { onRetry() }
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(BoopColors.primary)
+                            Button("RETRY") { onRetry() }
+                                .font(BoopTypography.cineCaption)
+                                .tracking(1)
+                                .foregroundStyle(BoopColors.accentColor)
                         }
                     }
                 }
@@ -883,11 +927,11 @@ private struct ChatMessageBubble: View {
                     AsyncImage(url: URL(string: mediaURL)) { image in
                         image.resizable().scaledToFill()
                     } placeholder: {
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
                             .fill(BoopColors.overlayLight)
                     }
                     .frame(width: 180, height: 180)
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous))
                 }
             }
         case "voice":
@@ -896,9 +940,10 @@ private struct ChatMessageBubble: View {
             } label: {
                 HStack(spacing: BoopSpacing.sm) {
                     Image(systemName: audioPlayer.currentURL == message.content.mediaUrl && audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 13, weight: .regular))
                     Text(message.content.mediaDuration.map { "\($0, specifier: "%.0f")s voice note" } ?? "Voice note")
+                        .font(BoopTypography.cineBody)
                 }
-                .font(BoopTypography.callout)
                 .foregroundStyle(isCurrentUser ? .white : BoopColors.textPrimary)
             }
         case "game_invite":
@@ -908,35 +953,31 @@ private struct ChatMessageBubble: View {
                 } label: {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: BoopSpacing.xs) {
-                            Image(systemName: "gamecontroller.fill")
-                                .foregroundStyle(isCurrentUser ? Color.white.opacity(0.8) : BoopColors.secondary)
+                            Image(systemName: "gamecontroller")
+                                .font(.system(size: 13, weight: .thin))
+                                .foregroundStyle(isCurrentUser ? Color.white.opacity(0.85) : BoopColors.accentColor)
                             Text(message.content.text ?? "Game invite")
-                                .font(BoopTypography.body)
+                                .font(BoopTypography.cineBody)
                                 .foregroundStyle(isCurrentUser ? .white : BoopColors.textPrimary)
                         }
-                        Text("Tap to join")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(isCurrentUser ? Color.white.opacity(0.8) : BoopColors.secondary)
+                        Text("TAP TO JOIN")
+                            .font(BoopTypography.cineLabel)
+                            .tracking(1.5)
+                            .foregroundStyle(isCurrentUser ? Color.white.opacity(0.85) : BoopColors.accentColor)
                     }
                 }
                 .buttonStyle(.plain)
             }
         default:
             Text(message.content.text ?? "")
-                .font(BoopTypography.body)
+                .font(BoopTypography.cineBody)
                 .foregroundStyle(isCurrentUser ? .white : BoopColors.textPrimary)
         }
     }
 
     private var bubbleBackground: some ShapeStyle {
         if isCurrentUser {
-            return AnyShapeStyle(
-                LinearGradient(
-                    colors: [BoopColors.primary, Color(hex: "FF8C8C")],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-            )
+            return AnyShapeStyle(BoopColors.accentColor)
         }
         return AnyShapeStyle(BoopColors.chatBubbleReceived)
     }
@@ -971,16 +1012,18 @@ struct MatchConversationLoaderView: View {
                 ChatConversationView(conversation: conversation)
             } else if viewModel.isLoading {
                 ProgressView()
-                    .tint(BoopColors.primary)
+                    .tint(BoopColors.accentColor)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .boopBackground()
             } else {
-                VStack(spacing: BoopSpacing.md) {
+                VStack(spacing: BoopSpacing.sm) {
                     Text("Conversation unavailable")
-                        .font(BoopTypography.headline)
+                        .font(BoopTypography.cineHeadline)
+                        .foregroundStyle(BoopColors.textPrimary)
                     Text("This match does not have an active conversation yet.")
-                        .font(BoopTypography.body)
+                        .font(BoopTypography.cineBodyLight)
                         .foregroundStyle(BoopColors.textSecondary)
+                        .multilineTextAlignment(.center)
                 }
                 .padding()
                 .boopBackground()

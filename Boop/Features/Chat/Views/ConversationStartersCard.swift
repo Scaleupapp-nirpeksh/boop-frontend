@@ -12,20 +12,13 @@ struct ConversationStartersCard: View {
             Button {
                 withAnimation(.easeInOut(duration: 0.2)) { isCollapsed.toggle() }
             } label: {
-                HStack(spacing: BoopSpacing.xs) {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(BoopColors.secondary)
-
-                    Text("Conversation starters")
-                        .font(BoopTypography.callout)
-                        .fontWeight(.medium)
-                        .foregroundStyle(BoopColors.textPrimary)
+                HStack(spacing: BoopSpacing.sm) {
+                    EyebrowLabel(text: "Conversation starters", color: BoopColors.textSecondary)
 
                     Spacer()
 
                     Image(systemName: isCollapsed ? "chevron.down" : "chevron.up")
-                        .font(.system(size: 11, weight: .semibold))
+                        .font(.system(size: 11, weight: .thin))
                         .foregroundStyle(BoopColors.textMuted)
                 }
             }
@@ -35,42 +28,47 @@ struct ConversationStartersCard: View {
                     HStack(spacing: BoopSpacing.sm) {
                         ProgressView()
                             .scaleEffect(0.8)
-                            .tint(BoopColors.secondary)
+                            .tint(BoopColors.textMuted)
                         Text("Finding things to talk about...")
-                            .font(BoopTypography.caption)
+                            .font(BoopTypography.cineCaption)
                             .foregroundStyle(BoopColors.textSecondary)
                     }
                 } else {
+                    AccentRule()
+
                     Text("Based on your shared answers")
-                        .font(BoopTypography.caption)
+                        .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.textMuted)
 
-                    VStack(spacing: BoopSpacing.xs) {
+                    VStack(spacing: 0) {
                         ForEach(starters) { starter in
                             Button {
                                 onSelect(starter.text)
                             } label: {
-                                HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                                    Image(systemName: starter.categoryIcon)
-                                        .font(.system(size: 12))
-                                        .foregroundStyle(BoopColors.secondary)
-                                        .frame(width: 20, height: 20)
-                                        .padding(.top, 2)
+                                VStack(spacing: 0) {
+                                    Rectangle().fill(BoopColors.hairline).frame(height: 1)
 
-                                    Text(starter.text)
-                                        .font(BoopTypography.footnote)
-                                        .foregroundStyle(BoopColors.textPrimary)
-                                        .multilineTextAlignment(.leading)
+                                    HStack(alignment: .top, spacing: BoopSpacing.sm) {
+                                        Image(systemName: starter.categoryIcon)
+                                            .font(.system(size: 12, weight: .thin))
+                                            .foregroundStyle(BoopColors.accentColor)
+                                            .frame(width: 18)
+                                            .padding(.top, 2)
 
-                                    Spacer()
+                                        Text(starter.text)
+                                            .font(BoopTypography.cineBody)
+                                            .foregroundStyle(BoopColors.textPrimary)
+                                            .multilineTextAlignment(.leading)
 
-                                    Image(systemName: "arrow.turn.down.left")
-                                        .font(.system(size: 10))
-                                        .foregroundStyle(BoopColors.textMuted)
+                                        Spacer(minLength: BoopSpacing.sm)
+
+                                        Image(systemName: "arrow.turn.down.left")
+                                            .font(.system(size: 11, weight: .thin))
+                                            .foregroundStyle(BoopColors.textMuted)
+                                            .padding(.top, 2)
+                                    }
+                                    .padding(.vertical, BoopSpacing.sm)
                                 }
-                                .padding(BoopSpacing.sm)
-                                .background(Color.white)
-                                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.md, style: .continuous))
                             }
                             .buttonStyle(.plain)
                         }
@@ -79,7 +77,6 @@ struct ConversationStartersCard: View {
             }
         }
         .padding(BoopSpacing.md)
-        .background(BoopColors.secondary.opacity(0.06))
-        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+        .boopCard(radius: BoopRadius.sharp, shadow: false)
     }
 }
