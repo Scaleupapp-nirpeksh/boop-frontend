@@ -394,11 +394,10 @@ struct OptionIndicator: View {
         ZStack {
             if isMulti {
                 RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                    .fill(isSelected ? BoopColors.accentColor : Color.clear)
+                    .frame(width: 18, height: 18)
+                RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
                     .stroke(isSelected ? BoopColors.accentColor : BoopColors.textMuted, lineWidth: 1)
-                    .background(
-                        RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
-                            .fill(isSelected ? BoopColors.accentColor : Color.clear)
-                    )
                     .frame(width: 18, height: 18)
                 if isSelected {
                     Image(systemName: "checkmark")
