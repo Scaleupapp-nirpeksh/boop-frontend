@@ -15,7 +15,7 @@ struct TheClearingView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            BoopColors.ground.ignoresSafeArea()
 
             BoopRemoteImage(urlString: photoURL) {
                 BoopColors.brandGradient
@@ -23,33 +23,34 @@ struct TheClearingView: View {
             .blur(radius: blur, opaque: true)
             .ignoresSafeArea()
 
-            LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .center, endPoint: .bottom)
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: [.clear, BoopColors.ground.opacity(0.6), BoopColors.ground],
+                startPoint: .center,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
-            VStack(spacing: BoopSpacing.md) {
+            VStack(alignment: .leading, spacing: BoopSpacing.sm) {
                 Spacer()
                 if showText {
-                    Text("THE FOG HAS LIFTED")
-                        .font(.nunito(.bold, size: 12))
-                        .foregroundStyle(Color(hex: "FFD6DD"))
+                    EyebrowLabel(text: "The Fog Has Lifted", color: BoopColors.accentColor)
+                        .transition(.opacity)
+                    AccentRule()
                         .transition(.opacity)
                     Text(name)
-                        .font(.nunito(.extraBold, size: 34))
-                        .foregroundStyle(.white)
+                        .font(BoopTypography.cineDisplayXL)
+                        .foregroundStyle(BoopColors.textPrimary)
                         .transition(.opacity)
-                    HStack(spacing: BoopSpacing.xs) {
-                        recapChip("🔥 \(days) days")
-                        recapChip("🎮 \(games) games")
-                        recapChip("🎙 \(voiceNotes) voice")
-                    }
-                    .transition(.opacity)
-                    BoopButton(title: "Say something 💕") { onDone() }
-                        .padding(.horizontal, BoopSpacing.xl)
-                        .padding(.top, BoopSpacing.sm)
+                    EyebrowLabel(text: recapLine)
+                        .transition(.opacity)
+                    BoopButton(title: "Say something") { onDone() }
+                        .padding(.top, BoopSpacing.md)
                         .transition(.opacity)
                 }
                 Spacer().frame(height: BoopSpacing.xl)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, BoopSpacing.xl)
             .padding(.bottom, BoopSpacing.xl)
         }
         .onAppear {
@@ -59,13 +60,12 @@ struct TheClearingView: View {
         }
     }
 
-    private func recapChip(_ text: String) -> some View {
-        Text(text)
-            .font(.nunito(.bold, size: 11))
-            .foregroundStyle(.white)
-            .padding(.horizontal, BoopSpacing.sm)
-            .padding(.vertical, 6)
-            .background(.white.opacity(0.18))
-            .clipShape(Capsule())
+    private var recapLine: String {
+        var parts: [String] = []
+        if days > 0 { parts.append("\(days) Days") }
+        if games > 0 { parts.append("\(games) Games") }
+        if voiceNotes > 0 { parts.append("\(voiceNotes) Voice") }
+        guard !parts.isEmpty else { return "A connection earned" }
+        return parts.joined(separator: "  ·  ")
     }
 }

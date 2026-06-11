@@ -40,38 +40,28 @@ struct MatchDetailView: View {
                         NavigationLink {
                             DatePlanView(matchId: matchId)
                         } label: {
-                            BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-                                HStack(spacing: BoopSpacing.sm) {
-                                    Circle()
-                                        .fill(BoopColors.primary.opacity(0.15))
-                                        .frame(width: 44, height: 44)
-                                        .overlay(
-                                            Image(systemName: "calendar.badge.plus")
-                                                .font(.system(size: 18))
-                                                .foregroundStyle(BoopColors.primary)
-                                        )
+                            HStack(spacing: BoopSpacing.md) {
+                                Image(systemName: "calendar")
+                                    .font(.system(size: 18, weight: .thin))
+                                    .foregroundStyle(BoopColors.accentColor)
+                                    .frame(width: 36, height: 36)
+                                    .overlay(Circle().stroke(BoopColors.accentColor.opacity(0.5), lineWidth: 1))
 
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text("Plan a Date")
-                                            .font(BoopTypography.callout)
-                                            .fontWeight(.semibold)
-                                            .foregroundStyle(BoopColors.textPrimary)
-                                        Text("You're both ready! Suggest a time and place.")
-                                            .font(BoopTypography.caption)
-                                            .foregroundStyle(BoopColors.textSecondary)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "chevron.right")
-                                        .font(.system(size: 14, weight: .semibold))
-                                        .foregroundStyle(BoopColors.textMuted)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    EyebrowLabel(text: "Plan A Date", color: BoopColors.accentColor)
+                                    Text("You're both ready. Suggest a time and place.")
+                                        .font(BoopTypography.cineCaption)
+                                        .foregroundStyle(BoopColors.textSecondary)
                                 }
+
+                                Spacer()
+
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 13, weight: .thin))
+                                    .foregroundStyle(BoopColors.textMuted)
                             }
-                            .overlay(
-                                RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                                    .stroke(BoopColors.primary.opacity(0.2), lineWidth: 1)
-                            )
+                            .padding(BoopSpacing.lg)
+                            .boopCard(radius: BoopRadius.xl, shadow: false)
                         }
                     }
                 }
@@ -122,7 +112,9 @@ struct MatchDetailView: View {
                         Label("Block", systemImage: "hand.raised")
                     }
                 } label: {
-                    Image(systemName: "ellipsis.circle")
+                    Image(systemName: "ellipsis")
+                        .font(.system(size: 16, weight: .thin))
+                        .foregroundStyle(BoopColors.textPrimary)
                 }
                 .accessibilityLabel("Match options")
             }
@@ -222,576 +214,449 @@ struct MatchDetailView: View {
     }
 
     private var heroCard: some View {
-        BoopCard(padding: 0, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: 0) {
-                ZStack(alignment: .bottomLeading) {
-                    Rectangle()
-                        .fill(
-                            LinearGradient(
-                                colors: [BoopColors.cardDarkAccent, BoopColors.cardDarkSlate, BoopColors.secondary.opacity(0.6)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            CinematicHeader(
+                urlString: displayPhotoURL,
+                blurRadius: FogBlur.radius(forComfort: viewModel.detail?.comfortScore, stage: viewModel.detail?.stage),
+                height: 300
+            ) {
+                EyebrowLabel(text: viewModel.stageTitle, color: BoopColors.accentColor)
+                AccentRule()
+                Text(heroTitle)
+                    .font(BoopTypography.cineDisplay)
+                    .foregroundStyle(BoopColors.textPrimary)
+                Text(heroSubtitle)
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textSecondary)
+
+                if viewModel.detail?.otherUser?.voiceIntro?.audioUrl != nil {
+                    Button {
+                        audioPlayer.togglePlayback(urlString: viewModel.detail?.otherUser?.voiceIntro?.audioUrl)
+                    } label: {
+                        HStack(spacing: BoopSpacing.xs) {
+                            Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                                .font(.system(size: 11, weight: .regular))
+                            Text("Voice intro")
+                                .font(BoopTypography.cineCaption)
+                                .tracking(0.5)
+                        }
+                        .foregroundStyle(BoopColors.textPrimary)
+                        .padding(.vertical, BoopSpacing.xs)
+                        .padding(.horizontal, BoopSpacing.sm)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                                .stroke(BoopColors.hairline, lineWidth: 1)
                         )
-                        .frame(height: 210)
-
-                    if let photo = displayPhotoURL {
-                        BoopRemoteImage(urlString: photo) {
-                            Rectangle().fill(Color.white.opacity(0.08))
-                        }
-                        .frame(height: 210)
-                        .clipped()
-                        .blur(radius: CGFloat(viewModel.detail?.otherUser?.blurLevel ?? 0))
-                        .opacity(0.42)
                     }
-
-                    VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                        Text(viewModel.stageTitle.uppercased())
-                            .font(BoopTypography.caption)
-                            .fontWeight(.bold)
-                            .kerning(1)
-                            .foregroundStyle(Color.white.opacity(0.72))
-
-                        Text(heroTitle)
-                            .font(BoopTypography.title1)
-                            .foregroundStyle(.white)
-
-                        Text(heroSubtitle)
-                            .font(BoopTypography.callout)
-                            .foregroundStyle(Color.white.opacity(0.82))
-
-                        if viewModel.detail?.otherUser?.voiceIntro?.audioUrl != nil {
-                            Button {
-                                audioPlayer.togglePlayback(urlString: viewModel.detail?.otherUser?.voiceIntro?.audioUrl)
-                            } label: {
-                                HStack(spacing: BoopSpacing.xs) {
-                                    Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
-                                    Text("Play voice intro")
-                                }
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(.white)
-                                .padding(.horizontal, BoopSpacing.sm)
-                                .padding(.vertical, BoopSpacing.xs)
-                                .background(Color.white.opacity(0.16))
-                                .clipShape(Capsule())
-                            }
-                            .padding(.top, BoopSpacing.xs)
-                        }
-                    }
-                    .padding(BoopSpacing.lg)
+                    .padding(.top, BoopSpacing.xs)
                 }
-
-                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                    Text(viewModel.detail?.otherUser?.bio ?? "Keep building the connection. This page brings together comfort, reveal readiness, and the next action.")
-                        .font(BoopTypography.body)
-                        .foregroundStyle(BoopColors.textSecondary)
-                }
-                .padding(BoopSpacing.lg)
             }
+
+            Text(viewModel.detail?.otherUser?.bio ?? "Keep building the connection. This page brings together comfort, reveal readiness, and the next action.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
         }
     }
 
     private var boopAndStreakRow: some View {
-        HStack(spacing: BoopSpacing.sm) {
+        HStack(alignment: .center, spacing: BoopSpacing.lg) {
             // Boop button
             Button {
                 Task { await viewModel.sendBoop() }
             } label: {
                 HStack(spacing: BoopSpacing.xs) {
-                    if viewModel.boopSuccess {
-                        Image(systemName: "heart.fill")
-                            .symbolEffect(.bounce, value: viewModel.boopSuccess)
-                    } else {
-                        Image(systemName: "heart.circle.fill")
-                    }
+                    Image(systemName: viewModel.boopSuccess ? "heart.fill" : "heart")
+                        .font(.system(size: 14, weight: .regular))
+                        .symbolEffect(.bounce, value: viewModel.boopSuccess)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(viewModel.boopSuccess ? "Booped!" : "Boop")
-                            .font(BoopTypography.callout)
-                            .fontWeight(.semibold)
+                        Text(viewModel.boopSuccess ? "Booped" : "Boop")
+                            .font(.system(size: 15, weight: .semibold))
+                            .tracking(0.5)
                         if let count = viewModel.detail?.boopCount, count > 0 {
                             Text("\(count) total")
-                                .font(BoopTypography.caption)
-                                .foregroundStyle(.white.opacity(0.7))
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textMuted)
                         }
                     }
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(viewModel.boopSuccess ? BoopColors.accentColor : BoopColors.textPrimary)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, BoopSpacing.md)
-                .background(
-                    viewModel.boopSuccess
-                        ? BoopColors.success
-                        : viewModel.canBoop ? BoopColors.primary : BoopColors.textMuted
+                .overlay(
+                    RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
+                        .stroke(viewModel.canBoop ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
                 )
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
             }
             .disabled(!viewModel.canBoop || viewModel.isBoopping)
             .sensoryFeedback(.success, trigger: viewModel.boopSuccess)
 
             // Streak display
-            VStack(spacing: 4) {
+            VStack(alignment: .leading, spacing: 4) {
                 let streakCurrent = viewModel.detail?.streak?.current ?? 0
                 let streakLongest = viewModel.detail?.streak?.longest ?? 0
 
-                HStack(spacing: 4) {
-                    Text(streakCurrent > 0 ? "🔥" : "💤")
+                EyebrowLabel(text: streakCurrent > 0 ? "Day Streak" : "No Streak")
+
+                HStack(spacing: BoopSpacing.xs) {
+                    Image(systemName: "flame")
+                        .font(.system(size: 13, weight: .thin))
+                        .foregroundStyle(streakCurrent > 0 ? BoopColors.accentColor : BoopColors.textMuted)
                     Text("\(streakCurrent)")
-                        .font(BoopTypography.title3)
-                        .fontWeight(.bold)
-                        .foregroundStyle(streakCurrent > 0 ? BoopColors.primary : BoopColors.textMuted)
-                }
-
-                Text(streakCurrent > 0 ? "day streak" : "no streak")
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textSecondary)
-
-                if streakLongest > streakCurrent {
-                    Text("Best: \(streakLongest)")
-                        .font(.system(size: 10))
-                        .foregroundStyle(BoopColors.textMuted)
+                        .font(BoopTypography.cineTitle)
+                        .foregroundStyle(streakCurrent > 0 ? BoopColors.textPrimary : BoopColors.textMuted)
+                    if streakLongest > streakCurrent {
+                        Text("Best \(streakLongest)")
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textMuted)
+                    }
                 }
             }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, BoopSpacing.md)
-            .background(Color.white.opacity(0.8))
-            .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 
     private var scoreRow: some View {
-        HStack(spacing: BoopSpacing.sm) {
-            statBlock(title: "Match", value: "\(viewModel.detail?.compatibilityScore ?? 0)%", tint: BoopColors.primary)
-            statBlock(title: "Comfort", value: "\(viewModel.comfort?.score ?? viewModel.detail?.comfortScore ?? 0)", tint: BoopColors.secondary)
-            statBlock(title: "Date", value: "\(viewModel.readiness?.score ?? 0)", tint: BoopColors.accent)
+        let comfort = viewModel.comfort?.score ?? viewModel.detail?.comfortScore ?? 0
+        let readiness = viewModel.readiness?.score ?? 0
+        return HStack(alignment: .top, spacing: 0) {
+            statBlock(title: "Match", value: "\(viewModel.detail?.compatibilityScore ?? 0)%", progress: nil)
+            scoreDivider
+            statBlock(title: "Comfort", value: "\(comfort)", progress: Double(comfort) / 100.0)
+            scoreDivider
+            statBlock(title: "Readiness", value: "\(readiness)", progress: Double(readiness) / 100.0)
         }
+    }
+
+    private var scoreDivider: some View {
+        Rectangle()
+            .fill(BoopColors.hairline)
+            .frame(width: 1, height: 48)
     }
 
     private var stageCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack(alignment: .top, spacing: BoopSpacing.md) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Connection stage")
-                            .font(BoopTypography.headline)
-                            .foregroundStyle(BoopColors.textPrimary)
-                        Text(viewModel.stageSummary)
-                            .font(BoopTypography.body)
-                            .foregroundStyle(BoopColors.textSecondary)
-                    }
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            HStack(alignment: .top) {
+                EyebrowLabel(text: "Connection Stage")
+                Spacer()
+                EyebrowLabel(text: viewModel.stageTitle, color: BoopColors.accentColor)
+            }
+            AccentRule()
 
-                    Spacer()
+            Text(viewModel.stageSummary)
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
 
-                    Text(viewModel.stageTitle)
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(stageColor(for: viewModel.detail?.stage ?? "mutual"))
-                        .padding(.horizontal, BoopSpacing.sm)
-                        .padding(.vertical, 6)
-                        .background(stageColor(for: viewModel.detail?.stage ?? "mutual").opacity(0.12))
-                        .clipShape(Capsule())
-                }
+            VStack(spacing: 0) {
+                ForEach(Array(viewModel.stageSteps.enumerated()), id: \.element.id) { index, step in
+                    let reached = index <= viewModel.currentStageIndex
+                    HStack(alignment: .top, spacing: BoopSpacing.sm) {
+                        VStack(spacing: 0) {
+                            Circle()
+                                .fill(reached ? BoopColors.accentColor : BoopColors.hairline)
+                                .frame(width: 8, height: 8)
+                                .padding(.top, 5)
 
-                VStack(spacing: BoopSpacing.sm) {
-                    ForEach(Array(viewModel.stageSteps.enumerated()), id: \.element.id) { index, step in
-                        HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                            VStack(spacing: 0) {
-                                Circle()
-                                    .fill(index <= viewModel.currentStageIndex ? stageColor(for: step.rawValue) : BoopColors.border)
-                                    .frame(width: 12, height: 12)
-
-                                if index < viewModel.stageSteps.count - 1 {
-                                    Rectangle()
-                                        .fill(index < viewModel.currentStageIndex ? stageColor(for: step.rawValue) : BoopColors.border)
-                                        .frame(width: 2, height: 24)
-                                }
-                            }
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(step.title)
-                                    .font(BoopTypography.callout)
-                                    .foregroundStyle(BoopColors.textPrimary)
-                                Text(step.subtitle)
-                                    .font(BoopTypography.caption)
-                                    .foregroundStyle(BoopColors.textSecondary)
-                            }
-
-                            Spacer()
-                        }
-                    }
-                }
-
-                if let revealProgressText = viewModel.revealProgressText {
-                    HStack(spacing: BoopSpacing.xs) {
-                        Image(systemName: "eye.fill")
-                        Text(revealProgressText)
-                    }
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.secondary)
-                    .padding(.horizontal, BoopSpacing.sm)
-                    .padding(.vertical, BoopSpacing.xs)
-                    .background(BoopColors.secondary.opacity(0.1))
-                    .clipShape(Capsule())
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Recommended next move")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textMuted)
-                    Text(viewModel.nextActionSummary)
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(BoopColors.textPrimary)
-                }
-                .padding(BoopSpacing.md)
-                .background(BoopColors.chatBackground)
-                .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(BoopTypography.footnote)
-                        .foregroundStyle(BoopColors.error)
-                }
-
-                HStack(spacing: BoopSpacing.sm) {
-                    if viewModel.canRequestReveal {
-                        BoopButton(title: viewModel.revealButtonTitle, variant: .secondary, isLoading: viewModel.isWorking, fullWidth: false) {
-                            Task {
-                                await viewModel.requestReveal()
-                                if viewModel.detail?.stage == "revealed" {
-                                    showClearing = true
-                                }
+                            if index < viewModel.stageSteps.count - 1 {
+                                Rectangle()
+                                    .fill(index < viewModel.currentStageIndex ? BoopColors.accentColor : BoopColors.hairline)
+                                    .frame(width: 1, height: 28)
                             }
                         }
-                    } else if viewModel.isAwaitingOtherReveal {
-                        Text("Reveal request sent")
-                            .font(BoopTypography.caption)
-                            .foregroundStyle(BoopColors.secondary)
-                            .padding(.horizontal, BoopSpacing.sm)
-                            .padding(.vertical, BoopSpacing.xs)
-                            .background(BoopColors.secondary.opacity(0.1))
-                            .clipShape(Capsule())
-                    }
 
-                    if viewModel.canAdvanceStage {
-                        BoopButton(title: "Advance", variant: .primary, isLoading: viewModel.isWorking, fullWidth: false) {
-                            Task { await viewModel.advanceStage() }
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(step.title)
+                                .font(BoopTypography.cineBody)
+                                .foregroundStyle(reached ? BoopColors.textPrimary : BoopColors.textMuted)
+                            Text(step.subtitle)
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textSecondary)
                         }
+                        .padding(.bottom, index < viewModel.stageSteps.count - 1 ? BoopSpacing.sm : 0)
+
+                        Spacer()
                     }
                 }
             }
+
+            if let revealProgressText = viewModel.revealProgressText {
+                HStack(spacing: BoopSpacing.xs) {
+                    Image(systemName: "eye")
+                        .font(.system(size: 11, weight: .thin))
+                    Text(revealProgressText)
+                        .font(BoopTypography.cineCaption)
+                        .tracking(0.5)
+                }
+                .foregroundStyle(BoopColors.accentColor)
+            }
+
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                EyebrowLabel(text: "Recommended Next Move")
+                Text(viewModel.nextActionSummary)
+                    .font(BoopTypography.cineBody)
+                    .foregroundStyle(BoopColors.textPrimary)
+            }
+            .padding(.top, BoopSpacing.xs)
+
+            if let error = viewModel.errorMessage {
+                Text(error)
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.error)
+            }
+
+            HStack(spacing: BoopSpacing.sm) {
+                if viewModel.canRequestReveal {
+                    BoopButton(title: viewModel.revealButtonTitle, variant: .secondary, isLoading: viewModel.isWorking, fullWidth: false) {
+                        Task {
+                            await viewModel.requestReveal()
+                            if viewModel.detail?.stage == "revealed" {
+                                showClearing = true
+                            }
+                        }
+                    }
+                } else if viewModel.isAwaitingOtherReveal {
+                    EyebrowLabel(text: "Reveal Request Sent", color: BoopColors.accentColor)
+                }
+
+                if viewModel.canAdvanceStage {
+                    BoopButton(title: "Advance", variant: .primary, isLoading: viewModel.isWorking, fullWidth: false) {
+                        Task { await viewModel.advanceStage() }
+                    }
+                }
+            }
+            .padding(.top, BoopSpacing.xs)
         }
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
     private var chemistryCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                Text("Why this could work")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Why This Could Work")
+            AccentRule()
 
-                Text("Your strongest overlap shows up here first.")
-                    .font(BoopTypography.footnote)
-                    .foregroundStyle(BoopColors.textSecondary)
+            Text("Your strongest overlap shows up here first.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
 
+            VStack(spacing: 0) {
                 ForEach(viewModel.topInsights) { insight in
-                    HStack(alignment: .top, spacing: BoopSpacing.sm) {
-                        Circle()
-                            .fill(Color(hex: insight.tintHex))
-                            .frame(width: 10, height: 10)
-                            .padding(.top, 5)
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(insight.title)
-                                .font(BoopTypography.callout)
-                                .foregroundStyle(BoopColors.textPrimary)
-                            Text(insight.detail)
-                                .font(BoopTypography.footnote)
-                                .foregroundStyle(BoopColors.textSecondary)
-                        }
-                    }
-                }
-
-                if let growthInsight = viewModel.growthInsight {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(growthInsight.title)
-                            .font(BoopTypography.callout)
-                            .foregroundStyle(Color(hex: growthInsight.tintHex))
-                        Text(growthInsight.detail)
-                            .font(BoopTypography.footnote)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                        Text(insight.title)
+                            .font(BoopTypography.cineBody)
+                            .foregroundStyle(BoopColors.textPrimary)
+                            .padding(.top, BoopSpacing.md)
+                        Text(insight.detail)
+                            .font(BoopTypography.cineCaption)
                             .foregroundStyle(BoopColors.textSecondary)
+                            .padding(.bottom, BoopSpacing.md)
                     }
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.surfaceGoldenLight)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
-                }
-
-                NavigationLink {
-                    CompatibilityDeepDiveView(matchId: matchId)
-                } label: {
-                    HStack {
-                        Text("View Full Breakdown")
-                            .font(BoopTypography.callout)
-                            .fontWeight(.medium)
-                        Spacer()
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 12, weight: .semibold))
-                    }
-                    .foregroundStyle(BoopColors.secondary)
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.secondary.opacity(0.08))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+
+            if let growthInsight = viewModel.growthInsight {
+                VStack(alignment: .leading, spacing: 4) {
+                    EyebrowLabel(text: growthInsight.title, color: BoopColors.accentColor)
+                    Text(growthInsight.detail)
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                }
+                .padding(.top, BoopSpacing.xs)
+            }
+
+            NavigationLink {
+                CompatibilityDeepDiveView(matchId: matchId)
+            } label: {
+                HStack {
+                    Text("View Full Breakdown")
+                        .font(BoopTypography.cineBody)
+                    Spacer()
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 13, weight: .thin))
+                }
+                .foregroundStyle(BoopColors.accentColor)
+                .padding(.top, BoopSpacing.xs)
+            }
         }
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
     private func comfortCard(breakdown: [String: ComfortBreakdownItem]) -> some View {
         let comfortScore = viewModel.comfort?.score ?? 0
         let threshold = 70
 
-        return BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("How the connection is growing")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Text("\(comfortScore)/100")
-                        .font(BoopTypography.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(BoopColors.secondary)
-                }
+        return VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "How The Connection Is Growing")
+                Spacer()
+                Text("\(comfortScore)/100")
+                    .font(BoopTypography.cineHeadline)
+                    .foregroundStyle(BoopColors.textPrimary)
+            }
+            AccentRule()
 
-                // Overall progress bar
-                GeometryReader { proxy in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(BoopColors.surfaceSecondary)
-                        Capsule()
-                            .fill(BoopColors.secondaryGradient)
-                            .frame(width: proxy.size.width * CGFloat(min(comfortScore, 100)) / 100.0)
+            HairlineProgress(progress: Double(min(comfortScore, 100)) / 100.0)
 
-                        // Threshold marker
-                        Rectangle()
-                            .fill(BoopColors.textMuted)
-                            .frame(width: 2, height: 16)
-                            .offset(x: proxy.size.width * CGFloat(threshold) / 100.0 - 1)
-                    }
-                }
-                .frame(height: 10)
+            Text("Reveal unlocks at \(threshold). You're at \(comfortScore).")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textSecondary)
 
-                Text("Reveal unlocks at \(threshold). You're at \(comfortScore).")
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textSecondary)
-
+            VStack(spacing: BoopSpacing.md) {
                 ForEach(breakdown.keys.sorted(), id: \.self) { key in
                     if let item = breakdown[key] {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 6) {
                             HStack {
                                 Text(key.replacingOccurrences(of: "_", with: " ").capitalized)
-                                    .font(BoopTypography.callout)
+                                    .font(BoopTypography.cineBody)
                                     .foregroundStyle(BoopColors.textPrimary)
                                 Spacer()
                                 Text("\(item.value)")
-                                    .font(BoopTypography.callout)
-                                    .foregroundStyle(BoopColors.secondary)
+                                    .font(BoopTypography.cineBody)
+                                    .foregroundStyle(BoopColors.textMuted)
                             }
 
-                            GeometryReader { proxy in
-                                ZStack(alignment: .leading) {
-                                    Capsule().fill(BoopColors.surfaceSecondary)
-                                    Capsule()
-                                        .fill(BoopColors.secondary.opacity(0.6))
-                                        .frame(width: proxy.size.width * CGFloat(min(item.value, 100)) / 100.0)
-                                }
-                            }
-                            .frame(height: 6)
+                            HairlineProgress(progress: Double(min(item.value, 100)) / 100.0)
 
                             Text(item.detail)
-                                .font(BoopTypography.caption)
+                                .font(BoopTypography.cineCaption)
                                 .foregroundStyle(BoopColors.textSecondary)
                         }
                     }
                 }
+            }
+            .padding(.top, BoopSpacing.xs)
 
-                // Comfort tips
-                if comfortScore < threshold {
-                    VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                        Text("Tips to grow comfort")
-                            .font(BoopTypography.footnote)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(BoopColors.textPrimary)
+            // Comfort tips
+            if comfortScore < threshold {
+                VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                    EyebrowLabel(text: "Tips To Grow Comfort")
 
-                        comfortTip(icon: "bubble.left.fill", text: "Send more messages to build conversation depth")
-                        comfortTip(icon: "gamecontroller.fill", text: "Play games together to unlock shared experiences")
-                        comfortTip(icon: "waveform", text: "Send a voice note to add warmth")
-                        comfortTip(icon: "clock.fill", text: "Consistent daily interaction boosts your score")
-                    }
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.secondary.opacity(0.06))
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+                    comfortTip(icon: "bubble.left", text: "Send more messages to build conversation depth")
+                    comfortTip(icon: "gamecontroller", text: "Play games together to unlock shared experiences")
+                    comfortTip(icon: "waveform", text: "Send a voice note to add warmth")
+                    comfortTip(icon: "clock", text: "Consistent daily interaction boosts your score")
                 }
+                .padding(.top, BoopSpacing.sm)
             }
         }
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
     private func comfortTip(icon: String, text: String) -> some View {
-        HStack(alignment: .top, spacing: BoopSpacing.xs) {
+        HStack(alignment: .top, spacing: BoopSpacing.sm) {
             Image(systemName: icon)
-                .font(.system(size: 12))
-                .foregroundStyle(BoopColors.secondary)
+                .font(.system(size: 12, weight: .thin))
+                .foregroundStyle(BoopColors.accentColor)
                 .frame(width: 18)
             Text(text)
-                .font(BoopTypography.caption)
+                .font(BoopTypography.cineCaption)
                 .foregroundStyle(BoopColors.textSecondary)
         }
     }
 
     private func readinessCard(_ readiness: DateReadinessResponse) -> some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                HStack {
-                    Text("Momentum to reveal or meet")
-                        .font(BoopTypography.headline)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Text(readiness.isReady ? "Ready" : "Not yet")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(readiness.isReady ? BoopColors.success : BoopColors.warning)
-                        .padding(.horizontal, BoopSpacing.xs)
-                        .padding(.vertical, 3)
-                        .background((readiness.isReady ? BoopColors.success : BoopColors.warning).opacity(0.12))
-                        .clipShape(Capsule())
-                }
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            HStack(alignment: .firstTextBaseline) {
+                EyebrowLabel(text: "Momentum To Reveal Or Meet")
+                Spacer()
+                EyebrowLabel(
+                    text: readiness.isReady ? "Ready" : "Not Yet",
+                    color: readiness.isReady ? BoopColors.accentColor : BoopColors.textMuted
+                )
+            }
+            AccentRule()
 
-                // Overall score bar
-                GeometryReader { proxy in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(BoopColors.surfaceSecondary)
-                        Capsule()
-                            .fill(BoopColors.warmGradient)
-                            .frame(width: proxy.size.width * CGFloat(min(readiness.score, 100)) / 100.0)
-                    }
-                }
-                .frame(height: 10)
+            HairlineProgress(progress: Double(min(readiness.score, 100)) / 100.0)
 
-                Text("Overall readiness: \(readiness.score)/100")
-                    .font(BoopTypography.caption)
-                    .foregroundStyle(BoopColors.textSecondary)
+            Text("Overall readiness: \(readiness.score)/100")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textSecondary)
 
+            VStack(spacing: BoopSpacing.md) {
                 ForEach(readiness.breakdown.keys.sorted(), id: \.self) { key in
                     if let item = readiness.breakdown[key] {
-                        VStack(alignment: .leading, spacing: 4) {
+                        VStack(alignment: .leading, spacing: 6) {
                             HStack {
                                 Text(key.replacingOccurrences(of: "_", with: " ").capitalized)
-                                    .font(BoopTypography.callout)
+                                    .font(BoopTypography.cineBody)
                                     .foregroundStyle(BoopColors.textPrimary)
                                 Spacer()
                                 Text("\(item.value)")
-                                    .font(BoopTypography.callout)
-                                    .foregroundStyle(BoopColors.accent)
+                                    .font(BoopTypography.cineBody)
+                                    .foregroundStyle(BoopColors.textMuted)
                             }
 
-                            GeometryReader { proxy in
-                                ZStack(alignment: .leading) {
-                                    Capsule().fill(BoopColors.surfaceSecondary)
-                                    Capsule()
-                                        .fill(BoopColors.accent.opacity(0.6))
-                                        .frame(width: proxy.size.width * CGFloat(min(item.value, 100)) / 100.0)
-                                }
-                            }
-                            .frame(height: 6)
+                            HairlineProgress(progress: Double(min(item.value, 100)) / 100.0)
                         }
                     }
                 }
             }
+            .padding(.top, BoopSpacing.xs)
         }
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
     private var insightsPromptCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(spacing: BoopSpacing.md) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 28))
-                    .foregroundStyle(BoopColors.primary.opacity(0.6))
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Relationship Insights")
+            AccentRule()
+            Text("AI analysis of your connection, strengths, and growth areas.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
 
-                VStack(spacing: 4) {
-                    Text("Get relationship insights")
-                        .font(BoopTypography.callout)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Text("AI-powered analysis of your connection, strengths, and growth areas")
-                        .font(BoopTypography.caption)
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .multilineTextAlignment(.center)
-                }
-
-                BoopButton(title: "Analyze Connection", variant: .secondary, isLoading: false, fullWidth: true) {
-                    Task { await viewModel.loadInsights() }
-                }
+            BoopButton(title: "Analyze Connection", variant: .secondary, isLoading: false, fullWidth: true) {
+                Task { await viewModel.loadInsights() }
             }
+            .padding(.top, BoopSpacing.xs)
         }
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
     private var actionsCard: some View {
-        BoopCard(padding: BoopSpacing.lg, radius: BoopRadius.xxl) {
-            VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                Text("Next actions")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            EyebrowLabel(text: "Next Actions")
+            AccentRule()
 
-                NavigationLink {
-                    MatchConversationLoaderView(matchId: matchId)
-                } label: {
-                    HStack {
-                        Text("Open Chat")
-                        Spacer()
-                        Image(systemName: "arrow.right")
-                    }
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.textPrimary)
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.surfaceWarm)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
-                }
+            NavigationLink {
+                MatchConversationLoaderView(matchId: matchId)
+            } label: {
+                HairlineRow("Open Chat", showChevron: true)
+            }
 
-                NavigationLink {
-                    MatchGamesView(matchId: matchId)
-                } label: {
-                    HStack {
-                        Text("Play Games")
-                        Spacer()
-                        Image(systemName: "gamecontroller.fill")
-                    }
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(BoopColors.textPrimary)
-                    .padding(BoopSpacing.md)
-                    .background(BoopColors.surfaceMintLight)
-                    .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
-                }
+            NavigationLink {
+                MatchGamesView(matchId: matchId)
+            } label: {
+                HairlineRow("Play Games", showChevron: true)
+            }
 
-                Button {
-                    Task { await viewModel.archive() }
-                } label: {
-                    Text("Archive Match")
-                        .font(BoopTypography.callout)
-                        .foregroundStyle(BoopColors.error)
-                }
+            Button {
+                Task { await viewModel.archive() }
+            } label: {
+                HairlineRow("Archive Match", titleColor: BoopColors.error)
             }
         }
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
-    private func statBlock(title: String, value: String, tint: Color) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(title)
-                .font(BoopTypography.caption)
-                .foregroundStyle(BoopColors.textMuted)
+    private func statBlock(title: String, value: String, progress: Double?) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+            EyebrowLabel(text: title)
             Text(value)
-                .font(BoopTypography.title3)
-                .foregroundStyle(tint)
+                .font(BoopTypography.cineDisplay)
+                .foregroundStyle(BoopColors.textPrimary)
+            if let progress {
+                HairlineProgress(progress: progress)
+                    .frame(width: 56)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(BoopSpacing.md)
-        .background(Color.white.opacity(0.8))
-        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous))
+        .padding(.horizontal, BoopSpacing.md)
     }
 
     private var gamesCountForRecap: Int {
@@ -821,25 +686,6 @@ struct MatchDetailView: View {
 
     private var heroSubtitle: String {
         viewModel.detail?.otherUser?.city ?? "Building your connection"
-    }
-
-    private func stageIndex(_ stage: String) -> Int {
-        switch stage {
-        case "mutual": return 0
-        case "connecting": return 1
-        case "reveal_ready": return 2
-        case "revealed": return 3
-        case "dating": return 4
-        default: return 0
-        }
-    }
-
-    private func stageColor(for stage: String) -> Color {
-        switch stage {
-        case "revealed", "dating": return BoopColors.success
-        case "reveal_ready": return BoopColors.accent
-        default: return BoopColors.primary
-        }
     }
 
     private func blockOtherUser() async {

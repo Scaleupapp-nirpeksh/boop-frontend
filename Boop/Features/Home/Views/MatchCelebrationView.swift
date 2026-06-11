@@ -12,8 +12,8 @@ struct MatchCelebrationView: View {
 
     var body: some View {
         ZStack {
-            // Dimmed background
-            Color.black.opacity(0.7)
+            // Near-ground backdrop
+            BoopColors.ground.opacity(0.94)
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
 
@@ -22,55 +22,48 @@ struct MatchCelebrationView: View {
                 FloatingHeartsView()
             }
 
-            // Content
             VStack(spacing: BoopSpacing.xxl) {
                 Spacer()
 
-                // Two circles connecting (like logo)
+                // Two circles connecting (the brand motif)
                 ZStack {
                     Circle()
-                        .fill(BoopColors.primary.opacity(0.8))
+                        .stroke(BoopColors.accentColor, lineWidth: 1.5)
                         .frame(width: 80, height: 80)
                         .offset(x: showContent ? -20 : -60)
 
                     Circle()
-                        .fill(BoopColors.secondary.opacity(0.8))
+                        .stroke(BoopColors.textPrimary.opacity(0.5), lineWidth: 1.5)
                         .frame(width: 80, height: 80)
                         .offset(x: showContent ? 20 : 60)
 
-                    // Heart at intersection
                     if showContent {
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: 32))
-                            .foregroundStyle(.white)
+                        Image(systemName: "heart")
+                            .font(.system(size: 28, weight: .thin))
+                            .foregroundStyle(BoopColors.accentColor)
                             .scaleEffect(showContent ? 1.0 : 0.0)
                     }
                 }
                 .animation(.spring(response: 0.6, dampingFraction: 0.7), value: showContent)
 
                 VStack(spacing: BoopSpacing.sm) {
-                    Text("It's a connection!")
-                        .font(.nunito(.extraBold, size: 28))
-                        .foregroundStyle(.white)
+                    EyebrowLabel(text: "It's a Connection", color: BoopColors.accentColor)
 
-                    Text("You and \(name) both want to connect")
-                        .font(BoopTypography.body)
-                        .foregroundStyle(.white.opacity(0.8))
+                    Text(name)
+                        .font(BoopTypography.cineDisplay)
+                        .foregroundStyle(BoopColors.textPrimary)
                         .multilineTextAlignment(.center)
 
-                    // Tier badge
-                    HStack(spacing: BoopSpacing.xs) {
-                        Text(tierEmoji)
-                        Text(tierLabel)
-                            .font(BoopTypography.callout)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                    }
-                    .padding(.horizontal, BoopSpacing.md)
-                    .padding(.vertical, BoopSpacing.xs)
-                    .background(.white.opacity(0.2))
-                    .clipShape(Capsule())
-                    .padding(.top, BoopSpacing.xs)
+                    AccentRule()
+                        .padding(.vertical, BoopSpacing.xs)
+
+                    Text("You and \(name) both want to connect")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .multilineTextAlignment(.center)
+
+                    EyebrowLabel(text: tierLabel)
+                        .padding(.top, BoopSpacing.xs)
                 }
                 .opacity(showContent ? 1 : 0)
                 .offset(y: showContent ? 0 : 20)
@@ -85,8 +78,9 @@ struct MatchCelebrationView: View {
                     Button("Keep Discovering") {
                         onDismiss()
                     }
-                    .font(BoopTypography.callout)
-                    .foregroundStyle(.white.opacity(0.7))
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textMuted)
                 }
                 .opacity(showContent ? 1 : 0)
                 .padding(.horizontal, BoopSpacing.xl)
@@ -101,15 +95,6 @@ struct MatchCelebrationView: View {
             withAnimation(.easeOut(duration: 0.3).delay(0.4)) {
                 showHearts = true
             }
-        }
-    }
-
-    private var tierEmoji: String {
-        switch matchTier {
-        case "platinum": return "💎"
-        case "gold": return "💛"
-        case "silver": return "🤍"
-        default: return "🧡"
         }
     }
 
@@ -132,8 +117,8 @@ struct FloatingHeartsView: View {
         GeometryReader { geometry in
             ZStack {
                 ForEach(hearts) { heart in
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: heart.size))
+                    Image(systemName: "heart")
+                        .font(.system(size: heart.size, weight: .thin))
                         .foregroundStyle(heart.color)
                         .position(x: heart.x, y: heart.y)
                         .opacity(heart.opacity)
@@ -153,7 +138,7 @@ struct FloatingHeartsView: View {
                 x: CGFloat.random(in: 40...(size.width - 40)),
                 y: size.height + 20,
                 size: CGFloat.random(in: 12...24),
-                color: [BoopColors.primary, BoopColors.secondary, BoopColors.accent].randomElement()!,
+                color: BoopColors.accentColor.opacity(Double.random(in: 0.4...0.9)),
                 opacity: 1.0
             )
             hearts.append(heart)

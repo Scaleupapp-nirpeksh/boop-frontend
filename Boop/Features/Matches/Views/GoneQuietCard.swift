@@ -8,18 +8,21 @@ struct GoneQuietCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            Text("This one's gone quiet")
-                .font(.nunito(.bold, size: 16))
+            EyebrowLabel(text: "Gone Quiet")
+            AccentRule()
+            Text("This one's drifted")
+                .font(BoopTypography.cineHeadline)
                 .foregroundStyle(BoopColors.textPrimary)
             Text("\(name) hasn't been around lately. Send a Boop to revive it, or gracefully let it go and make room for someone new.")
-                .font(.nunito(.regular, size: 13))
+                .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
             HStack(spacing: BoopSpacing.sm) {
-                BoopButton(title: "👋 Boop", variant: .outline, fullWidth: true) { onBoop() }
+                BoopButton(title: "Boop", variant: .outline, fullWidth: true) { onBoop() }
                 BoopButton(title: "Let it go", variant: .ghost, fullWidth: true) { onLetGo() }
             }
+            .padding(.top, BoopSpacing.xs)
         }
         .padding(BoopSpacing.lg)
-        .boopCard(radius: BoopRadius.xxl)
+        .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 }
