@@ -108,7 +108,7 @@ struct MatchGamesView: View {
                         .foregroundStyle(BoopColors.textSecondary)
                 }
                 Spacer()
-                Text("+8 Comfort".uppercased())
+                Text("Builds Comfort".uppercased())
                     .font(BoopTypography.cineLabel)
                     .tracking(2)
                     .foregroundStyle(BoopColors.accentColor)
