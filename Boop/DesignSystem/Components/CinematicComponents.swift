@@ -69,6 +69,8 @@ struct HairlineProgress: View {
 struct VoiceLine: View {
     var duration: String
     var isPlaying: Bool = false
+    var progress: Double = 0
+    var elapsedText: String? = nil
     var onTap: () -> Void = {}
     var body: some View {
         HStack(spacing: BoopSpacing.sm) {
@@ -79,8 +81,8 @@ struct VoiceLine: View {
                     .frame(width: 36, height: 36)
                     .overlay(Circle().stroke(BoopColors.textPrimary.opacity(0.5), lineWidth: 1))
             }
-            Rectangle().fill(BoopColors.hairline).frame(height: 1).frame(maxWidth: .infinity)
-            Text(duration).font(BoopTypography.cineCaption).foregroundStyle(BoopColors.textMuted)
+            HairlineProgress(progress: progress).frame(maxWidth: .infinity)
+            Text(elapsedText ?? duration).font(BoopTypography.cineCaption).foregroundStyle(BoopColors.textMuted)
         }
     }
 }

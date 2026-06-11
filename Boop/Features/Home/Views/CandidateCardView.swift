@@ -126,6 +126,7 @@ struct CandidateCardView: View {
             VoiceLine(
                 duration: voiceDurationLabel,
                 isPlaying: isThis,
+                progress: audioPlayer.currentURL == candidate.voiceIntro.audioUrl ? audioPlayer.progress : 0,
                 onTap: {
                     Haptics.light()
                     audioPlayer.togglePlayback(urlString: candidate.voiceIntro.audioUrl)

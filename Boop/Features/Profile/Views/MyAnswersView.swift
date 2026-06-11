@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MyAnswersView: View {
     @State private var viewModel = MyAnswersViewModel()
+    @State private var audioPlayer = RemoteAudioPlayer()
 
     var body: some View {
         ScrollView(showsIndicators: false) {
@@ -33,6 +34,9 @@ struct MyAnswersView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.load()
+        }
+        .onDisappear {
+            audioPlayer.stop()
         }
     }
 
@@ -105,7 +109,9 @@ struct MyAnswersView: View {
 
     @ViewBuilder
     private func answerContent(_ item: AnswerHistoryItem) -> some View {
-        if let text = item.textAnswer, !text.isEmpty {
+        if item.isVoice == true || item.voiceAnswerUrl != nil {
+            voiceAnswer(item)
+        } else if let text = item.textAnswer, !text.isEmpty {
             Text(text)
                 .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
@@ -113,6 +119,31 @@ struct MyAnswersView: View {
             answerValue(option)
         } else if let options = item.selectedOptions, !options.isEmpty {
             answerValue(options.joined(separator: ", "))
+        }
+    }
+
+    @ViewBuilder
+    private func voiceAnswer(_ item: AnswerHistoryItem) -> some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            let url = item.voiceAnswerUrl
+            VoiceLine(
+                duration: "Listen",
+                isPlaying: audioPlayer.currentURL == url && audioPlayer.isPlaying,
+                progress: audioPlayer.currentURL == url ? audioPlayer.progress : 0
+            ) {
+                audioPlayer.togglePlayback(urlString: url)
+            }
+
+            if let transcript = item.voiceAnswerTranscript, !transcript.isEmpty {
+                Text(transcript)
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+            } else {
+                Text("Voice answer")
+                    .font(BoopTypography.cineCaption)
+                    .tracking(1)
+                    .foregroundStyle(BoopColors.textMuted)
+            }
         }
     }
 

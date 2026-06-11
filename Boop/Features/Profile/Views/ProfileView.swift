@@ -259,16 +259,24 @@ struct ProfileView: View {
             }
 
             HStack(spacing: BoopSpacing.xs) {
+                Text("REORDER")
+                    .font(BoopTypography.cineCaption)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textMuted)
+                    .accessibilityHidden(true)
+
                 photoOrderButton(
                     systemName: "arrow.left",
-                    isDisabled: index == 0 || viewModel.isReorderingPhotos
+                    isDisabled: index == 0 || viewModel.isReorderingPhotos,
+                    accessibilityLabel: "Move earlier"
                 ) {
                     Task { await viewModel.movePhoto(from: index, by: -1) }
                 }
 
                 photoOrderButton(
                     systemName: "arrow.right",
-                    isDisabled: index == total - 1 || viewModel.isReorderingPhotos
+                    isDisabled: index == total - 1 || viewModel.isReorderingPhotos,
+                    accessibilityLabel: "Move later"
                 ) {
                     Task { await viewModel.movePhoto(from: index, by: 1) }
                 }
@@ -287,7 +295,7 @@ struct ProfileView: View {
     }
 
     @ViewBuilder
-    private func photoOrderButton(systemName: String, isDisabled: Bool, action: @escaping () -> Void) -> some View {
+    private func photoOrderButton(systemName: String, isDisabled: Bool, accessibilityLabel: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 12, weight: .regular))
@@ -296,6 +304,7 @@ struct ProfileView: View {
                 .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
         }
         .disabled(isDisabled)
+        .accessibilityLabel(accessibilityLabel)
     }
 
     // MARK: - Voice intro
@@ -307,7 +316,8 @@ struct ProfileView: View {
             if let audioURL = viewModel.user?.voiceIntro?.audioUrl {
                 VoiceLine(
                     duration: voiceDurationText,
-                    isPlaying: audioPlayer.currentURL == audioURL && audioPlayer.isPlaying
+                    isPlaying: audioPlayer.currentURL == audioURL && audioPlayer.isPlaying,
+                    progress: audioPlayer.currentURL == audioURL ? audioPlayer.progress : 0
                 ) {
                     audioPlayer.togglePlayback(urlString: audioURL)
                 }

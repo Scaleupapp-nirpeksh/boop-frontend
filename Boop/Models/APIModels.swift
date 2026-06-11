@@ -178,6 +178,9 @@ struct AnswerHistoryItem: Decodable, Identifiable {
     let selectedOptions: [String]?
     let followUpAnswer: String?
     let submittedAt: Date?
+    let voiceAnswerUrl: String?
+    let voiceAnswerTranscript: String?
+    let isVoice: Bool?
 }
 
 // MARK: - Personality Analysis
