@@ -42,6 +42,7 @@ enum APIEndpoint {
     // Matches
     case getMatches(stage: String? = nil, page: Int = 1)
     case getMatchById(matchId: String)
+    case getMatchPartner(matchId: String)
     case advanceMatchStage(matchId: String)
     case archiveMatch(matchId: String, reason: String)
     case requestReveal(matchId: String)
@@ -131,6 +132,7 @@ enum APIEndpoint {
             if let stage { path += "&stage=\(stage)" }
             return path
         case .getMatchById(let matchId): return "/matches/\(matchId)"
+        case .getMatchPartner(let matchId): return "/matches/\(matchId)/partner"
         case .advanceMatchStage(let matchId): return "/matches/\(matchId)/advance"
         case .archiveMatch(let matchId, _): return "/matches/\(matchId)/archive"
         case .requestReveal(let matchId): return "/matches/\(matchId)/reveal"
@@ -198,6 +200,7 @@ enum APIEndpoint {
         case .me, .getProfile, .getQuestions, .getQuestionsProgress, .getQuestionHistory, .getPersonalityAnalysis,
              .getBadges,
              .getCandidates, .getDiscoverStats, .getPendingLikes, .suggestNote, .getMatches, .getMatchById,
+             .getMatchPartner,
              .getComfortScore, .getDateReadiness, .getDatePlans, .getVenueSuggestions,
              .getGame, .getGamesForMatch,
              .getScoreHistory, .getRelationshipInsights, .getConversationStarters, .getCompatibilityDeepDive,

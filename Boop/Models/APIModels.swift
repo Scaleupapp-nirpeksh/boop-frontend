@@ -236,6 +236,62 @@ struct NumerologyData: Decodable {
     let description: String
 }
 
+// MARK: - Partner Profile
+
+struct PartnerProfileResponse: Decodable {
+    let partner: PartnerProfile
+}
+
+/// The depth view of a matched partner: identity, voice, archetype, facet
+/// shape, and showcase answers. Everything the backend may omit is optional
+/// so the decode stays safe across rollout states (pre-analysis, pre-reveal).
+struct PartnerProfile: Decodable {
+    let userId: String
+    let firstName: String?
+    let age: Int?
+    let city: String?
+    let bio: String?
+    let voiceIntro: PartnerVoiceIntro?
+    let photos: PartnerPhotos?
+    let archetype: PartnerArchetype?
+    let facets: [PartnerFacet]?
+    let questionsAnswered: Int?
+    let showcaseAnswers: [PartnerShowcaseAnswer]?
+
+    struct PartnerVoiceIntro: Decodable {
+        let audioUrl: String?
+        let duration: Double?
+    }
+
+    struct PartnerPhotos: Decodable {
+        let blurredUrl: String?
+        let silhouetteUrl: String?
+        /// Non-nil only after the match's photo reveal has happened.
+        let clearUrl: String?
+    }
+}
+
+struct PartnerArchetype: Decodable {
+    let code: String?
+    let number: Int?
+    let name: String?
+    let essence: String?
+    let rarityPercent: Int?
+}
+
+struct PartnerFacet: Decodable, Identifiable {
+    let key: String
+    let title: String?
+    let score: Int?
+
+    var id: String { key }
+}
+
+struct PartnerShowcaseAnswer: Decodable, Hashable {
+    let questionText: String?
+    let answer: String?
+}
+
 // MARK: - Games
 
 struct CreateGameRequest: Encodable {

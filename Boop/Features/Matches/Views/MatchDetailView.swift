@@ -250,6 +250,20 @@ struct MatchDetailView: View {
                     }
                     .padding(.top, BoopSpacing.xs)
                 }
+
+                NavigationLink {
+                    PartnerProfileView(matchId: matchId, firstName: viewModel.detail?.otherUser?.firstName)
+                } label: {
+                    HStack(spacing: BoopSpacing.xs) {
+                        Text("VIEW PROFILE")
+                            .font(BoopTypography.cineLabel)
+                            .tracking(2)
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 10, weight: .regular))
+                    }
+                    .foregroundStyle(BoopColors.accentColor)
+                }
+                .padding(.top, BoopSpacing.xs)
             }
             .padding(.horizontal, -BoopSpacing.xl)
 
@@ -622,6 +636,12 @@ struct MatchDetailView: View {
         VStack(alignment: .leading, spacing: BoopSpacing.sm) {
             EyebrowLabel(text: "Next Actions")
             AccentRule()
+
+            NavigationLink {
+                PartnerProfileView(matchId: matchId, firstName: viewModel.detail?.otherUser?.firstName)
+            } label: {
+                HairlineRow("About \(viewModel.detail?.otherUser?.firstName ?? "them")", showChevron: true)
+            }
 
             NavigationLink {
                 MatchConversationLoaderView(matchId: matchId)

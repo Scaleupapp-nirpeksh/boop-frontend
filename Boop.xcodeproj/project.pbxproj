@@ -123,6 +123,7 @@
 		C3FB7E69F1BEC6BE14A970D5 /* Haptics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 471095D4F94142B1C4B43356 /* Haptics.swift */; };
 		C458EA2B08F6C4992ABE22AB /* PushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13A88FF5598CCC610DB7A2B3 /* PushNotificationService.swift */; };
 		C4DDACE2FE5F30B17CFF6DBC /* OTPVerificationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D51D66CA2441034D957E851C /* OTPVerificationView.swift */; };
+		CA1A56897FDC5B8EAE87B3FE /* PartnerProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADB9045FDACB8C9255A1DAAB /* PartnerProfileViewModel.swift */; };
 		CA1FD6B822DD43BC93B69A8F /* ConnectionCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABD35B948632E31FF8A83A6 /* ConnectionCard.swift */; };
 		CC6B4FBA65E1EF48662A87B1 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4458765922C0561C5F6DB931 /* ProfileView.swift */; };
 		CCB52AD25863617AEF10B183 /* BoopApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28C1391E032AE6F632E3CF80 /* BoopApp.swift */; };
@@ -132,6 +133,7 @@
 		D4850268D9F059D352726EFC /* RevealView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7A043A9247D2285F5981723 /* RevealView.swift */; };
 		D6D64FC60406210B419C7DE0 /* BoopVoiceRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894D0C09E20C3C291A0909EB /* BoopVoiceRecorder.swift */; };
 		D7FFC02C1A7AA1D3091EC5BC /* NotificationInboxViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 305E515B0BE01E9348E62DAA /* NotificationInboxViewModel.swift */; };
+		D887FA01DCC176A0FA724F78 /* PartnerProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBEFE96655052A063F8944 /* PartnerProfileView.swift */; };
 		D984558F43DA09D6C901F165 /* TheClearingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CAC26BC2010C4AB69F7B717 /* TheClearingView.swift */; };
 		DC18BB836B17AD8426FD440F /* RealtimeStatusBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8FE0178447D54BB0C9921A /* RealtimeStatusBanner.swift */; };
 		DCCB1220FA993275FEE87604 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 6D0730889E4C49397EC39E1C /* GoogleService-Info.plist */; };
@@ -248,6 +250,7 @@
 		8063D8EA6945D1EF0276A253 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		80D36B41C425F685447A092E /* QuestionsProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionsProgressView.swift; sourceTree = "<group>"; };
 		82B492A47A12697F27111744 /* BioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BioView.swift; sourceTree = "<group>"; };
+		84EBEFE96655052A063F8944 /* PartnerProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerProfileView.swift; sourceTree = "<group>"; };
 		864429D41708E46F3741698C /* OnboardingIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingIntroView.swift; sourceTree = "<group>"; };
 		8650197EE9802665BE9B422B /* QuestionsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuestionsViewModel.swift; sourceTree = "<group>"; };
 		879E9696006FB1EA9C86ABA9 /* ConversationStartersCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationStartersCard.swift; sourceTree = "<group>"; };
@@ -277,6 +280,7 @@
 		A7A8A9661141D72563FDA5BD /* DatePlanView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePlanView.swift; sourceTree = "<group>"; };
 		AA8265325BEB7E7C4496563E /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		AB86FAE3A127ED7BFE0B78B2 /* GameHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameHistoryView.swift; sourceTree = "<group>"; };
+		ADB9045FDACB8C9255A1DAAB /* PartnerProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerProfileViewModel.swift; sourceTree = "<group>"; };
 		B07D1F25864C22B7C94F5A48 /* BoopWidget.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = BoopWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		B20020C58661A7DC2987D88F /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		B283A6EF2B73A48BC3A6BB8B /* ScoreProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScoreProgressView.swift; sourceTree = "<group>"; };
@@ -410,6 +414,7 @@
 				FD65CE737D3A17A9BDCD083A /* CompatibilityDeepDiveViewModel.swift */,
 				55764FEA4CE82211D2A89672 /* DatePlanViewModel.swift */,
 				4C306A96BE48B481D3F89EA7 /* MatchDetailViewModel.swift */,
+				ADB9045FDACB8C9255A1DAAB /* PartnerProfileViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -553,6 +558,7 @@
 				A7A8A9661141D72563FDA5BD /* DatePlanView.swift */,
 				EC7A0803A805D3BAC3F37F0B /* GoneQuietCard.swift */,
 				40AB0A3C49A151B2D0D4E031 /* MatchDetailView.swift */,
+				84EBEFE96655052A063F8944 /* PartnerProfileView.swift */,
 				9C54AE3DF0970CDFB31C7B95 /* RelationshipInsightsView.swift */,
 				B283A6EF2B73A48BC3A6BB8B /* ScoreProgressView.swift */,
 				9CAC26BC2010C4AB69F7B717 /* TheClearingView.swift */,
@@ -1185,6 +1191,8 @@
 				390E0F6071AB55C5F788A04B /* OnboardingContainerView.swift in Sources */,
 				04FC7281E12C9287FA60E072 /* OnboardingIntroView.swift in Sources */,
 				9572FE51CB188211A059780F /* OnboardingViewModel.swift in Sources */,
+				D887FA01DCC176A0FA724F78 /* PartnerProfileView.swift in Sources */,
+				CA1A56897FDC5B8EAE87B3FE /* PartnerProfileViewModel.swift in Sources */,
 				2E875FA81A1B2CD9FDCC59B4 /* PersonalityRadarChartView.swift in Sources */,
 				3AFEA216B6E35395E14CAE45 /* PersonalityReportView.swift in Sources */,
 				1356366A91DBDFDCDCE14B9F /* PersonalityReportViewModel.swift in Sources */,
