@@ -11,6 +11,12 @@ class QuestionsViewModel {
     var answeredCount = 0
     var allBatchDone = false
 
+    /// Deepen/"answer more" context (QuestionsFullView) vs onboarding (QuestionsView).
+    /// In Deepen, the user is already preview/ready, so we must NOT treat a
+    /// preview/ready submit response as terminal — we just advance to the next
+    /// unanswered question. Onboarding leaves this false to drive the Reveal.
+    var isDeepenMode = false
+
     /// Onboarding is complete once the 8 onboarding questions are answered.
     /// This drives the terminal Reveal screen — it is derived from the answer
     /// count / batch state, NOT from a backend `profileStage` string, so the
@@ -174,7 +180,7 @@ class QuestionsViewModel {
             // (8 answers) or `ready` (15+). Treat either as terminal so the
             // Reveal shows even if this fires before we run out of questions.
             let isOnboardingDoneStage = response.profileStage == "preview" || response.profileStage == "ready"
-            if isOnboardingDoneStage {
+            if isOnboardingDoneStage && !isDeepenMode {
                 allBatchDone = true
                 Analytics.capture("onboarding_complete", [
                     "answers": answeredCount,
@@ -188,7 +194,13 @@ class QuestionsViewModel {
 
             advanceToNext()
         } catch let error as APIError {
-            errorMessage = error.errorDescription
+            // A stale available-questions cache can re-serve an answered question;
+            // the backend rejects the duplicate. Don't strand the user — skip it.
+            if (error.errorDescription ?? "").lowercased().contains("already answered") {
+                advanceToNext()
+            } else {
+                errorMessage = error.errorDescription
+            }
         } catch {
             errorMessage = "Failed to submit answer"
         }
@@ -253,8 +265,11 @@ class QuestionsViewModel {
             }
             questionStartTime = Date()
         } else {
-            // All available questions in this batch answered
+            // All available questions in this batch answered. Advance the index
+            // past the end so `currentQuestion` becomes nil → "All caught up"
+            // (Deepen) / Reveal (onboarding, driven by isOnboardingComplete).
             allBatchDone = true
+            currentIndex = questions.count
             Task {
                 let wrapper: UserWrapper = try await APIClient.shared.request(.me)
                 AuthManager.shared.updateUser(wrapper.user)

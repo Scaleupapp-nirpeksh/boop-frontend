@@ -37,6 +37,7 @@ struct QuestionsFullView: View {
         }
         .boopBackground()
         .task {
+            viewModel.isDeepenMode = true
             await viewModel.fetchAllQuestions()
         }
     }
