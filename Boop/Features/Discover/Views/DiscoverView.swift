@@ -6,83 +6,33 @@ struct DiscoverView: View {
     var body: some View {
         ZStack {
             ScrollView {
-                VStack(spacing: BoopSpacing.lg) {
-                    BoopSectionIntro(
-                        title: "Discover",
-                        subtitle: "Chemistry first. See who aligns with you today.",
-                        eyebrow: "Daily connections"
-                    )
+                VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                    header
 
-                    if viewModel.candidatesRemaining > 0 {
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(BoopColors.secondary)
-                                .frame(width: 6, height: 6)
-                            Text("\(viewModel.candidatesRemaining) left today")
-                                .font(BoopTypography.caption)
-                                .fontWeight(.medium)
-                                .foregroundStyle(BoopColors.secondary)
+                    Group {
+                        if viewModel.isLoading {
+                            SkeletonCandidateCard()
+                                .boopCard(radius: BoopRadius.xxl)
+                        } else if let error = viewModel.errorMessage {
+                            errorView(error)
+                        } else if let candidate = viewModel.currentCandidate {
+                            CandidateCardView(
+                                candidate: candidate,
+                                onConnect: { Haptics.medium(); viewModel.openConnectSheet(for: candidate) },
+                                onSkip: { Haptics.light(); Task { await viewModel.passCurrentCandidate() } }
+                            )
+                            .id(candidate.userId)
+                            .transition(.asymmetric(
+                                insertion: .move(edge: .trailing).combined(with: .opacity),
+                                removal: .move(edge: .leading).combined(with: .opacity)
+                            ))
+                        } else {
+                            allCaughtUpView
                         }
-                        .frame(maxWidth: .infinity, alignment: .trailing)
                     }
 
-                    ZStack {
-                        RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [BoopColors.cardDark, BoopColors.cardDarkDiscover],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: BoopRadius.xxl, style: .continuous)
-                                    .stroke(Color.white.opacity(0.08), lineWidth: 1)
-                            )
-
-                        VStack(spacing: BoopSpacing.md) {
-                            if viewModel.isLoading {
-                                SkeletonCandidateCard()
-                            } else if let error = viewModel.errorMessage {
-                                VStack(spacing: BoopSpacing.md) {
-                                    Image(systemName: "wifi.exclamationmark")
-                                        .font(.system(size: 36))
-                                        .foregroundStyle(BoopColors.error.opacity(0.6))
-                                    Text(error)
-                                        .font(BoopTypography.body)
-                                        .foregroundStyle(BoopColors.textSecondary)
-                                        .multilineTextAlignment(.center)
-                                    BoopButton(title: "Try Again", variant: .secondary, fullWidth: false) {
-                                        Task { await viewModel.loadCandidates() }
-                                    }
-                                }
-                                .padding(.vertical, BoopSpacing.xl)
-                            } else if let candidate = viewModel.currentCandidate {
-                                CandidateCardView(
-                                    candidate: candidate,
-                                    onConnect: { Haptics.medium(); viewModel.openConnectSheet(for: candidate) },
-                                    onSkip: { Haptics.light(); Task { await viewModel.passCurrentCandidate() } }
-                                )
-                                .id(candidate.userId)
-                                .transition(.asymmetric(
-                                    insertion: .move(edge: .trailing).combined(with: .opacity),
-                                    removal: .move(edge: .leading).combined(with: .opacity)
-                                ))
-                            } else {
-                                allCaughtUpView
-                            }
-
-                            if viewModel.candidates.count > 1 && viewModel.currentCandidateIndex < viewModel.candidates.count {
-                                HStack(spacing: 6) {
-                                    ForEach(0..<min(viewModel.candidates.count, 10), id: \.self) { i in
-                                        Circle()
-                                            .fill(i == viewModel.currentCandidateIndex ? BoopColors.primary : Color.white.opacity(0.18))
-                                            .frame(width: 6, height: 6)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(BoopSpacing.md)
+                    if viewModel.candidates.count > 1 && viewModel.currentCandidateIndex < viewModel.candidates.count {
+                        queueProgress
                     }
                 }
                 .padding(.horizontal, BoopSpacing.xl)
@@ -116,25 +66,73 @@ struct DiscoverView: View {
         }
     }
 
-    private var allCaughtUpView: some View {
-        BoopCard(padding: BoopSpacing.xl, radius: BoopRadius.xxl) {
-            VStack(spacing: BoopSpacing.md) {
-                Image(systemName: "heart.circle")
-                    .font(.system(size: 48))
-                    .foregroundStyle(BoopColors.primary.opacity(0.5))
-                    .symbolEffect(.pulse, options: .repeating)
+    // MARK: - Header (eyebrow + daily count)
 
-                Text("All caught up for now")
-                    .font(BoopTypography.headline)
-                    .foregroundStyle(BoopColors.textPrimary)
+    private var header: some View {
+        HStack(alignment: .firstTextBaseline) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                EyebrowLabel(text: "Discover", color: BoopColors.textMuted)
+                AccentRule()
+            }
 
-                Text("You've seen today's queue. Check back tomorrow!")
-                    .font(BoopTypography.body)
-                    .foregroundStyle(BoopColors.textMuted)
-                    .multilineTextAlignment(.center)
+            Spacer()
+
+            if viewModel.candidatesRemaining > 0 {
+                Text("\(viewModel.candidatesRemaining) TODAY")
+                    .font(BoopTypography.cineLabel)
+                    .tracking(2)
+                    .foregroundStyle(BoopColors.textSecondary)
+            }
+        }
+    }
+
+    // MARK: - Queue progress (hairline ticks)
+
+    private var queueProgress: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<min(viewModel.candidates.count, 10), id: \.self) { i in
+                Rectangle()
+                    .fill(i == viewModel.currentCandidateIndex ? BoopColors.accentColor : BoopColors.hairline)
+                    .frame(height: 2)
             }
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, BoopSpacing.xl)
+    }
+
+    // MARK: - Error
+
+    private func errorView(_ error: String) -> some View {
+        VStack(spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "Connection lost", color: BoopColors.textMuted)
+            Text(error)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textSecondary)
+                .multilineTextAlignment(.center)
+            BoopButton(title: "Try Again", variant: .secondary, fullWidth: false) {
+                Task { await viewModel.loadCandidates() }
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, BoopSpacing.huge)
+        .padding(.horizontal, BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.xxl)
+    }
+
+    // MARK: - Empty
+
+    private var allCaughtUpView: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            EyebrowLabel(text: "All caught up", color: BoopColors.textMuted)
+            AccentRule()
+            Text("You've seen today's queue")
+                .font(BoopTypography.cineTitle)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text("New people align with you each day. Check back tomorrow.")
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BoopSpacing.xl)
+        .boopCard(radius: BoopRadius.xxl)
     }
 }
