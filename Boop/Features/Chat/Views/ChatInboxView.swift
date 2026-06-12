@@ -317,7 +317,13 @@ struct ChatConversationView: View {
         ZStack {
             fogBackground
 
+            // Pin the chat column to the safe content width. The fog layer below
+            // bleeds edge-to-edge via .ignoresSafeArea(); keeping the content in
+            // its own width-bounded layer stops the ScrollView (and the
+            // GeometryReader that measures it) from ever inheriting the fog's
+            // full-bleed width on the chats that show fog.
             conversationContent
+                .frame(maxWidth: .infinity)
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -629,9 +635,9 @@ struct ChatConversationView: View {
                 .background(
                     GeometryReader { proxy in
                         Color.clear
-                            .onAppear { messageListWidth = proxy.size.width }
+                            .onAppear { updateMessageListWidth(proxy.size.width) }
                             .onChange(of: proxy.size.width) { _, newValue in
-                                messageListWidth = newValue
+                                updateMessageListWidth(newValue)
                             }
                     }
                 )
@@ -676,15 +682,43 @@ struct ChatConversationView: View {
         }
     }
 
-    /// Cap each bubble at ~76% of the message list's usable width (after the
-    /// list's own 16pt horizontal padding) so sent bubbles hug the right with a
-    /// left gutter and received hug the left with a right gutter — identical in
-    /// fog and non-fog states. Falls back to the screen width before geometry
-    /// resolves so the very first layout pass is already constrained.
+    /// Store the measured list width, but never above the physical screen width.
+    /// The fog layer's edge-to-edge `.ignoresSafeArea()` AsyncImage can cause a
+    /// relayout pass that briefly proposes a full-bleed width to the ScrollView;
+    /// because the width is kept in @State, an un-clamped over-wide value would
+    /// stick and loosen the bubble cap. Clamping at the source keeps it sane.
+    private func updateMessageListWidth(_ width: CGFloat) {
+        guard width > 0 else { return }
+        messageListWidth = min(width, UIScreen.main.bounds.width)
+    }
+
+    /// Cap each bubble so sent bubbles hug the right with a left gutter and
+    /// received hug the left with a right gutter — identical in fog and non-fog
+    /// states.
+    ///
+    /// Two independent caps are taken, and we use the SMALLER:
+    ///  1. ~76% of the measured list width (after the list's own 16pt padding).
+    ///  2. A HARD ceiling of 74% of the *physical* screen width.
+    ///
+    /// The second cap is the bulletproof part. The fog background wraps an
+    /// `AsyncImage` (`.aspectRatio(.fill)`) in a `.frame(maxWidth: .infinity)`
+    /// that `.ignoresSafeArea()`. That greedy, edge-to-edge layer can make the
+    /// ZStack — and therefore the `.background` GeometryReader on the ScrollView
+    /// — resolve a width WIDER than the visible safe content area on the exact
+    /// chats that show fog (low comfort / "THE FOG IS LIFTING"). When that
+    /// happens, `messageListWidth` is too large and a 76%-of-measured cap is too
+    /// loose, so bubbles spill off both edges. Clamping to a fraction of
+    /// `UIScreen.main.bounds.width` — which can never exceed the device — keeps
+    /// every bubble inside the screen no matter how the fog/safe-area layout
+    /// mis-measures the list. Non-fog chats are unaffected (their measured cap is
+    /// already the smaller of the two).
     private var maxBubbleWidth: CGFloat {
-        let usable = (messageListWidth > 0 ? messageListWidth : UIScreen.main.bounds.width)
+        let screen = UIScreen.main.bounds.width
+        let measuredBase = (messageListWidth > 0 ? messageListWidth : screen)
             - (BoopSpacing.md * 2)
-        return max(120, usable * 0.76)
+        let measuredCap = measuredBase * 0.76
+        let hardCeiling = screen * 0.74
+        return max(120, min(measuredCap, hardCeiling))
     }
 
     private var filteredMessages: [ChatMessage] {
@@ -948,6 +982,11 @@ private struct ChatMessageBubble: View {
 
                     if !isCurrentUser { Spacer() }
                 }
+                // Pin the row to the full content width so the capped bubble + its
+                // single Spacer always resolve inside the list. Without this the
+                // HStack would size to its content and a wide bubble could push the
+                // Spacer to zero and bleed past the gutter.
+                .frame(maxWidth: .infinity, alignment: isCurrentUser ? .trailing : .leading)
 
                 // Quick reactions surface only under the newest message so the
                 // thread stays quiet — every message keeps the full reaction
@@ -1041,6 +1080,10 @@ private struct ChatMessageBubble: View {
             Text(message.content.text ?? "")
                 .font(BoopTypography.cineBody)
                 .foregroundStyle(isCurrentUser ? .white : BoopColors.textPrimary)
+                // Wrap to the bubble's capped width and grow vertically. Horizontal
+                // is explicitly NOT fixed (no fixedSize-horizontal / lineLimit(1)),
+                // so long messages flow onto new lines instead of widening the bubble.
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
