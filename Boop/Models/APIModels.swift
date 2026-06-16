@@ -242,9 +242,12 @@ struct PartnerProfileResponse: Decodable {
     let partner: PartnerProfile
 }
 
-/// The depth view of a matched partner: identity, voice, archetype, facet
-/// shape, and showcase answers. Everything the backend may omit is optional
-/// so the decode stays safe across rollout states (pre-analysis, pre-reveal).
+/// The depth view of a matched partner: identity, voice, archetype, and facet
+/// shape. Everything the backend may omit is optional so the decode stays safe
+/// across rollout states (pre-analysis, pre-reveal).
+///
+/// PRIVACY: intentionally has no field for the partner's verbatim written
+/// answers — the "About [person]" page must never surface their exact responses.
 struct PartnerProfile: Decodable {
     let userId: String
     let firstName: String?
@@ -256,7 +259,6 @@ struct PartnerProfile: Decodable {
     let archetype: PartnerArchetype?
     let facets: [PartnerFacet]?
     let questionsAnswered: Int?
-    let showcaseAnswers: [PartnerShowcaseAnswer]?
 
     struct PartnerVoiceIntro: Decodable {
         let audioUrl: String?
@@ -285,11 +287,6 @@ struct PartnerFacet: Decodable, Identifiable {
     let score: Int?
 
     var id: String { key }
-}
-
-struct PartnerShowcaseAnswer: Decodable, Hashable {
-    let questionText: String?
-    let answer: String?
 }
 
 // MARK: - Games

@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// Read-only depth view of a matched partner: who they are, how they sound,
-/// their personality type and shape, and a few of their answers in their own
-/// words. Presented from MatchDetailView.
+/// and their personality type and shape. Deliberately never shows the partner's
+/// verbatim written answers (privacy). Presented from MatchDetailView.
 struct PartnerProfileView: View {
     let matchId: String
     var firstName: String? = nil
@@ -27,10 +27,6 @@ struct PartnerProfileView: View {
 
                         if let facets = partner.facets, !facets.isEmpty {
                             shapeSection(facets)
-                        }
-
-                        if hasWords(partner) {
-                            wordsSection(partner)
                         }
                     }
                     .padding(.horizontal, BoopSpacing.xl)
@@ -215,51 +211,12 @@ struct PartnerProfileView: View {
         }
     }
 
-    // MARK: - In their words (bio + showcase answers as quiet quote rows)
-
-    private func hasWords(_ partner: PartnerProfile) -> Bool {
-        if let bio = partner.bio, !bio.isEmpty { return true }
-        return !(partner.showcaseAnswers ?? []).isEmpty
-    }
-
-    private func wordsSection(_ partner: PartnerProfile) -> some View {
-        let answers = partner.showcaseAnswers ?? []
-
-        return VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            EyebrowLabel(text: "In Their Words")
-
-            VStack(spacing: 0) {
-                if let bio = partner.bio, !bio.isEmpty {
-                    wordRow(label: "About", text: bio)
-                }
-
-                ForEach(Array(answers.enumerated()), id: \.offset) { _, item in
-                    if let answer = item.answer, !answer.isEmpty {
-                        wordRow(label: item.questionText ?? "They shared", text: answer)
-                    }
-                }
-
-                Rectangle().fill(BoopColors.hairline).frame(height: 1)
-            }
-        }
-    }
-
-    private func wordRow(label: String, text: String) -> some View {
-        VStack(spacing: 0) {
-            Rectangle().fill(BoopColors.hairline).frame(height: 1)
-            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                EyebrowLabel(text: label)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(text)
-                    .font(BoopTypography.cineBodyLight)
-                    .foregroundStyle(BoopColors.textSecondary)
-                    .lineSpacing(4)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, BoopSpacing.md)
-        }
-    }
+    // PRIVACY: the partner's verbatim written answers (their "showcase answers"
+    // / raw question responses) and free-text bio are intentionally NOT rendered
+    // here. The "About [person]" page may only surface derived signals — voice
+    // intro, personality type (archetype), and the facet shape. Verbatim
+    // responses surface elsewhere as synthesized summaries (answer-sync), never
+    // as the other person's exact words on this page.
 
     // MARK: - Loading
 
