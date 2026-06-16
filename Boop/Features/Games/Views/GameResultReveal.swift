@@ -165,21 +165,24 @@ struct GameResultRevealView: View {
                     .fill(
                         RadialGradient(
                             colors: [BoopColors.accentColor.opacity(0.55), .clear],
-                            center: .center, startRadius: 1, endRadius: ringSize * 0.7
+                            center: .center, startRadius: 1, endRadius: ringSize * 0.55
                         )
                     )
                     .frame(width: ringSize, height: ringSize)
-                    .scaleEffect(bloom ? 1.15 : 0.6)
-                    .opacity(bloom ? (summary.isCelebratory ? 0.9 : 0.5) : 0)
-                    .blur(radius: 8)
+                    .scaleEffect(bloom ? 1.05 : 0.6)
+                    .opacity(bloom ? (summary.isCelebratory ? 0.85 : 0.45) : 0)
+                    .blur(radius: 10)
 
-                // Track + progress ring
+                // Track + progress ring — both explicitly sized so the ZStack
+                // can never inflate past ringSize and bleed into the text.
                 Circle()
                     .stroke(Color.white.opacity(0.10), lineWidth: 3)
+                    .frame(width: ringSize, height: ringSize)
                 Circle()
                     .trim(from: 0, to: appeared ? summary.ringFraction : 0)
                     .stroke(BoopColors.accentColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                     .rotationEffect(.degrees(-90))
+                    .frame(width: ringSize, height: ringSize)
 
                 VStack(spacing: 2) {
                     Text("\(shownValue)")
@@ -193,14 +196,7 @@ struct GameResultRevealView: View {
                         .foregroundStyle(BoopColors.textMuted)
                         .multilineTextAlignment(.center)
                 }
-                .padding(.horizontal, BoopSpacing.sm)
-
-                // A few rising sparks on a strong result — restrained, on-brand.
-                if summary.isCelebratory {
-                    CelebrationSparks(active: appeared)
-                        .frame(width: ringSize * 1.6, height: ringSize * 1.6)
-                        .allowsHitTesting(false)
-                }
+                .frame(width: ringSize - 28)
             }
             .frame(width: ringSize, height: ringSize)
 
@@ -260,10 +256,16 @@ struct GameResultRevealView: View {
             Text(value)
                 .font(BoopTypography.cineHeadline)
                 .foregroundStyle(BoopColors.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+            // Single line, shrink-to-fit — never break a word like "COMPLETION"
+            // across two lines in the narrow 1/3-width column.
             Text(label.uppercased())
                 .font(BoopTypography.cineLabel)
-                .tracking(2)
+                .tracking(1)
                 .foregroundStyle(BoopColors.textMuted)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
         }
         .frame(maxWidth: .infinity)
     }
@@ -278,35 +280,6 @@ struct GameResultRevealView: View {
             Haptics.celebration()
         } else {
             Haptics.success()
-        }
-    }
-}
-
-// MARK: - Restrained celebration sparks
-
-/// A small set of coral hearts that rise and fade once — tasteful, not confetti.
-private struct CelebrationSparks: View {
-    let active: Bool
-    private let count = 7
-
-    var body: some View {
-        GeometryReader { geo in
-            ZStack {
-                ForEach(0..<count, id: \.self) { i in
-                    let frac = CGFloat(i) / CGFloat(max(count - 1, 1))
-                    let x = geo.size.width * (0.18 + 0.64 * frac)
-                    Image(systemName: "heart.fill")
-                        .font(.system(size: 9 + CGFloat(i % 3) * 3))
-                        .foregroundStyle(BoopColors.accentColor.opacity(0.85))
-                        .position(x: x, y: geo.size.height * 0.62)
-                        .offset(y: active ? -geo.size.height * (0.34 + 0.10 * frac) : 0)
-                        .opacity(active ? 0 : 0.9)
-                        .animation(
-                            .easeOut(duration: 1.5).delay(0.1 + Double(i) * 0.08),
-                            value: active
-                        )
-                }
-            }
         }
     }
 }

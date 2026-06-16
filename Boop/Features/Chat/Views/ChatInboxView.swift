@@ -330,7 +330,13 @@ struct ChatConversationView: View {
             // its own width-bounded layer stops the ScrollView (and the
             // GeometryReader that measures it) from ever inheriting the fog's
             // full-bleed width on the chats that show fog.
+            // Hard-clamp the chat column to the physical screen width and centre
+            // it. The fog layer below bleeds edge-to-edge via .ignoresSafeArea();
+            // using .infinity here let the column (and its right/left-aligned
+            // bubble rows) inherit that over-wide width, pushing bubbles off both
+            // screen edges. Clamping to the screen width keeps every row on-screen.
             conversationContent
+                .frame(maxWidth: UIScreen.main.bounds.width)
                 .frame(maxWidth: .infinity)
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -354,10 +360,11 @@ struct ChatConversationView: View {
                         }
                     }
 
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 1) {
                         Text(conversation.otherUser.firstName ?? "Chat")
                             .font(BoopTypography.cineHeadline)
                             .foregroundStyle(BoopColors.textPrimary)
+                            .lineLimit(1)
 
                         HStack(spacing: 4) {
                             Image(systemName: "circle.fill")
@@ -367,21 +374,6 @@ struct ChatConversationView: View {
                                 .tracking(1.5)
                         }
                         .foregroundStyle(conversation.otherUser.isOnline == true ? BoopColors.accentColor : BoopColors.textMuted)
-
-                        if let comfort = viewModel.comfortScore,
-                           conversation.matchId != nil,
-                           conversation.matchStage != "revealed",
-                           conversation.matchStage != "dating" {
-                            Button { showComfortDetail = true } label: {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    AccentRule(width: 18)
-                                    Text("THE FOG IS LIFTING · \(comfort)/70")
-                                        .font(BoopTypography.cineLabel)
-                                        .tracking(1.5)
-                                        .foregroundStyle(BoopColors.accentColor)
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -564,9 +556,48 @@ struct ChatConversationView: View {
         }
     }
 
+    /// Slim, full-width fog/comfort strip below the nav bar. Moved out of the
+    /// cramped toolbar so the header can breathe (just avatar + name + status).
     @ViewBuilder
+    private var fogBanner: some View {
+        if let comfort = viewModel.comfortScore,
+           conversation.matchId != nil,
+           conversation.matchStage != "revealed",
+           conversation.matchStage != "dating" {
+            Button { showComfortDetail = true } label: {
+                HStack(spacing: BoopSpacing.sm) {
+                    Text("THE FOG IS LIFTING")
+                        .font(BoopTypography.cineLabel)
+                        .tracking(1.5)
+                        .foregroundStyle(BoopColors.accentColor)
+                    HairlineProgress(progress: min(Double(comfort) / 70.0, 1))
+                        .frame(maxWidth: .infinity)
+                    Text("\(comfort)/70")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textMuted)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 10, weight: .thin))
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+                .padding(.horizontal, BoopSpacing.md)
+                .padding(.vertical, BoopSpacing.sm)
+                .frame(maxWidth: .infinity)
+                .background(
+                    Rectangle()
+                        .fill(BoopColors.accentColor.opacity(0.06))
+                        .overlay(alignment: .bottom) {
+                            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+                        }
+                )
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
     private var conversationContent: some View {
         VStack(spacing: 0) {
+            fogBanner
+
             if !searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 HStack {
                     Text("\(filteredMessages.count) RESULT\(filteredMessages.count == 1 ? "" : "S")")
