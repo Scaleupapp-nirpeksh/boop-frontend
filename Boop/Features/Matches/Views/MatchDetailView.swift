@@ -2,6 +2,9 @@ import SwiftUI
 
 struct MatchDetailView: View {
     let matchId: String
+    /// When presented modally (full-screen cover), show a Close button. When
+    /// pushed in a navigation stack the system back button handles dismissal.
+    let isModal: Bool
 
     @Environment(\.dismiss) private var dismiss
     @State private var viewModel: MatchDetailViewModel
@@ -12,8 +15,9 @@ struct MatchDetailView: View {
     @State private var showClearing = false
     @State private var showLetGoConfirm = false
 
-    init(matchId: String) {
+    init(matchId: String, isModal: Bool = false) {
         self.matchId = matchId
+        self.isModal = isModal
         _viewModel = State(initialValue: MatchDetailViewModel(matchId: matchId))
     }
 
@@ -99,6 +103,12 @@ struct MatchDetailView: View {
         .navigationTitle(viewModel.detail?.otherUser?.firstName ?? "Match")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            if isModal {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Close") { dismiss() }
+                        .foregroundStyle(BoopColors.accentColor)
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
@@ -333,12 +343,22 @@ struct MatchDetailView: View {
     private var scoreRow: some View {
         let comfort = viewModel.comfort?.score ?? viewModel.detail?.comfortScore ?? 0
         let readiness = viewModel.readiness?.score ?? 0
-        return HStack(alignment: .top, spacing: 0) {
-            statBlock(title: "Match", value: "\(viewModel.detail?.compatibilityScore ?? 0)%", progress: nil)
-            scoreDivider
-            statBlock(title: "Comfort", value: "\(comfort)", progress: Double(comfort) / 100.0)
-            scoreDivider
-            statBlock(title: "Readiness", value: "\(readiness)", progress: Double(readiness) / 100.0)
+        return VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            HStack(alignment: .top, spacing: 0) {
+                statBlock(title: "Match", value: "\(viewModel.detail?.compatibilityScore ?? 0)%", progress: nil)
+                scoreDivider
+                statBlock(title: "Comfort", value: "\(comfort)", progress: Double(comfort) / 100.0)
+                scoreDivider
+                statBlock(title: "Readiness", value: "\(readiness)", progress: Double(readiness) / 100.0)
+            }
+
+            // Plain-language key so these three numbers aren't a mystery — and
+            // so people know comfort is what gradually clears the photo.
+            Text("Match is how aligned your answers are. Comfort is how safe this connection feels — it slowly clears the photo as it grows. Readiness is how close you both are to meeting.")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+                .lineSpacing(2)
         }
     }
 

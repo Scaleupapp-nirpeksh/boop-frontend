@@ -9,7 +9,7 @@ options:
 settings:
   base:
     MARKETING_VERSION: "1.0.0"
-    CURRENT_PROJECT_VERSION: "23"
+    CURRENT_PROJECT_VERSION: "25"
     DEVELOPMENT_TEAM: "NK5P69WG2H"
     SWIFT_VERSION: "5.9"
     INFOPLIST_KEY_CFBundleDisplayName: "UnMutee"
@@ -53,12 +53,9 @@ targets:
         product: PostHog
       - target: BoopWidget
         embed: true
-    entitlements:
-      path: Boop/Resources/Boop.entitlements
-      properties:
-        aps-environment: development
-        com.apple.security.application-groups:
-          - group.com.influhitch.boop
+    # Entitlements are managed as two static files (not auto-generated) so the
+    # APNs environment can differ per build config — see settings.configs below.
+    # Boop.entitlements = development (Debug), Boop-Release.entitlements = production.
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.influhitch.boop
@@ -70,6 +67,13 @@ targets:
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
         DEVELOPMENT_ASSET_PATHS: "\"Boop/Resources/Preview Content\""
         DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+      configs:
+        # Debug keeps the sandbox (development) APNs entitlement. Release /
+        # TestFlight / App Store must use production APNs — otherwise distribution
+        # builds register sandbox tokens that FCM rejects (BadDeviceToken) and
+        # every push silently fails.
+        Release:
+          CODE_SIGN_ENTITLEMENTS: Boop/Resources/Boop-Release.entitlements
     postBuildScripts:
       - name: Crashlytics dSYM Upload
         script: "\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\""
@@ -82,7 +86,7 @@ targets:
       properties:
         CFBundleDisplayName: UnMutee
         CFBundleShortVersionString: "1.0.0"
-        CFBundleVersion: "23"
+        CFBundleVersion: "25"
         # App uses only standard HTTPS/TLS — exempt encryption. Auto-answers
         # the App Store Connect export-compliance question for every build.
         ITSAppUsesNonExemptEncryption: false

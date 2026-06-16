@@ -11,6 +11,8 @@ struct PersonalityRadarChartView: View {
     private var center: CGPoint { CGPoint(x: size / 2, y: size / 2) }
     private var radius: CGFloat { size / 2 - 36 }
     private var count: Int { facets.count }
+    // Label width scales with the chart so long titles get room to wrap.
+    private var labelWidth: CGFloat { max(64, size * 0.34) }
 
     var body: some View {
         ZStack {
@@ -56,19 +58,24 @@ struct PersonalityRadarChartView: View {
                 .position(pt)
             }
 
-            // Axis labels — typeset facet title + score, no emoji
+            // Axis labels — typeset facet title + score, no emoji.
+            // Full titles wrap to two lines (and shrink slightly if needed) so
+            // longer dimension names like "Emotional Stability" never truncate.
             ForEach(0..<count, id: \.self) { i in
-                let labelPoint = point(for: i, scale: 1.34)
+                let labelPoint = point(for: i, scale: 1.3)
                 VStack(spacing: 1) {
                     Text(facets[i].title)
                         .font(BoopTypography.cineCaption)
                         .foregroundStyle(BoopColors.textSecondary)
-                        .lineLimit(1)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(2)
+                        .minimumScaleFactor(0.75)
+                        .fixedSize(horizontal: false, vertical: true)
                     Text("\(facets[i].score)")
                         .font(.system(size: 11, weight: .semibold))
                         .foregroundStyle(BoopColors.textPrimary)
                 }
-                .frame(width: 72)
+                .frame(width: labelWidth)
                 .position(labelPoint)
             }
         }

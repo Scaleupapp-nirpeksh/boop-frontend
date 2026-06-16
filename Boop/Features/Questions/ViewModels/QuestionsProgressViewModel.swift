@@ -56,10 +56,10 @@ final class QuestionsProgressViewModel {
         guard let target = nextTarget(progress) else {
             return "\(answered) answered · your matches are dialed in"
         }
-        // Honest, simple heuristic: how many unlocked questions are still unanswered.
-        // Frame as "answer M more" without over-promising precise % math.
-        let remainingUnlocked = max(progress.totalUnlocked - answered, 0)
-        let more = max(remainingUnlocked, 1)
+        // Exact, not a guess: confidence follows 100·(1−e^(−answered/14)), so the
+        // answers needed to reach a target T% is ceil(−14·ln(1 − T/100)).
+        let required = Int(ceil(-14.0 * log(1.0 - Double(target) / 100.0)))
+        let more = max(required - answered, 1)
         let noun = more == 1 ? "answer" : "answers"
         return "\(answered) answered · \(more) more \(noun) to reach \(target)%"
     }

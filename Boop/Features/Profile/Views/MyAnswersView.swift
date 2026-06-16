@@ -164,15 +164,14 @@ struct MyAnswersView: View {
     }
 
     private func answerValue(_ text: String) -> some View {
-        HStack(alignment: .top, spacing: BoopSpacing.xs) {
-            Rectangle()
-                .fill(BoopColors.accentColor)
-                .frame(width: 2)
-            Text(text)
-                .font(BoopTypography.cineBody)
-                .foregroundStyle(BoopColors.textSecondary)
-        }
-        .fixedSize(horizontal: false, vertical: true)
+        // Flush-left, same as text/voice answers — so every answer in the list
+        // shares one consistent left edge (previously option answers were
+        // indented behind an accent bar while text answers sat flush).
+        Text(text)
+            .font(BoopTypography.cineBodyLight)
+            .foregroundStyle(BoopColors.textSecondary)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var emptyState: some View {

@@ -32,8 +32,17 @@ struct GameSession: Decodable, Identifiable {
     let createdAt: Date?
     let sessionPhase: String?
     let sync: GameSyncState?
+    /// Comfort snapshot captured when the game completed (post-game reveal).
+    let comfort: GameComfortBoost?
 
     var id: String { gameId }
+}
+
+/// How much a completed game moved the connection's comfort forward.
+struct GameComfortBoost: Decodable {
+    let before: Int?
+    let after: Int?
+    let delta: Int?
 }
 
 struct GameRound: Decodable, Identifiable {

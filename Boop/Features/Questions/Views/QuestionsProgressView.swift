@@ -108,6 +108,15 @@ struct QuestionsProgressView: View {
                     .foregroundStyle(BoopColors.textSecondary)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
+
+                // Plain-language explanation of what the number actually is.
+                Text("How sharply we can match you. It climbs with every answer — the first answers help most.")
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, BoopSpacing.xxs)
+                    .padding(.horizontal, BoopSpacing.md)
             }
         }
         .frame(maxWidth: .infinity)

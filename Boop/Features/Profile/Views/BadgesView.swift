@@ -3,10 +3,10 @@ import SwiftUI
 struct BadgesView: View {
     @State private var viewModel = BadgesViewModel()
 
+    // Two columns so each badge has room for its one-line description.
     private let columns = [
-        GridItem(.flexible(), spacing: BoopSpacing.md),
-        GridItem(.flexible(), spacing: BoopSpacing.md),
-        GridItem(.flexible(), spacing: BoopSpacing.md)
+        GridItem(.flexible(), spacing: BoopSpacing.lg),
+        GridItem(.flexible(), spacing: BoopSpacing.lg)
     ]
 
     var body: some View {
@@ -131,13 +131,29 @@ private struct BadgeMedallion: View {
             }
             .opacity(badge.earned ? 1 : 0.45)
 
-            Text(badge.title)
-                .font(BoopTypography.cineCaption)
-                .tracking(0.3)
-                .foregroundStyle(badge.earned ? BoopColors.textPrimary : BoopColors.textMuted)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .fixedSize(horizontal: false, vertical: true)
+            VStack(spacing: 3) {
+                Text(badge.title)
+                    .font(BoopTypography.cineCaption)
+                    .tracking(0.3)
+                    .foregroundStyle(badge.earned ? BoopColors.textPrimary : BoopColors.textMuted)
+                    .multilineTextAlignment(.center)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                // One-line hint so each badge is self-explanatory (how to earn /
+                // what it means) instead of a bare title.
+                if !badge.description.isEmpty {
+                    Text(badge.description)
+                        .font(.system(size: 10, weight: .regular))
+                        .foregroundStyle(BoopColors.textMuted)
+                        .multilineTextAlignment(.center)
+                        .lineLimit(3)
+                        .minimumScaleFactor(0.85)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .opacity(badge.earned ? 0.9 : 0.7)
+                }
+            }
+            .frame(maxWidth: .infinity)
         }
     }
 

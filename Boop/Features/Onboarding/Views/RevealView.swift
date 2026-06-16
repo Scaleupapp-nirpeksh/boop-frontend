@@ -72,59 +72,70 @@ struct RevealView: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer(minLength: BoopSpacing.huge)
 
-            if showContent {
-                VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                    EyebrowLabel(text: "Your type", color: BoopColors.accentColor)
+            // Content is ALWAYS in the tree once revealed — `showContent` drives
+            // only the fade-in opacity, never presence. (Previously the whole
+            // block was gated behind `if showContent`, so if the delayed setter
+            // was dropped — e.g. the `.task` re-ran — the user landed on an
+            // absolutely blank screen.)
+            VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                EyebrowLabel(text: "Your type", color: BoopColors.accentColor)
 
-                    // Coded & Rare top row: TYPE 0N (left) · N% RARE (right).
-                    codedRareRow
+                // Coded & Rare top row: TYPE 0N (left) · N% RARE (right).
+                codedRareRow
 
-                    // The archetype name — the hero line.
-                    Text(displayName)
-                        .font(BoopTypography.cineDisplay)
-                        .foregroundStyle(BoopColors.textPrimary)
+                // The archetype name — the hero line.
+                Text(displayName)
+                    .font(BoopTypography.cineDisplay)
+                    .foregroundStyle(BoopColors.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if let rarity = analysis?.rarityPercent, rarity > 0 {
+                    Text("Only \(rarity)% of members share this type")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textMuted)
                         .fixedSize(horizontal: false, vertical: true)
-
-                    if let rarity = analysis?.rarityPercent, rarity > 0 {
-                        Text("Only \(rarity)% of members share this type")
-                            .font(BoopTypography.cineCaption)
-                            .foregroundStyle(BoopColors.textMuted)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    AccentRule()
-
-                    // Essence line.
-                    if let essence = essenceLine {
-                        Text(essence)
-                            .font(BoopTypography.cineBodyLight)
-                            .foregroundStyle(BoopColors.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-
-                    // Signature traits — top facets by score, as tracked lines.
-                    if !signatureTraits.isEmpty {
-                        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                            ForEach(signatureTraits, id: \.self) { trait in
-                                EyebrowLabel(text: trait, color: BoopColors.textMuted)
-                            }
-                        }
-                        .padding(.top, BoopSpacing.sm)
-                    }
                 }
-                .transition(.opacity)
+
+                AccentRule()
+
+                // Essence line.
+                if let essence = essenceLine {
+                    Text(essence)
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                // Signature traits — top facets by score, as tracked lines.
+                if !signatureTraits.isEmpty {
+                    VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                        ForEach(signatureTraits, id: \.self) { trait in
+                            EyebrowLabel(text: trait, color: BoopColors.textMuted)
+                        }
+                    }
+                    .padding(.top, BoopSpacing.sm)
+                }
             }
+            .opacity(showContent ? 1 : 0)
+            .animation(.easeIn(duration: 0.6), value: showContent)
 
             Spacer(minLength: BoopSpacing.huge)
 
+            // Always visible/tappable — never trap the user behind the fade flag.
             BoopButton(title: pullTitle, isLoading: isEntering) {
                 enterApp()
             }
-            .opacity(showContent ? 1 : 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, BoopSpacing.xl)
         .padding(.vertical, BoopSpacing.xl)
+        .onAppear {
+            // Self-heal: if the delayed reveal animation was dropped (task re-run,
+            // re-identification), make sure content still fades in.
+            if !showContent {
+                withAnimation(.easeIn(duration: 0.3)) { showContent = true }
+            }
+        }
     }
 
     @ViewBuilder

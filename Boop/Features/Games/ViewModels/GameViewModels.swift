@@ -243,7 +243,8 @@ final class GameSessionViewModel {
             completedAt: game.completedAt,
             createdAt: game.createdAt,
             sessionPhase: sessionPhase ?? game.sessionPhase,
-            sync: sync ?? game.sync
+            sync: sync ?? game.sync,
+            comfort: game.comfort
         )
         self.game = game
     }

@@ -45,6 +45,8 @@ struct PersonalityReportView: View {
     private func reportContent(_ analysis: PersonalityAnalysis) -> some View {
         heroSection(analysis)
 
+        typeExplainer
+
         if viewModel.isPreliminary {
             preliminaryNote
         }
@@ -124,6 +126,26 @@ struct PersonalityReportView: View {
                 .tracking(1.5)
                 .foregroundStyle(BoopColors.textMuted)
         }
+    }
+
+    // MARK: - Type explainer ("what is a Type / what does % rare mean")
+
+    private var typeExplainer: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+            EyebrowLabel(text: "What this means")
+
+            Text("Your answers map to one of 14 personality types. The \u{201C}% rare\u{201D} is simply how few members currently share your type — the lower the number, the more uncommon you are. Keep answering and your type sharpens.")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textSecondary)
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(BoopSpacing.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .overlay(
+            RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
+                .stroke(BoopColors.hairline, lineWidth: 1)
+        )
     }
 
     // MARK: - Preliminary note

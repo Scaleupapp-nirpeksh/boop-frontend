@@ -562,49 +562,18 @@ struct GameSessionView: View {
         )
     }
 
+    @ViewBuilder
     private var completedCard: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            AccentRule()
-            Text("Finished together")
-                .font(BoopTypography.cineTitle)
-                .foregroundStyle(BoopColors.textPrimary)
-            Text("You completed this game live. Use the completed rounds below to revisit what came out of it.")
-                .font(BoopTypography.cineBodyLight)
-                .foregroundStyle(BoopColors.textSecondary)
-
-            if let game = viewModel.game {
-                let completedCount = game.rounds.filter(\.isComplete).count
-                let answeredCount = game.rounds.filter { round in
-                    round.responses?.contains(where: { $0.userId?.id == AuthManager.shared.currentUser?.id }) == true
-                }.count
-
-                HStack(spacing: BoopSpacing.lg) {
-                    completionStat(value: "\(completedCount)/\(game.totalRounds)", label: "Rounds")
-                    completionStat(value: "\(answeredCount)", label: "You answered")
-                    completionStat(value: game.rounds.filter(\.isComplete).count == game.totalRounds ? "Full" : "Partial", label: "Completion")
-                }
-                .padding(.top, BoopSpacing.xs)
-            }
+        if let game = viewModel.game {
+            // Shared dopamine reveal — same celebratory moment across every game.
+            GameResultRevealView(
+                summary: GameSyncSummary.make(
+                    from: game,
+                    currentUserId: AuthManager.shared.currentUser?.id
+                )
+            )
+            .id(game.gameId)
         }
-        .padding(BoopSpacing.lg)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .overlay(
-            RoundedRectangle(cornerRadius: BoopRadius.sharp, style: .continuous)
-                .stroke(BoopColors.hairline, lineWidth: 1)
-        )
-    }
-
-    private func completionStat(value: String, label: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(BoopTypography.cineHeadline)
-                .foregroundStyle(BoopColors.textPrimary)
-            Text(label.uppercased())
-                .font(BoopTypography.cineLabel)
-                .tracking(2)
-                .foregroundStyle(BoopColors.textMuted)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private var cancelledCard: some View {

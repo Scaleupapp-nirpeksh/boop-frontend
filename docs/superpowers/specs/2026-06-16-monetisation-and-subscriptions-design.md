@@ -256,13 +256,18 @@ One cohesive system, built in revenue-first order. `writing-plans` will expand e
 
 ---
 
-## 13. Open Questions / Assumptions
+## 13. Resolved Decisions & Remaining Assumptions
 
-1. **Super Connect price** — assumed a single-credit consumable; price not yet set (suggest ₹99–149, or a pack). **Decision needed before Phase 3.**
-2. **Grievance Officer name + contact** + the support/legal email domain (`unmutee.in` recommended over `scaleupapp.club` for consistency, since the API already runs on `api.unmutee.in`). **Needed for legal docs.**
-3. **Operating entity at go-live** — ScaleUp Learning Technologies now vs. NewCo. Affects the App Store Connect account holder, bank, tax forms, and Small Business Program enrollment; switching later requires an app transfer + re-papering. **Decision needed before App Store Connect setup.**
-4. **Daily free limits** — assumed 5 Discover / 3 Connects; tune with data.
-5. **Boost window** — assumed 30 min; tune with data.
+**Resolved (founders, 2026-06-16):**
+1. **Operating entity at go-live** — launch under **ScaleUp Learning Technologies** now (NewCo is 1–2 months out; migrate later via Apple app transfer + re-papering). App Store Connect account holder, bank, tax forms, and Small Business Program enrollment all under ScaleUp for now.
+2. **Grievance Officer / support contact** — **ScaleUp Admin team, `admin@scaleupapp.club`**. Legal docs and in-app grievance contact use this.
+3. **Super Connect price** — **₹129 single / ₹299 for 3** (value pack).
+
+**App Store go-live:** the app is currently **TestFlight only**; taking it **live on the App Store** is part of this work (age rating 17+/dating, App Privacy labels, app-review notes, submission). Founder owns account-holder submission actions; Claude prepares everything required for review.
+
+**Remaining assumptions (tune with data, no decision needed):**
+4. **Daily free limits** — 5 Discover / 3 Connects.
+5. **Boost window** — 30 min.
 6. **Lawyer review** — one-time Indian-counsel sign-off on the three legal docs before go-live (assumed yes).
 
 ---

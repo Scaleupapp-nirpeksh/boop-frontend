@@ -17,6 +17,7 @@
 		0D1E61339BF08098AD99A3FB /* ChatInboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 54F2C79B8AC91FC57243E7EB /* ChatInboxView.swift */; };
 		0D48A5653A451E340598B113 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 617F21A799BDE07195956D7F /* APIClient.swift */; };
 		0ED62E647F96BBF55E3BDB88 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F183D8B7EE7BC4F1F51BBA8 /* MainTabView.swift */; };
+		0FE2A39CCD3BF0B64FFA2833 /* GameResultReveal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74B46A0D9F377257AFA2E3B0 /* GameResultReveal.swift */; };
 		108024B0D41CE5B33E78C496 /* MomentHeroCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 915A69A9EC48C0A5A7785779 /* MomentHeroCard.swift */; };
 		11C22129887F201357BBF605 /* GameViewModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = D72E936D968CF16447DCBDFC /* GameViewModels.swift */; };
 		1302EEC78AB972601B02E2E0 /* ReportUserSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761F75B614C6CEE8A63E75C0 /* ReportUserSheet.swift */; };
@@ -242,6 +243,7 @@
 		6D0730889E4C49397EC39E1C /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		7302B7D5CC763EA7A9D242E2 /* BoopClipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopClipApp.swift; sourceTree = "<group>"; };
 		748EAEB592E9EA3924D2541E /* DiscoverViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverViewModel.swift; sourceTree = "<group>"; };
+		74B46A0D9F377257AFA2E3B0 /* GameResultReveal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameResultReveal.swift; sourceTree = "<group>"; };
 		761F75B614C6CEE8A63E75C0 /* ReportUserSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportUserSheet.swift; sourceTree = "<group>"; };
 		7971E41E088CC2C9F83E616D /* Nunito-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Nunito-SemiBold.ttf"; sourceTree = "<group>"; };
 		7D28CFE574E0E98548E7307B /* BoopOTPField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopOTPField.swift; sourceTree = "<group>"; };
@@ -274,6 +276,7 @@
 		9C54AE3DF0970CDFB31C7B95 /* RelationshipInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationshipInsightsView.swift; sourceTree = "<group>"; };
 		9CAC26BC2010C4AB69F7B717 /* TheClearingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TheClearingView.swift; sourceTree = "<group>"; };
 		9E222CBF6A7D59940EE3EC24 /* NotificationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationModels.swift; sourceTree = "<group>"; };
+		9EAC9BBB8ECF0DC12F30B033 /* Boop-Release.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Boop-Release.entitlements"; sourceTree = "<group>"; };
 		9FD9EF89443D1BBB96EB6DE6 /* BoopToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoopToast.swift; sourceTree = "<group>"; };
 		A28BD38D498697A15879B8EB /* APIResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIResponse.swift; sourceTree = "<group>"; };
 		A41924F14E14AAFB912108F8 /* CinematicComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CinematicComponents.swift; sourceTree = "<group>"; };
@@ -357,6 +360,7 @@
 			isa = PBXGroup;
 			children = (
 				8063D8EA6945D1EF0276A253 /* Assets.xcassets */,
+				9EAC9BBB8ECF0DC12F30B033 /* Boop-Release.entitlements */,
 				895407BE8092C36D5FF25653 /* Boop.entitlements */,
 				6D0730889E4C49397EC39E1C /* GoogleService-Info.plist */,
 				348E4ACEAD9A97924C7918CD /* Info.plist */,
@@ -862,6 +866,7 @@
 			isa = PBXGroup;
 			children = (
 				AB86FAE3A127ED7BFE0B78B2 /* GameHistoryView.swift */,
+				74B46A0D9F377257AFA2E3B0 /* GameResultReveal.swift */,
 				31DF5B70630F5C2F54E7FF54 /* GameViews.swift */,
 			);
 			path = Views;
@@ -1163,6 +1168,7 @@
 				C11EFE488E9A8880D0F05FAC /* Font+Boop.swift in Sources */,
 				87D8BBA0DADB445A317AB4F1 /* GameHistoryView.swift in Sources */,
 				82B8D9B9B5A2B35D33C88AAA /* GameModels.swift in Sources */,
+				0FE2A39CCD3BF0B64FFA2833 /* GameResultReveal.swift in Sources */,
 				11C22129887F201357BBF605 /* GameViewModels.swift in Sources */,
 				0950BF0A22643698D4F8E299 /* GameViews.swift in Sources */,
 				088E322E7453FB902A8419F8 /* GoneQuietCard.swift in Sources */,
@@ -1311,7 +1317,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 25;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = NK5P69WG2H;
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1359,7 +1365,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Boop/Resources/Boop.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "Boop/Resources/Boop-Release.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -1426,7 +1432,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 23;
+				CURRENT_PROJECT_VERSION = 25;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = NK5P69WG2H;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;

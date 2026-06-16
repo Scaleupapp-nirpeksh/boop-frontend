@@ -54,6 +54,12 @@ struct RootView: View {
         .task(id: currentRoute) {
             if currentRoute == .main {
                 RealtimeService.shared.connect(token: authManager.accessToken)
+                // Ask for notification permission once the user reaches the app.
+                // Previously this was only ever requested from Profile → Notifications,
+                // so most users never granted it → no FCM token → zero pushes.
+                // requestAuthorization is idempotent: it prompts only when status is
+                // notDetermined, and otherwise just re-registers for remote notifications.
+                await PushNotificationService.shared.requestAuthorization()
                 await PushNotificationService.shared.refreshStatus()
                 await PushNotificationService.shared.syncTokenToBackendIfPossible()
             } else {

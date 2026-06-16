@@ -108,11 +108,19 @@ struct ChatInboxView: View {
             let matchesFilter: Bool
             switch filter {
             case .all:
-                matchesFilter = true
+                // Every (non-archived) conversation.
+                matchesFilter = (conversation.matchStage ?? "mutual") != "archived"
             case .unread:
+                // Anything with messages I haven't read yet.
                 matchesFilter = conversation.unreadCount > 0
             case .active:
-                matchesFilter = (conversation.matchStage ?? "mutual") != "archived"
+                // Conversations I've actually replied in — i.e. I'm the most
+                // recent sender. Brand-new matches (their opener only) stay in
+                // All/Unread until I respond, then surface here.
+                let myId = AuthManager.shared.currentUser?.id
+                matchesFilter = myId != nil
+                    && conversation.lastMessage?.senderId == myId
+                    && (conversation.matchStage ?? "mutual") != "archived"
             }
 
             return matchesSearch && matchesFilter
@@ -435,10 +443,11 @@ struct ChatConversationView: View {
                 contentType: "message"
             )
         }
-        .sheet(isPresented: $showComfortDetail) {
+        .fullScreenCover(isPresented: $showComfortDetail) {
             if let matchId = conversation.matchId {
-                NavigationStack { MatchDetailView(matchId: matchId) }
-                    .presentationDragIndicator(.visible)
+                // Full-screen (not a sheet) so the chat header doesn't peek
+                // above it; Close button handles dismissal.
+                NavigationStack { MatchDetailView(matchId: matchId, isModal: true) }
             }
         }
         .sheet(isPresented: $showGames) {

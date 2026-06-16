@@ -259,12 +259,6 @@ struct ProfileView: View {
             }
 
             HStack(spacing: BoopSpacing.xs) {
-                Text("REORDER")
-                    .font(BoopTypography.cineCaption)
-                    .tracking(2)
-                    .foregroundStyle(BoopColors.textMuted)
-                    .accessibilityHidden(true)
-
                 photoOrderButton(
                     systemName: "arrow.left",
                     isDisabled: index == 0 || viewModel.isReorderingPhotos,

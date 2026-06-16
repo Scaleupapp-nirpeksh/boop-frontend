@@ -3,15 +3,9 @@ import SwiftUI
 struct WelcomeView: View {
     @State private var appeared = false
 
-    private let callouts: [(label: String, detail: String)] = [
-        ("Voice-first", "Real intros, not selfies"),
-        ("Thoughtful", "Guided prompts, slow burn"),
-        ("Private", "Blurred until you're ready"),
-    ]
-
     var body: some View {
         ScrollView(showsIndicators: false) {
-            VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xl) {
                 Spacer(minLength: 40)
 
                 // Wordmark + headline
@@ -30,28 +24,24 @@ struct WelcomeView: View {
                             .fixedSize(horizontal: false, vertical: true)
 
                         AccentRule()
-
-                        Text("Voice and chemistry first.")
-                            .font(BoopTypography.cineBodyLight)
-                            .foregroundStyle(BoopColors.textSecondary)
                     }
                 }
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 12)
 
-                // Feature callouts as tracked hairline rows
-                VStack(spacing: 0) {
-                    ForEach(callouts, id: \.label) { item in
-                        HairlineRow(item.label) {
-                            Text(item.detail.uppercased())
-                                .font(BoopTypography.cineLabel)
-                                .tracking(1.5)
-                                .foregroundStyle(BoopColors.textMuted)
-                        }
-                    }
-                }
-                .opacity(appeared ? 1 : 0)
-                .offset(y: appeared ? 0 : 18)
+                // Hero — two voices weaving into a single bloom.
+                // Carries the feeling the splash promised, without re-listing the pitch.
+                VoiceWeaveHero()
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, BoopSpacing.lg)
+
+                Text("Two voices, one bloom.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .opacity(appeared ? 1 : 0)
+
+                Spacer(minLength: BoopSpacing.lg)
 
                 // Start block
                 VStack(alignment: .leading, spacing: BoopSpacing.md) {
@@ -86,10 +76,93 @@ struct WelcomeView: View {
         .boopBackground()
         .navigationBarHidden(true)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.8).delay(0.8)) {
+            withAnimation(.easeOut(duration: 0.8).delay(0.3)) {
                 appeared = true
             }
         }
+    }
+}
+
+// MARK: - Voice Weave Hero
+
+/// Two voices — one coral, one periwinkle — weave through each other and bloom a
+/// new colour where they cross. Mirrors the splash's "merge" idea in the app's
+/// hairline language, and visualises "voice-first" (which nothing else in the
+/// flow shows). Draws on appear, then the bloom settles in.
+private struct VoiceWeaveHero: View {
+    @State private var draw = false
+    @State private var bloom = false
+
+    private let coral = [Color(hex: "FFB07A"), Color(hex: "FF5C72"), Color(hex: "D7335F")]
+    private let peri  = [Color(hex: "9DB6FF"), Color(hex: "6E84E6"), Color(hex: "4E5FC9")]
+
+    var body: some View {
+        ZStack {
+            // The new colour, born where the two voices cross.
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            Color.white.opacity(0.90),
+                            Color(hex: "E9C9F4").opacity(0.40),
+                            Color.clear,
+                        ],
+                        center: .center,
+                        startRadius: 1,
+                        endRadius: 56
+                    )
+                )
+                .frame(width: 112, height: 112)
+                .blur(radius: 12)
+                .scaleEffect(bloom ? 1 : 0.55)
+                .opacity(bloom ? 1 : 0)
+
+            VoiceWave(flipped: false)
+                .trim(from: 0, to: draw ? 1 : 0)
+                .stroke(
+                    LinearGradient(colors: coral, startPoint: .leading, endPoint: .trailing),
+                    style: StrokeStyle(lineWidth: 2.6, lineCap: .round, lineJoin: .round)
+                )
+
+            VoiceWave(flipped: true)
+                .trim(from: 0, to: draw ? 1 : 0)
+                .stroke(
+                    LinearGradient(colors: peri, startPoint: .leading, endPoint: .trailing),
+                    style: StrokeStyle(lineWidth: 2.6, lineCap: .round, lineJoin: .round)
+                )
+        }
+        .frame(height: 156)
+        .onAppear {
+            withAnimation(.easeInOut(duration: 1.1).delay(0.4)) { draw = true }
+            withAnimation(.easeOut(duration: 0.7).delay(1.3)) { bloom = true }
+        }
+    }
+}
+
+/// A single voice: a soft wave that rises on the left lobe and falls on the right
+/// (or the mirror, when `flipped`). Two of these cross at the centre and the ends.
+private struct VoiceWave: Shape {
+    var flipped: Bool
+
+    func path(in rect: CGRect) -> Path {
+        let w = rect.width, h = rect.height
+        let midY = h / 2
+        let up: CGFloat = flipped ? 0.74 : 0.26
+        let down: CGFloat = flipped ? 0.26 : 0.74
+
+        var p = Path()
+        p.move(to: CGPoint(x: 0.06 * w, y: midY))
+        p.addCurve(
+            to: CGPoint(x: 0.46 * w, y: midY),
+            control1: CGPoint(x: 0.19 * w, y: up * h),
+            control2: CGPoint(x: 0.32 * w, y: up * h)
+        )
+        p.addCurve(
+            to: CGPoint(x: 0.94 * w, y: midY),
+            control1: CGPoint(x: 0.60 * w, y: down * h),
+            control2: CGPoint(x: 0.74 * w, y: down * h)
+        )
+        return p
     }
 }
 

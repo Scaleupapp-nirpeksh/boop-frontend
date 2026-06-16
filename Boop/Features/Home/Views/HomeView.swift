@@ -160,20 +160,36 @@ struct HomeView: View {
         return viewModel.activeMatches.filter { $0.matchId != hero.matchId }
     }
 
+    /// Shown to brand-new members (and anyone with a momentarily empty feed):
+    /// sets the expectation that matches are curated, and gives the one action
+    /// that actually improves them right now — answering more questions.
     private var emptyDiscoverPrompt: some View {
-        VStack(spacing: BoopSpacing.sm) {
-            Image(systemName: "sparkle")
-                .font(.system(size: 28, weight: .thin))
-                .foregroundStyle(BoopColors.accentColor)
-            Text("Find your first connection")
-                .font(BoopTypography.cineHeadline)
-                .foregroundStyle(BoopColors.textPrimary)
-            Text("Head to Discover to meet someone whose answers match yours.")
+        VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            HStack(spacing: BoopSpacing.xs) {
+                Image(systemName: "sparkle")
+                    .font(.system(size: 18, weight: .thin))
+                    .foregroundStyle(BoopColors.accentColor)
+                EyebrowLabel(text: "Your matches are on the way", color: BoopColors.accentColor)
+            }
+
+            AccentRule()
+
+            Text("Each day we hand-pick a few people whose answers truly fit yours. Yours are being gathered now.")
                 .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textSecondary)
-                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+
+            Text("The more you share, the sharper your matches — keep answering to help us find your people.")
+                .font(BoopTypography.cineCaption)
+                .foregroundStyle(BoopColors.textMuted)
+                .fixedSize(horizontal: false, vertical: true)
+
+            BoopButton(title: "Answer more questions", variant: .outline) {
+                viewModel.showQuestionsSheet = true
+            }
+            .padding(.top, BoopSpacing.xs)
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BoopSpacing.xl)
         .boopCard(radius: BoopRadius.xxl, shadow: false)
         .padding(.horizontal, BoopSpacing.xl)

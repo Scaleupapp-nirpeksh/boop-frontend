@@ -215,12 +215,12 @@ struct QuestionsFullView: View {
         VStack(alignment: .leading, spacing: 0) {
             Spacer()
             VStack(alignment: .leading, spacing: BoopSpacing.md) {
-                EyebrowLabel(text: "All Caught Up", color: BoopColors.accentColor)
+                EyebrowLabel(text: "Questions", color: BoopColors.accentColor)
                 AccentRule()
                 Text("All caught up.")
                     .font(BoopTypography.cineDisplay)
                     .foregroundStyle(BoopColors.textPrimary)
-                Text("No new questions right now. Check back tomorrow.")
+                Text("You've answered everything we have for you right now — new questions are added over time.")
                     .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textMuted)
                     .fixedSize(horizontal: false, vertical: true)

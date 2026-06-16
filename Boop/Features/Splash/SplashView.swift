@@ -1,44 +1,51 @@
 import SwiftUI
 
-/// "The Merge" — two outlined circles (two people, two colours) slide together;
-/// where they meet, a new soothing colour is born through shades. Then the wordmark.
-/// Mirrors the app icon, adapts to light/dark via tokens.
+/// "The Merge" — two luminous orbs (two people, two colours) drift together until
+/// they overlap, and in the overlap a new colour blooms: something new, together.
+/// Then the wordmark settles in. Mirrors the app icon; adapts light/dark via tokens
+/// with deliberate contrast tuning (deep-plum ground + white bloom in dark; cream
+/// ground + deepened orbs + lavender bloom + a seating halo in light).
 struct SplashView: View {
     @Binding var isFinished: Bool
     @Environment(\.colorScheme) private var colorScheme
 
-    // Merge choreography
-    @State private var merged = false        // circles slide together
-    @State private var strokesDim = false    // outlines soften at full merge
-    @State private var bloomStage = 0        // 0 none, 1 warm shade, 2 mauve, 3 lavender gradient
-    // Wordmark
+    // Choreography
+    @State private var merged = false      // orbs drift from apart -> resting overlap
+    @State private var bloom = false       // the new colour blooms in the overlap
     @State private var wordmark = false
     @State private var ruleReveal = false
     @State private var tagline = false
     @State private var fadeOut = false
 
-    // Palette (deeper in light mode, luminous in dark — matches the icon variants)
-    private var leftStroke: Color {
-        colorScheme == .dark ? Color(red: 1.0, green: 0.30, blue: 0.43) : Color(red: 0.88, green: 0.23, blue: 0.35)
-    }
-    private var rightStroke: Color {
-        colorScheme == .dark ? Color(red: 0.50, green: 0.66, blue: 0.94) : Color(red: 0.36, green: 0.51, blue: 0.84)
-    }
-    private var shadeWarm: Color {
-        colorScheme == .dark ? Color(red: 0.94, green: 0.66, blue: 0.71) : Color(red: 0.91, green: 0.56, blue: 0.62)
-    }
-    private var shadeMauve: Color {
-        colorScheme == .dark ? Color(red: 0.85, green: 0.68, blue: 0.90) : Color(red: 0.78, green: 0.60, blue: 0.85)
-    }
-    private var lavender: Color {
-        colorScheme == .dark ? Color(red: 0.79, green: 0.72, blue: 0.94) : Color(red: 0.73, green: 0.65, blue: 0.91)
-    }
-    private var lavenderCool: Color {
-        colorScheme == .dark ? Color(red: 0.66, green: 0.74, blue: 0.94) : Color(red: 0.56, green: 0.65, blue: 0.88)
-    }
+    // Geometry
+    private let orb: CGFloat = 132
+    private var radius: CGFloat { orb / 2 }
+    private let restGap: CGFloat = 34      // half-distance at rest (partial overlap = the logo)
+    private let startGap: CGFloat = 92     // half-distance apart at the start
 
-    private let circleSize: CGFloat = 120
-    private let apart: CGFloat = 42   // half-distance between centers in the Venn state
+    private var gap: CGFloat { merged ? restGap : startGap }
+
+    // MARK: Palette (contrast-tuned per scheme — matches the icon variants)
+    private var coral: [Color] {
+        colorScheme == .dark
+            ? [Color(hex: "FFB07A"), Color(hex: "FF5C72"), Color(hex: "D7335F")]
+            : [Color(hex: "FF8A6B"), Color(hex: "EE3D62"), Color(hex: "C2185B")]
+    }
+    private var peri: [Color] {
+        colorScheme == .dark
+            ? [Color(hex: "9DB6FF"), Color(hex: "6E84E6"), Color(hex: "4E5FC9")]
+            : [Color(hex: "7E96F0"), Color(hex: "4F63D2"), Color(hex: "33409E")]
+    }
+    private var lens: [Color] {
+        colorScheme == .dark
+            ? [Color.white, Color(hex: "F0D2F2"), Color(hex: "C9A7EA")]
+            : [Color(hex: "F3E4FB"), Color(hex: "D9B8EE"), Color(hex: "B07FD8")]
+    }
+    private var bloomCore: Color {
+        colorScheme == .dark ? .white : Color(hex: "C9A7EA")
+    }
+    private var orbOpacity: Double { colorScheme == .dark ? 0.92 : 0.97 }
+    private var glowOpacity: Double { colorScheme == .dark ? 0.55 : 0.30 }
 
     var body: some View {
         ZStack {
@@ -47,43 +54,40 @@ struct SplashView: View {
             VStack(spacing: 0) {
                 Spacer()
 
-                // The merge
                 ZStack {
-                    // The new colour, born through shades at full merge
-                    Circle()
-                        .fill(bloomFill)
-                        .frame(width: circleSize, height: circleSize)
-                        .scaleEffect(bloomStage > 0 ? 1 : 0.72)
-                        .opacity(bloomStage > 0 ? 1 : 0)
+                    // Seating halo — gives the mark depth on the cream light ground
+                    if colorScheme == .light {
+                        Ellipse()
+                            .fill(Color(hex: "C98E86"))
+                            .frame(width: orb * 2.4, height: orb * 2.1)
+                            .opacity(merged ? 0.16 : 0)
+                            .blur(radius: 46)
+                    }
 
-                    // Lens: the new colour already showing where the circles overlap
-                    Circle()
-                        .fill(LinearGradient(colors: [shadeWarm, lavender, lavenderCool],
-                                             startPoint: .leading, endPoint: .trailing))
-                        .frame(width: circleSize, height: circleSize)
-                        .offset(x: merged ? 0 : apart)
-                        .mask(
-                            Circle()
-                                .frame(width: circleSize, height: circleSize)
-                                .offset(x: merged ? 0 : -apart)
-                        )
-                        .opacity(bloomStage > 0 ? 0 : 1)
+                    // Soft glow behind each orb
+                    orbCircle(coral).offset(x: -gap).blur(radius: 26).opacity(glowOpacity)
+                    orbCircle(peri).offset(x: gap).blur(radius: 26).opacity(glowOpacity)
 
-                    // Two people, two colours — visible outlines
+                    // The two people, two colours
+                    orbCircle(coral).offset(x: -gap).opacity(orbOpacity)
+                    orbCircle(peri).offset(x: gap).opacity(orbOpacity)
+
+                    // The new colour, showing only where they overlap
+                    orbCircle(lens)
+                        .offset(x: gap)
+                        .mask(Circle().frame(width: orb, height: orb).offset(x: -gap))
+                        .opacity(merged ? 0.96 : 0)
+
+                    // The bloom — the new colour born in the overlap
                     Circle()
-                        .stroke(leftStroke, lineWidth: 2.5)
-                        .frame(width: circleSize, height: circleSize)
-                        .offset(x: merged ? 0 : -apart)
-                        .opacity(strokesDim ? 0.18 : 1)
-                    Circle()
-                        .stroke(rightStroke, lineWidth: 2.5)
-                        .frame(width: circleSize, height: circleSize)
-                        .offset(x: merged ? 0 : apart)
-                        .opacity(strokesDim ? 0.18 : 1)
+                        .fill(bloomCore)
+                        .frame(width: orb * 0.62, height: orb * 0.62)
+                        .blur(radius: 26)
+                        .scaleEffect(bloom ? 1 : 0.5)
+                        .opacity(bloom ? (colorScheme == .dark ? 0.55 : 0.5) : 0)
                 }
-                .frame(height: 140)
+                .frame(height: orb * 1.6)
 
-                // Wordmark in the app's own type
                 Text("UnMutee")
                     .font(BoopTypography.cineDisplayXL)
                     .tracking(wordmark ? 6 : 12)
@@ -111,55 +115,45 @@ struct SplashView: View {
         .onAppear { runAnimation() }
     }
 
-    /// The bloom passes through shades — warm, then mauve, then settles
-    /// into the lavender gradient (the new colour, gradiently taking shades).
-    private var bloomFill: AnyShapeStyle {
-        switch bloomStage {
-        case 1: return AnyShapeStyle(shadeWarm)
-        case 2: return AnyShapeStyle(shadeMauve)
-        default:
-            return AnyShapeStyle(LinearGradient(colors: [shadeWarm, lavender, lavenderCool],
-                                                startPoint: .topLeading, endPoint: .bottomTrailing))
-        }
+    private func orbCircle(_ colors: [Color]) -> some View {
+        Circle()
+            .fill(
+                RadialGradient(
+                    colors: colors,
+                    center: UnitPoint(x: 0.42, y: 0.38),
+                    startRadius: 2,
+                    endRadius: radius
+                )
+            )
+            .frame(width: orb, height: orb)
     }
 
-    // MARK: - Choreography (overall fade/finish timings preserved: 2.8s fade, 3.3s finish)
-
+    // MARK: - Choreography (overall ~3.8s, preserved)
     private func runAnimation() {
-        // 1. Hold the Venn a beat, then the circles slide into each other
-        withAnimation(.easeInOut(duration: 0.7).delay(0.45)) {
+        // 1. Orbs drift together into the resting overlap (the logo lockup)
+        withAnimation(.spring(response: 0.9, dampingFraction: 0.78).delay(0.4)) {
             merged = true
         }
-        // 2. At full merge the outlines soften and the new colour blooms…
-        withAnimation(.easeInOut(duration: 0.35).delay(1.05)) {
-            strokesDim = true
-            bloomStage = 1
+        // 2. The new colour blooms in the overlap
+        withAnimation(.easeInOut(duration: 0.7).delay(1.15)) {
+            bloom = true
         }
-        // …gradiently taking shades: warm → mauve → lavender gradient
-        withAnimation(.easeInOut(duration: 0.3).delay(1.35)) { bloomStage = 2 }
-        withAnimation(.easeInOut(duration: 0.45).delay(1.6)) { bloomStage = 3 }
-
-        // 3. Wordmark settles in, rule draws, tagline fades
-        withAnimation(.easeOut(duration: 0.7).delay(1.3)) {
-            wordmark = true
-        }
-        withAnimation(.easeInOut(duration: 0.6).delay(1.9)) {
-            ruleReveal = true
-        }
-        withAnimation(.easeOut(duration: 0.5).delay(2.35)) {
-            tagline = true
-        }
-
-        // 4. Hold the finished composition a beat, then fade out and finish
-        withAnimation(.easeInOut(duration: 0.5).delay(3.3)) {
-            fadeOut = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3.8) {
-            isFinished = true
-        }
+        // 3. Wordmark settles, rule draws, tagline fades in
+        withAnimation(.easeOut(duration: 0.7).delay(1.4)) { wordmark = true }
+        withAnimation(.easeInOut(duration: 0.6).delay(1.95)) { ruleReveal = true }
+        withAnimation(.easeOut(duration: 0.5).delay(2.35)) { tagline = true }
+        // 4. Hold, then fade out and finish
+        withAnimation(.easeInOut(duration: 0.5).delay(3.3)) { fadeOut = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.8) { isFinished = true }
     }
 }
 
-#Preview {
+#Preview("Dark") {
     SplashView(isFinished: .constant(false))
+        .preferredColorScheme(.dark)
+}
+
+#Preview("Light") {
+    SplashView(isFinished: .constant(false))
+        .preferredColorScheme(.light)
 }
