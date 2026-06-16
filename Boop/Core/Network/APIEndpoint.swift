@@ -74,6 +74,7 @@ enum APIEndpoint {
     case getRelationshipInsights(matchId: String)
     case getConversationStarters(matchId: String)
     case getCompatibilityDeepDive(matchId: String)
+    case getAnswerSync(matchId: String)
 
     // Notifications
     case getNotifications(page: Int = 1)
@@ -158,6 +159,7 @@ enum APIEndpoint {
         case .getRelationshipInsights(let matchId): return "/matches/\(matchId)/insights"
         case .getConversationStarters(let matchId): return "/matches/\(matchId)/conversation-starters"
         case .getCompatibilityDeepDive(let matchId): return "/matches/\(matchId)/compatibility"
+        case .getAnswerSync(let matchId): return "/matches/\(matchId)/answer-sync"
         case .getNotifications(let page): return "/notifications?page=\(page)"
         case .getUnreadNotificationCount: return "/notifications/unread-count"
         case .markNotificationRead(let id): return "/notifications/\(id)/read"
@@ -204,6 +206,7 @@ enum APIEndpoint {
              .getComfortScore, .getDateReadiness, .getDatePlans, .getVenueSuggestions,
              .getGame, .getGamesForMatch,
              .getScoreHistory, .getRelationshipInsights, .getConversationStarters, .getCompatibilityDeepDive,
+             .getAnswerSync,
              .getNotifications, .getUnreadNotificationCount,
              .getConversations, .getMessages, .getConversationMedia,
              .getBlockedUsers:

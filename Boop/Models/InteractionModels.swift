@@ -445,3 +445,32 @@ struct SafetyContactRequest: Encodable {
 struct DatePlanResponse: Codable {
     let plan: DatePlanItem
 }
+
+// MARK: - Answer Sync ("How you answer together")
+
+struct AnswerSyncResponse: Decodable {
+    let totalCommon: Int
+    let verdict: String
+    let buckets: [AnswerSyncBucket]
+    let questions: [AnswerSyncQuestion]
+}
+
+struct AnswerSyncBucket: Decodable, Identifiable {
+    let key: String
+    let label: String
+    let count: Int
+
+    var id: String { key }
+}
+
+struct AnswerSyncQuestion: Decodable, Identifiable {
+    let questionNumber: Int
+    let dimension: String
+    let category: String
+    let syncLevel: String
+    let questionText: String
+    let summaryYou: String
+    let summaryThem: String
+
+    var id: Int { questionNumber }
+}
