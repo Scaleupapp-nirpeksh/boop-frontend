@@ -688,6 +688,17 @@ struct ChatConversationView: View {
                         }
                     }
                 }
+                // Dismiss the keyboard by dragging the messages, or by tapping
+                // anywhere in the conversation area. The tap is a simultaneous
+                // gesture so it never swallows bubble / game-invite / reaction taps.
+                .scrollDismissesKeyboard(.interactively)
+                .simultaneousGesture(
+                    TapGesture().onEnded {
+                        UIApplication.shared.sendAction(
+                            #selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil
+                        )
+                    }
+                )
             }
 
             if remoteTypingUserId != nil {
