@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(grep -nA6 \"struct StreakData\" Boop/Models/InteractionModels.swift)",
-      "Bash(grep -rnA6 \"struct StreakData\" Boop/)"
+      "Bash(grep -rnA6 \"struct StreakData\" Boop/)",
+      "Bash(rm -rf /tmp/BoopExport28)",
+      "Bash(xcodebuild -exportArchive -archivePath /tmp/Boop.xcarchive -exportPath /tmp/BoopExport28 -exportOptionsPlist /tmp/ExportManual.plist -authenticationKeyPath ~/.appstoreconnect/private_keys/AuthKey_A4MNMMCCVB.p8 -authenticationKeyID A4MNMMCCVB -authenticationKeyIssuerID 0bbf6f7f-a7cf-4b88-8759-4c85e5c0f240)"
     ]
   }
 }
