@@ -1176,6 +1176,10 @@ private struct ChatMessageBubble: View {
     }
 
     private var bubbleBackground: some ShapeStyle {
+        // Photos render edge-to-edge — no coral slab behind them.
+        if message.type == "image" {
+            return AnyShapeStyle(Color.clear)
+        }
         if isCurrentUser {
             // Game-invite slabs sit slightly calmer than regular sent bubbles
             // so a run of invites doesn't shout. Same flat coral language.

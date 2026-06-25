@@ -3,6 +3,8 @@ import Foundation
 @Observable
 final class PartnerProfileViewModel {
     var partner: PartnerProfile?
+    var myFacets: [PersonalityFacet] = []
+    var compatibilityScore: Int?
     var isLoading = false
     var errorMessage: String?
 
@@ -19,6 +21,14 @@ final class PartnerProfileViewModel {
             errorMessage = error.errorDescription
         } catch {
             errorMessage = "Could not load their profile."
+        }
+
+        // Best-effort extras for the "you vs them" compare — never block the profile.
+        if let me: PersonalityAnalysisResponse = try? await APIClient.shared.request(.getPersonalityAnalysis) {
+            myFacets = me.analysis?.facets ?? []
+        }
+        if let detail: MatchDetail = try? await APIClient.shared.request(.getMatchById(matchId: matchId)) {
+            compatibilityScore = detail.compatibilityScore
         }
     }
 }

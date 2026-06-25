@@ -26,6 +26,24 @@ struct HomeView: View {
                         YourPeopleRow(matches: secondaryMatches)
                     }
 
+                    if heroMatch != nil {
+                        NavigationLink {
+                            AllMatchesView()
+                        } label: {
+                            HStack(spacing: BoopSpacing.xs) {
+                                Text("See all matches")
+                                    .font(BoopTypography.cineLabel)
+                                    .tracking(1.5)
+                                Image(systemName: "chevron.right")
+                                    .font(.system(size: 11, weight: .thin))
+                            }
+                            .foregroundStyle(BoopColors.accentColor)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, BoopSpacing.xl)
+                        }
+                        .buttonStyle(.plain)
+                    }
+
                     DailyQuestionBand(newCount: viewModel.newQuestionsCount) {
                         viewModel.showQuestionsSheet = true
                     }

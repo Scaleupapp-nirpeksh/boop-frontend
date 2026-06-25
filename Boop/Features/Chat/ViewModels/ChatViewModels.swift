@@ -314,6 +314,10 @@ final class ChatConversationViewModel {
     func applyReadEvent(_ event: MessageReadEvent) {
         guard event.conversationId == conversation.conversationId else { return }
         let currentUserId = AuthManager.shared.currentUser?.id
+        // Only the OTHER person reading marks YOUR messages as "Seen". When you
+        // open the chat, this event's readBy is you — ignore it so your own sent
+        // messages don't flip to "Seen" before the recipient has actually read them.
+        guard event.readBy != currentUserId else { return }
         for index in messages.indices where messages[index].senderId.id == currentUserId {
             messages[index] = ChatMessage(
                 id: messages[index].id,

@@ -25,9 +25,7 @@ struct PartnerProfileView: View {
 
                         typeSection(partner)
 
-                        if let facets = partner.facets, !facets.isEmpty {
-                            shapeSection(facets)
-                        }
+                        compareSection(partner)
                     }
                     .padding(.horizontal, BoopSpacing.xl)
                     .padding(.top, BoopSpacing.lg)
@@ -176,38 +174,92 @@ struct PartnerProfileView: View {
         }
     }
 
-    // MARK: - Their shape (facet bars)
+    // MARK: - How you two compare (you vs her + overall connection)
 
-    private func shapeSection(_ facets: [PartnerFacet]) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            EyebrowLabel(text: "Their Shape")
+    @ViewBuilder
+    private func compareSection(_ partner: PartnerProfile) -> some View {
+        let partnerFacets = partner.facets ?? []
+        let herName = partner.firstName ?? firstName ?? "Them"
+        if !partnerFacets.isEmpty || viewModel.compatibilityScore != nil {
+            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                EyebrowLabel(text: "How you two compare")
 
-            VStack(spacing: 0) {
-                ForEach(facets) { facet in
-                    facetRow(facet)
+                if let compat = viewModel.compatibilityScore {
+                    compatHero(compat)
                 }
-                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+
+                VStack(spacing: BoopSpacing.lg) {
+                    ForEach(partnerFacets) { facet in
+                        compareRow(facet: facet, herName: herName)
+                    }
+                }
             }
         }
     }
 
-    private func facetRow(_ facet: PartnerFacet) -> some View {
-        VStack(spacing: 0) {
-            Rectangle().fill(BoopColors.hairline).frame(height: 1)
-            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(facet.title ?? facet.key.replacingOccurrences(of: "_", with: " ").capitalized)
-                        .font(BoopTypography.cineBody)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    Spacer()
-                    Text("\(facet.score ?? 0)")
-                        .font(.system(size: 17, weight: .light))
-                        .foregroundStyle(BoopColors.textPrimary)
-                }
-
-                HairlineProgress(progress: Double(facet.score ?? 0) / 100.0)
+    private func compatHero(_ compat: Int) -> some View {
+        HStack(alignment: .center, spacing: BoopSpacing.md) {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(compatLabel(compat))
+                    .font(BoopTypography.cineTitle)
+                    .foregroundStyle(BoopColors.textPrimary)
+                Text("how connected you two are")
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
             }
-            .padding(.vertical, BoopSpacing.md)
+            Spacer()
+            Text("\(compat)%")
+                .font(.system(size: 34, weight: .light))
+                .foregroundStyle(BoopColors.accentColor)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BoopSpacing.lg)
+        .boopCard(radius: BoopRadius.lg, shadow: false)
+    }
+
+    private func compatLabel(_ c: Int) -> String {
+        if c >= 85 { return "Rare chemistry" }
+        if c >= 70 { return "Strong connection" }
+        if c >= 55 { return "Real potential" }
+        return "Worth exploring"
+    }
+
+    private func compareRow(facet: PartnerFacet, herName: String) -> some View {
+        let title = facet.title ?? facet.key.replacingOccurrences(of: "_", with: " ").capitalized
+        let herScore = facet.score ?? 0
+        let myScore = viewModel.myFacets.first(where: { $0.key == facet.key })?.score
+        return VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            Text(title)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textPrimary)
+            if let myScore {
+                barLine(label: "You", score: myScore, color: BoopColors.accentColor)
+            }
+            barLine(label: herName, score: herScore, color: Color(hex: "6E84E6"))
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func barLine(label: String, score: Int, color: Color) -> some View {
+        HStack(spacing: BoopSpacing.sm) {
+            Text(label.uppercased())
+                .font(BoopTypography.cineLabel)
+                .tracking(1)
+                .foregroundStyle(color)
+                .frame(width: 64, alignment: .leading)
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(BoopColors.hairline)
+                    Capsule().fill(color).frame(width: max(6, geo.size.width * CGFloat(score) / 100))
+                }
+            }
+            .frame(height: 7)
+            Text("\(score)")
+                .font(.system(size: 13, weight: .light))
+                .foregroundStyle(BoopColors.textSecondary)
+                .frame(width: 28, alignment: .trailing)
         }
     }
 
