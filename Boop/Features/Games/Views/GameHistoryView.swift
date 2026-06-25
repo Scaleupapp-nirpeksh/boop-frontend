@@ -26,7 +26,6 @@ struct GameHistoryView: View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: BoopSpacing.xl) {
                 masthead
-                breakdownSection
                 filterChips
                 gamesList
             }

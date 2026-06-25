@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -nA6 \"struct StreakData\" Boop/Models/InteractionModels.swift)",
+      "Bash(grep -rnA6 \"struct StreakData\" Boop/)"
+    ]
+  }
+}

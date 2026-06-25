@@ -7,6 +7,7 @@ final class RemoteAudioPlayer {
     private var player: AVPlayer?
     private var endObserver: NSObjectProtocol?
     private var timeObserver: Any?
+    private var statusObserver: NSKeyValueObservation?
     private(set) var currentURL: String?
     private(set) var isPlaying = false
 
@@ -25,12 +26,34 @@ final class RemoteAudioPlayer {
         stop()
         currentURL = urlString
 
+        // Route to the speaker. A prior recording session may have left the
+        // route on .playAndRecord (earpiece) — force .playback so the note is audible.
         let session = AVAudioSession.sharedInstance()
-        try? session.setCategory(.playback, mode: .default)
-        try? session.setActive(true)
+        do {
+            try session.setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
+            try session.setActive(true, options: [])
+        } catch {
+            // Non-fatal: still attempt playback on the current route.
+        }
 
-        let player = AVPlayer(url: url)
+        let item = AVPlayerItem(url: url)
+        let player = AVPlayer(playerItem: item)
+        player.automaticallyWaitsToMinimizeStalling = false
         self.player = player
+
+        // Play as soon as the item is ready; surface load failures instead of
+        // silently doing nothing (the "voice note won't play" symptom).
+        statusObserver = item.observe(\.status, options: [.new, .initial]) { [weak self] item, _ in
+            Task { @MainActor in
+                guard let self, self.player?.currentItem === item else { return }
+                switch item.status {
+                case .readyToPlay: self.player?.play()
+                case .failed: self.stop()
+                default: break
+                }
+            }
+        }
+
         observePlaybackEnd()
         observePlaybackTime()
         player.play()
@@ -39,6 +62,8 @@ final class RemoteAudioPlayer {
 
     func stop() {
         player?.pause()
+        statusObserver?.invalidate()
+        statusObserver = nil
         if let timeObserver {
             player?.removeTimeObserver(timeObserver)
             self.timeObserver = nil

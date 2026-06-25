@@ -30,18 +30,15 @@ struct MatchDetailView: View {
                 heroCard
                 RealtimeStatusBanner()
                 goneQuietSection
-                boopAndStreakRow
+                lastInteractedRow
 
-                // 2. Connection stage — horizontal stepper + primary actions
+                // 2. Connection stage — horizontal stepper
                 connectionStageStrip
 
-                // 3. "How you answer together" teaser
-                answerSyncTeaser
-
-                // 4. "Growth & insights" teaser
+                // 3. "Growth & insights" teaser
                 growthInsightsTeaser
 
-                // 5. Next actions
+                // 4. Next actions
                 actionsCard
             }
             .padding(.horizontal, BoopSpacing.xl)
@@ -173,7 +170,6 @@ struct MatchDetailView: View {
         if isStalled {
             GoneQuietCard(
                 name: viewModel.detail?.otherUser?.firstName ?? "This match",
-                onBoop: { Task { await viewModel.sendBoop() } },
                 onLetGo: { showLetGoConfirm = true }
             )
         }
@@ -239,61 +235,49 @@ struct MatchDetailView: View {
         }
     }
 
-    private var boopAndStreakRow: some View {
+    private var lastInteractedRow: some View {
         HStack(alignment: .center, spacing: BoopSpacing.lg) {
-            // Boop button
-            Button {
-                Task { await viewModel.sendBoop() }
-            } label: {
-                HStack(spacing: BoopSpacing.xs) {
-                    Image(systemName: viewModel.boopSuccess ? "heart.fill" : "heart")
-                        .font(.system(size: 14, weight: .regular))
-                        .symbolEffect(.bounce, value: viewModel.boopSuccess)
-                    VStack(alignment: .leading, spacing: 1) {
-                        Text(viewModel.boopSuccess ? "Booped" : "Boop")
-                            .font(.system(size: 15, weight: .semibold))
-                            .tracking(0.5)
-                        if let count = viewModel.detail?.boopCount, count > 0 {
-                            Text("\(count) total")
-                                .font(BoopTypography.cineCaption)
-                                .foregroundStyle(BoopColors.textMuted)
-                        }
-                    }
-                }
-                .foregroundStyle(viewModel.boopSuccess ? BoopColors.accentColor : BoopColors.textPrimary)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, BoopSpacing.md)
-                .overlay(
-                    RoundedRectangle(cornerRadius: BoopRadius.soft, style: .continuous)
-                        .stroke(viewModel.canBoop ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1)
-                )
-            }
-            .disabled(!viewModel.canBoop || viewModel.isBoopping)
-            .sensoryFeedback(.success, trigger: viewModel.boopSuccess)
-
-            // Streak display
+            // Last interaction
             VStack(alignment: .leading, spacing: 4) {
-                let streakCurrent = viewModel.detail?.streak?.current ?? 0
-                let streakLongest = viewModel.detail?.streak?.longest ?? 0
+                EyebrowLabel(text: "Last Chatted")
+                Text(lastInteractedText)
+                    .font(BoopTypography.cineTitle)
+                    .foregroundStyle(BoopColors.textPrimary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
 
-                EyebrowLabel(text: streakCurrent > 0 ? "Day Streak" : "No Streak")
-
+            // Points to reveal
+            VStack(alignment: .leading, spacing: 4) {
+                let pts = pointsToReveal
+                EyebrowLabel(text: pts > 0 ? "To Reveal" : "Reveal Ready")
                 HStack(spacing: BoopSpacing.xs) {
-                    Image(systemName: "flame")
+                    Image(systemName: pts > 0 ? "eye.slash" : "eye")
                         .font(.system(size: 13, weight: .thin))
-                        .foregroundStyle(streakCurrent > 0 ? BoopColors.accentColor : BoopColors.textMuted)
-                    Text("\(streakCurrent)")
+                        .foregroundStyle(pts > 0 ? BoopColors.textMuted : BoopColors.accentColor)
+                    Text(pts > 0 ? "\(pts) points" : "Ready")
                         .font(BoopTypography.cineTitle)
-                        .foregroundStyle(streakCurrent > 0 ? BoopColors.textPrimary : BoopColors.textMuted)
-                    if streakLongest > streakCurrent {
-                        Text("Best \(streakLongest)")
-                            .font(BoopTypography.cineCaption)
-                            .foregroundStyle(BoopColors.textMuted)
-                    }
+                        .foregroundStyle(pts > 0 ? BoopColors.textPrimary : BoopColors.accentColor)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    private var pointsToReveal: Int {
+        let comfort = min(100, max(0, viewModel.comfort?.score ?? viewModel.detail?.comfortScore ?? 0))
+        return max(0, 70 - comfort)
+    }
+
+    private var lastInteractedText: String {
+        if let d = viewModel.detail?.streak?.lastActiveDate {
+            return d.formatted(.relative(presentation: .named)).capitalized
+        }
+        if let m = viewModel.detail?.matchedAt {
+            return "Matched \(m.formatted(.relative(presentation: .named)))"
+        }
+        return "Not yet"
     }
 
     // MARK: - Section 2 · Connection stage (horizontal)
@@ -463,6 +447,12 @@ struct MatchDetailView: View {
                 PartnerProfileView(matchId: matchId, firstName: viewModel.detail?.otherUser?.firstName)
             } label: {
                 HairlineRow("About \(viewModel.detail?.otherUser?.firstName ?? "them")", showChevron: true)
+            }
+
+            NavigationLink {
+                AnswerSyncView(matchId: matchId, partnerName: viewModel.detail?.otherUser?.firstName ?? "them")
+            } label: {
+                HairlineRow("Common Questions", showChevron: true)
             }
 
             NavigationLink {

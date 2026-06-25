@@ -61,31 +61,9 @@ struct ConnectionStageStrip: View {
                     .foregroundStyle(BoopColors.error)
             }
 
-            if hasActions {
-                HStack(spacing: BoopSpacing.sm) {
-                    if canRequestReveal {
-                        BoopButton(title: revealButtonTitle, variant: .secondary, isLoading: isWorking, fullWidth: false) {
-                            onRequestReveal()
-                        }
-                    } else if isAwaitingOtherReveal {
-                        EyebrowLabel(text: "Reveal Request Sent", color: BoopColors.accentColor)
-                    }
-
-                    if canAdvanceStage {
-                        BoopButton(title: "Advance", variant: .primary, isLoading: isWorking, fullWidth: false) {
-                            onAdvance()
-                        }
-                    }
-                }
-                .padding(.top, BoopSpacing.xxs)
-            }
         }
         .padding(BoopSpacing.lg)
         .boopCard(radius: BoopRadius.xl, shadow: false)
-    }
-
-    private var hasActions: Bool {
-        canRequestReveal || isAwaitingOtherReveal || canAdvanceStage
     }
 
     // MARK: - Horizontal stepper

@@ -231,6 +231,8 @@ struct ChatConversationView: View {
     @State private var remoteTypingUserId: String?
     @State private var hasSentTyping = false
     @State private var selectedMediaItem: PhotosPickerItem?
+    @State private var pendingImage: UIImage?
+    @State private var showImageConfirm = false
     @State private var isVoiceSheetPresented = false
     @State private var voiceRecorderState = VoiceRecorderState()
     @State private var searchText = ""
@@ -479,10 +481,45 @@ struct ChatConversationView: View {
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self),
                    let image = UIImage(data: data) {
-                    await viewModel.sendImage(image)
+                    pendingImage = image
+                    showImageConfirm = true
                 }
                 selectedMediaItem = nil
             }
+        }
+        .sheet(isPresented: $showImageConfirm) {
+            VStack(spacing: BoopSpacing.lg) {
+                Text("Send this photo?")
+                    .font(BoopTypography.cineHeadline)
+                    .foregroundStyle(BoopColors.textPrimary)
+                    .padding(.top, BoopSpacing.xl)
+                if let img = pendingImage {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 440)
+                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+                        .padding(.horizontal, BoopSpacing.xl)
+                }
+                Spacer()
+                HStack(spacing: BoopSpacing.md) {
+                    BoopButton(title: "Cancel", variant: .ghost, fullWidth: true) {
+                        showImageConfirm = false
+                        pendingImage = nil
+                    }
+                    BoopButton(title: "Send", variant: .primary, fullWidth: true) {
+                        let img = pendingImage
+                        showImageConfirm = false
+                        pendingImage = nil
+                        if let img { Task { await viewModel.sendImage(img) } }
+                    }
+                }
+                .padding(.horizontal, BoopSpacing.xl)
+                .padding(.bottom, BoopSpacing.xl)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .boopBackground()
+            .presentationDetents([.large])
         }
         .onReceive(NotificationCenter.default.publisher(for: .realtimeMessageNew)) { notification in
             guard let payload = notification.userInfo?["payload"] as? ChatMessage else { return }
