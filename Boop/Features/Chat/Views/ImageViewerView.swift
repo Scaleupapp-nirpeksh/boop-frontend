@@ -2,8 +2,13 @@ import SwiftUI
 
 struct ImageViewerView: View {
     let imageURL: String
+    var onClose: (() -> Void)? = nil
 
     @Environment(\.dismiss) private var dismiss
+
+    private func close() {
+        if let onClose { onClose() } else { dismiss() }
+    }
     @State private var scale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
@@ -68,7 +73,7 @@ struct ImageViewerView: View {
                         Spacer()
 
                         Button {
-                            dismiss()
+                            close()
                         } label: {
                             Image(systemName: "xmark")
                                 .font(.system(size: 15, weight: .thin))
@@ -180,7 +185,7 @@ struct ImageViewerView: View {
         DragGesture(minimumDistance: 60)
             .onEnded { value in
                 if scale <= 1.0 && abs(value.translation.height) > 100 {
-                    dismiss()
+                    close()
                 }
             }
     }

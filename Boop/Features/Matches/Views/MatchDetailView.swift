@@ -444,15 +444,9 @@ struct MatchDetailView: View {
             AccentRule()
 
             NavigationLink {
-                PartnerProfileView(matchId: matchId, firstName: viewModel.detail?.otherUser?.firstName)
-            } label: {
-                HairlineRow("About \(viewModel.detail?.otherUser?.firstName ?? "them")", showChevron: true)
-            }
-
-            NavigationLink {
                 AnswerSyncView(matchId: matchId, partnerName: viewModel.detail?.otherUser?.firstName ?? "them")
             } label: {
-                HairlineRow("Common Questions", showChevron: true)
+                HairlineRow("How you two answer", showChevron: true)
             }
 
             NavigationLink {
@@ -468,7 +462,7 @@ struct MatchDetailView: View {
             }
 
             Button {
-                Task { await viewModel.archive() }
+                showLetGoConfirm = true
             } label: {
                 HairlineRow("Archive Match", titleColor: BoopColors.error)
             }

@@ -64,7 +64,7 @@ struct ChatMediaGalleryView: View {
             set: { if !$0 { selectedImageURL = nil } }
         )) {
             if let urlString = selectedImageURL {
-                ImageViewerView(imageURL: urlString)
+                ImageViewerView(imageURL: urlString, onClose: { selectedImageURL = nil })
             }
         }
         .toolbar {

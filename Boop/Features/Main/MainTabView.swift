@@ -161,8 +161,10 @@ final class MainTabViewModel {
         do {
             let response: ConversationsResponse = try await APIClient.shared.request(.getConversations())
             unreadChatCount = response.conversations.reduce(0) { $0 + $1.unreadCount }
+            NotificationRouter.shared.unreadChatCount = unreadChatCount
         } catch {
             unreadChatCount = 0
+            NotificationRouter.shared.unreadChatCount = 0
         }
     }
 }

@@ -588,7 +588,7 @@ struct ChatConversationView: View {
             set: { if !$0 { expandedImageURL = nil } }
         )) {
             if let urlString = expandedImageURL {
-                ImageViewerView(imageURL: urlString)
+                ImageViewerView(imageURL: urlString, onClose: { expandedImageURL = nil })
             }
         }
     }

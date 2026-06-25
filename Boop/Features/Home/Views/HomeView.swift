@@ -105,17 +105,31 @@ struct HomeView: View {
                     .foregroundStyle(BoopColors.textPrimary)
             }
             Spacer()
-            if let streak = topStreak, streak > 0 {
-                HStack(spacing: 4) {
-                    Image(systemName: "flame")
-                        .font(.system(size: 12, weight: .thin))
-                    Text("\(streak)")
-                        .font(BoopTypography.cineCaption)
-                        .tracking(1)
+            Button {
+                NotificationRouter.shared.selectedTab = 2
+            } label: {
+                ZStack(alignment: .topTrailing) {
+                    Image(systemName: "bubble.left.and.bubble.right")
+                        .font(.system(size: 16, weight: .thin))
+                        .foregroundStyle(BoopColors.textPrimary)
+                        .frame(width: 44, height: 44)
+                        .background(BoopColors.surface)
+                        .clipShape(Circle())
+                        .overlay(Circle().stroke(BoopColors.hairline, lineWidth: 1))
+                    if NotificationRouter.shared.unreadChatCount > 0 {
+                        Text("\(min(99, NotificationRouter.shared.unreadChatCount))")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 5)
+                            .padding(.vertical, 1)
+                            .background(Capsule().fill(BoopColors.accentColor))
+                            .overlay(Capsule().stroke(BoopColors.ground, lineWidth: 1.5))
+                            .offset(x: 5, y: -2)
+                    }
                 }
-                .foregroundStyle(BoopColors.accentColor)
-                .padding(.trailing, BoopSpacing.xs)
             }
+            .accessibilityLabel("Chats")
+
             NavigationLink(value: NotificationRoute()) {
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: "bell")
@@ -139,10 +153,6 @@ struct HomeView: View {
                 : "Notifications")
         }
         .padding(.horizontal, BoopSpacing.xl)
-    }
-
-    private var topStreak: Int? {
-        viewModel.activeMatches.compactMap { $0.streak?.current }.max()
     }
 
     private var timeOfDayGreeting: String {

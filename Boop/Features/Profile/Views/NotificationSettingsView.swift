@@ -28,9 +28,6 @@ struct NotificationSettingsView: View {
 
     private var statusSection: some View {
         VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            EyebrowLabel(text: "Device status")
-            AccentRule()
-
             HStack(alignment: .top, spacing: BoopSpacing.sm) {
                 Circle()
                     .fill(statusTint)
@@ -38,48 +35,44 @@ struct NotificationSettingsView: View {
                     .padding(.top, 6)
 
                 VStack(alignment: .leading, spacing: BoopSpacing.xxs) {
-                    Text(pushService.statusTitle)
+                    Text(simpleStatusTitle)
                         .font(BoopTypography.cineBody)
                         .foregroundStyle(BoopColors.textPrimary)
-                    Text(pushService.statusMessage)
+                    Text(simpleStatusMessage)
                         .font(BoopTypography.cineBodyLight)
                         .foregroundStyle(BoopColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
-            if let token = pushService.fcmToken {
-                Text("FCM TOKEN \(token.prefix(16))…")
-                    .font(BoopTypography.cineCaption)
-                    .tracking(1)
-                    .foregroundStyle(BoopColors.textMuted)
-            }
-
-            HStack(spacing: BoopSpacing.sm) {
-                if pushService.authorizationStatus == .notDetermined {
-                    BoopButton(title: "Enable", variant: .primary, isLoading: pushService.registrationState == .requestingPermission, fullWidth: false) {
-                        Task { await pushService.requestAuthorization() }
-                    }
+            if pushService.authorizationStatus == .notDetermined {
+                BoopButton(title: "Turn on notifications", variant: .primary, fullWidth: true) {
+                    Task { await pushService.requestAuthorization() }
                 }
-
-                if pushService.authorizationStatus == .denied {
-                    BoopButton(title: "Open Settings", variant: .outline, fullWidth: false) {
-                        pushService.openSystemSettings()
-                    }
-                }
-
-                if pushService.fcmToken != nil && !pushService.backendTokenSynced {
-                    BoopButton(title: "Retry Sync", variant: .secondary, isLoading: pushService.registrationState == .registering, fullWidth: false) {
-                        Task { await pushService.syncTokenToBackendIfPossible() }
-                    }
+            } else if pushService.authorizationStatus == .denied {
+                BoopButton(title: "Open Settings", variant: .outline, fullWidth: true) {
+                    pushService.openSystemSettings()
                 }
             }
-            .padding(.top, BoopSpacing.xxs)
+        }
+    }
 
-            if let error = pushService.lastErrorMessage {
-                Text(error)
-                    .font(BoopTypography.cineCaption)
-                    .foregroundStyle(BoopColors.error)
-            }
+    private var simpleStatusTitle: String {
+        switch pushService.authorizationStatus {
+        case .authorized, .provisional, .ephemeral: return "Notifications are on"
+        case .denied: return "Notifications are off"
+        default: return "Stay in the loop"
+        }
+    }
+
+    private var simpleStatusMessage: String {
+        switch pushService.authorizationStatus {
+        case .authorized, .provisional, .ephemeral:
+            return "We'll let you know about new matches, messages and reveals."
+        case .denied:
+            return "Turn them on in Settings to hear about new matches, messages and reveals."
+        default:
+            return "Get notified about new matches, messages and reveals."
         }
     }
 
@@ -152,19 +145,12 @@ struct NotificationSettingsView: View {
     }
 
     private var statusTint: Color {
-        if !pushService.isFirebaseConfigured {
-            return BoopColors.warning
-        }
         switch pushService.authorizationStatus {
-        case .authorized, .provisional:
-            return pushService.backendTokenSynced ? BoopColors.success : BoopColors.warning
+        case .authorized, .provisional, .ephemeral:
+            return BoopColors.success
         case .denied:
             return BoopColors.error
-        case .notDetermined:
-            return BoopColors.textMuted
-        case .ephemeral:
-            return BoopColors.accentColor
-        @unknown default:
+        default:
             return BoopColors.textMuted
         }
     }

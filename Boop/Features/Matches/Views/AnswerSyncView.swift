@@ -56,170 +56,72 @@ struct AnswerSyncView: View {
     // MARK: - Loaded
 
     private func loadedView(_ data: AnswerSyncResponse) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.xxl) {
+        VStack(alignment: .leading, spacing: BoopSpacing.xl) {
             header(data)
-            bucketList(data)
-
-            if let selected = viewModel.selectedBucket {
-                expandedBucket(selected, data: data)
-            }
+            questionsList(data)
         }
         .padding(.horizontal, BoopSpacing.xl)
         .padding(.vertical, BoopSpacing.xl)
-        .animation(.easeInOut(duration: 0.25), value: viewModel.selectedBucket)
     }
 
-    // MARK: - Header (eyebrow + verdict + subtitle + spectrum)
+    // MARK: - Header
 
     private func header(_ data: AnswerSyncResponse) -> some View {
         VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            EyebrowLabel(text: "\(data.totalCommon) questions, both answered", color: BoopColors.accentColor)
-
+            EyebrowLabel(text: "\(data.totalCommon) questions you've both answered", color: BoopColors.accentColor)
             AccentRule()
-
             Text(data.verdict)
                 .font(BoopTypography.cineDisplay)
                 .foregroundStyle(BoopColors.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
-
-            Text("How your answers line up across the questions you've both shared.")
+            Text("Where you click — and where you're a little different. Each question shows how in sync the two of you are.")
                 .font(BoopTypography.cineBody)
                 .foregroundStyle(BoopColors.textSecondary)
                 .lineSpacing(5)
                 .fixedSize(horizontal: false, vertical: true)
-
-            spectrumBar(data)
-                .padding(.top, BoopSpacing.xs)
         }
     }
 
-    /// A horizontal spectrum: one rectangle per non-zero bucket, width proportional to count.
-    private func spectrumBar(_ data: AnswerSyncResponse) -> some View {
-        let segments = data.buckets.filter { $0.count > 0 }
-        let total = max(1, segments.reduce(0) { $0 + $1.count })
-        return GeometryReader { geo in
-            HStack(spacing: 2) {
-                ForEach(segments) { bucket in
-                    Rectangle()
-                        .fill(syncColor(bucket.key))
-                        .frame(width: max(3, (CGFloat(bucket.count) / CGFloat(total)) * (geo.size.width - CGFloat(max(0, segments.count - 1)) * 2)))
-                }
-            }
-        }
-        .frame(height: 8)
-        .clipShape(Capsule())
-    }
+    // MARK: - Per-question cards (you vs them + gradient meter)
 
-    // MARK: - Bucket list (5 tappable rows)
-
-    private func bucketList(_ data: AnswerSyncResponse) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-            EyebrowLabel(text: "Where you land")
-
-            VStack(spacing: 0) {
-                ForEach(data.buckets) { bucket in
-                    bucketRow(bucket)
-                }
-                Rectangle().fill(BoopColors.hairline).frame(height: 1)
+    private func questionsList(_ data: AnswerSyncResponse) -> some View {
+        VStack(spacing: BoopSpacing.md) {
+            ForEach(data.questions.sorted { syncPercent($0.syncLevel) > syncPercent($1.syncLevel) }) { q in
+                questionCard(q)
             }
         }
     }
 
-    private func bucketRow(_ bucket: AnswerSyncBucket) -> some View {
-        let isEmpty = bucket.count == 0
-        let isSelected = viewModel.selectedBucket == bucket.key
-        return Button {
-            guard !isEmpty else { return }
-            viewModel.selectedBucket = isSelected ? nil : bucket.key
-        } label: {
-            VStack(spacing: 0) {
-                Rectangle().fill(BoopColors.hairline).frame(height: 1)
-                HStack(spacing: BoopSpacing.sm) {
-                    Circle()
-                        .fill(syncColor(bucket.key))
-                        .frame(width: 10, height: 10)
-
-                    Text(bucket.label)
-                        .font(BoopTypography.cineBody)
-                        .foregroundStyle(BoopColors.textPrimary)
-
-                    Spacer()
-
-                    Text("\(bucket.count)")
-                        .font(.system(size: 17, weight: .light))
-                        .foregroundStyle(BoopColors.textPrimary)
-
-                    Image(systemName: isSelected ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 12, weight: .thin))
-                        .foregroundStyle(BoopColors.textMuted)
-                        .opacity(isEmpty ? 0 : 1)
-                }
-                .padding(.vertical, BoopSpacing.md)
-            }
-            .opacity(isEmpty ? 0.4 : 1)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .disabled(isEmpty)
-    }
-
-    // MARK: - Expanded bucket (question cards)
-
-    @ViewBuilder
-    private func expandedBucket(_ key: String, data: AnswerSyncResponse) -> some View {
-        let bucket = data.buckets.first(where: { $0.key == key })
-        let questions = viewModel.questions(in: key)
-        VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            EyebrowLabel(text: bucket?.label ?? humanize(key), color: syncColor(key))
-
-            if questions.isEmpty {
-                Text("No detail to show for these yet.")
-                    .font(BoopTypography.cineBodyLight)
-                    .foregroundStyle(BoopColors.textMuted)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(BoopSpacing.lg)
-                    .boopCard(radius: BoopRadius.lg, shadow: false)
-            } else {
-                ForEach(questions) { question in
-                    questionCard(question, bucketLabel: bucket?.label ?? humanize(key))
-                }
-            }
-        }
-    }
-
-    private func questionCard(_ question: AnswerSyncQuestion, bucketLabel: String) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            Text("\(bucketLabel) · \(humanize(question.category))")
-                .font(BoopTypography.cineCaption)
-                .tracking(1)
-                .foregroundStyle(BoopColors.textMuted)
-
-            Text(question.questionText)
+    private func questionCard(_ q: AnswerSyncQuestion) -> some View {
+        let pct = syncPercent(q.syncLevel)
+        return VStack(alignment: .leading, spacing: BoopSpacing.md) {
+            Text(q.questionText)
                 .font(BoopTypography.cineBodyLight)
                 .foregroundStyle(BoopColors.textPrimary)
                 .lineSpacing(4)
                 .fixedSize(horizontal: false, vertical: true)
 
             VStack(alignment: .leading, spacing: BoopSpacing.sm) {
-                summaryRow(label: "You", text: question.summaryYou, accent: BoopColors.accentColor)
-                summaryRow(label: partnerName.uppercased(), text: question.summaryThem, accent: BoopColors.textSecondary)
+                answerRow(label: "You", text: q.summaryYou, accent: BoopColors.accentColor)
+                answerRow(label: partnerName, text: q.summaryThem, accent: Color(hex: "6E84E6"))
             }
+
+            compatMeter(pct: pct, level: q.syncLevel)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(BoopSpacing.lg)
         .boopCard(radius: BoopRadius.lg, shadow: false)
     }
 
-    private func summaryRow(label: String, text: String, accent: Color) -> some View {
+    private func answerRow(label: String, text: String, accent: Color) -> some View {
         HStack(alignment: .top, spacing: BoopSpacing.sm) {
-            Text(label)
+            Text(label.uppercased())
                 .font(BoopTypography.cineLabel)
                 .tracking(1.5)
                 .foregroundStyle(accent)
-                .frame(width: 64, alignment: .leading)
+                .frame(width: 72, alignment: .leading)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
-
+                .minimumScaleFactor(0.6)
             Text(text)
                 .font(BoopTypography.cineBody)
                 .foregroundStyle(BoopColors.textSecondary)
@@ -227,6 +129,59 @@ struct AnswerSyncView: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+
+    private func compatMeter(pct: Int, level: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(BoopColors.hairline)
+                    Capsule()
+                        .fill(LinearGradient(colors: meterColors(pct), startPoint: .leading, endPoint: .trailing))
+                        .frame(width: max(8, geo.size.width * CGFloat(pct) / 100))
+                }
+            }
+            .frame(height: 8)
+            HStack {
+                Text(syncLabel(level))
+                    .font(BoopTypography.cineCaption)
+                    .foregroundStyle(BoopColors.textMuted)
+                Spacer()
+                Text("\(pct)% in sync")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(meterColors(pct).last ?? BoopColors.accentColor)
+            }
+        }
+        .padding(.top, BoopSpacing.xxs)
+    }
+
+    private func syncPercent(_ level: String) -> Int {
+        switch level {
+        case "highly_in_sync": return 95
+        case "in_sync": return 78
+        case "neutral_ground": return 55
+        case "different_views": return 32
+        case "poles_apart": return 12
+        default: return 50
+        }
+    }
+
+    private func syncLabel(_ level: String) -> String {
+        switch level {
+        case "highly_in_sync": return "Totally in sync"
+        case "in_sync": return "In sync"
+        case "neutral_ground": return "Some overlap"
+        case "different_views": return "Different takes"
+        case "poles_apart": return "Poles apart"
+        default: return "In common"
+        }
+    }
+
+    private func meterColors(_ pct: Int) -> [Color] {
+        if pct >= 85 { return [Color(hex: "FFB07A"), BoopColors.accentColor] }
+        if pct >= 65 { return [Color(hex: "FFC07A"), Color(hex: "FF8A6B")] }
+        if pct >= 45 { return [Color(hex: "C9A7EA"), Color(hex: "9B7BC0")] }
+        return [Color(hex: "9DB6FF"), Color(hex: "6E84E6")]
     }
 
     // MARK: - States

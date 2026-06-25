@@ -14,6 +14,7 @@ final class NotificationRouter {
 
     var pendingDestination: Destination?
     var selectedTab: Int = 0
+    var unreadChatCount: Int = 0
 
     private init() {}
 
