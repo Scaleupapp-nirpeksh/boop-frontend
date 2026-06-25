@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct ChatMediaGalleryView: View {
     let conversationId: String
@@ -8,6 +9,11 @@ struct ChatMediaGalleryView: View {
     @State private var selectedTab = 0
     @State private var selectedImageURL: String?
     @State private var audioPlayer = RemoteAudioPlayer()
+    @State private var selectedMediaItem: PhotosPickerItem?
+    @State private var pendingImage: UIImage?
+    @State private var showImageConfirm = false
+    @State private var isVoiceSheetPresented = false
+    @State private var voiceRecorderState = VoiceRecorderState()
 
     init(conversationId: String, otherUserName: String) {
         self.conversationId = conversationId
@@ -59,6 +65,102 @@ struct ChatMediaGalleryView: View {
         )) {
             if let urlString = selectedImageURL {
                 ImageViewerView(imageURL: urlString)
+            }
+        }
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                if selectedTab == 0 {
+                    PhotosPicker(selection: $selectedMediaItem, matching: .images) {
+                        Image(systemName: "photo.badge.plus")
+                            .foregroundStyle(BoopColors.accentColor)
+                    }
+                } else {
+                    Button {
+                        voiceRecorderState.minDuration = 1
+                        voiceRecorderState.maxDuration = 120
+                        isVoiceSheetPresented = true
+                    } label: {
+                        Image(systemName: "mic.badge.plus")
+                            .foregroundStyle(BoopColors.accentColor)
+                    }
+                }
+            }
+        }
+        .onChange(of: selectedMediaItem) { _, item in
+            guard let item else { return }
+            Task {
+                if let data = try? await item.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    pendingImage = image
+                    showImageConfirm = true
+                }
+                selectedMediaItem = nil
+            }
+        }
+        .sheet(isPresented: $showImageConfirm) {
+            VStack(spacing: BoopSpacing.lg) {
+                Text("Send this photo?")
+                    .font(BoopTypography.cineHeadline)
+                    .foregroundStyle(BoopColors.textPrimary)
+                    .padding(.top, BoopSpacing.xl)
+                if let img = pendingImage {
+                    Image(uiImage: img)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 440)
+                        .clipShape(RoundedRectangle(cornerRadius: BoopRadius.xl, style: .continuous))
+                        .padding(.horizontal, BoopSpacing.xl)
+                }
+                Spacer()
+                HStack(spacing: BoopSpacing.md) {
+                    BoopButton(title: "Cancel", variant: .ghost, fullWidth: true) {
+                        showImageConfirm = false
+                        pendingImage = nil
+                    }
+                    BoopButton(title: "Send", variant: .primary, fullWidth: true) {
+                        let img = pendingImage
+                        showImageConfirm = false
+                        pendingImage = nil
+                        if let img { Task { await viewModel.sendImage(img) } }
+                    }
+                }
+                .padding(.horizontal, BoopSpacing.xl)
+                .padding(.bottom, BoopSpacing.xl)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .boopBackground()
+            .presentationDetents([.large])
+        }
+        .sheet(isPresented: $isVoiceSheetPresented) {
+            NavigationStack {
+                VStack(spacing: BoopSpacing.lg) {
+                    BoopVoiceRecorder(state: voiceRecorderState)
+                    if let data = voiceRecorderState.getRecordingData() {
+                        BoopButton(
+                            title: "Send voice note",
+                            isLoading: viewModel.isLoading,
+                            isDisabled: !voiceRecorderState.hasRecording
+                        ) {
+                            Task {
+                                await viewModel.sendVoice(data: data, duration: voiceRecorderState.duration)
+                                voiceRecorderState.deleteRecording()
+                                isVoiceSheetPresented = false
+                            }
+                        }
+                    }
+                }
+                .padding(BoopSpacing.xl)
+                .boopBackground()
+                .navigationTitle("Voice Note")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Close") {
+                            voiceRecorderState.deleteRecording()
+                            isVoiceSheetPresented = false
+                        }
+                    }
+                }
             }
         }
     }

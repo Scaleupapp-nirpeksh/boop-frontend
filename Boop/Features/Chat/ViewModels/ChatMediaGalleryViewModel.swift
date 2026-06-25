@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 
 @Observable
 final class ChatMediaGalleryViewModel {
@@ -84,6 +85,49 @@ final class ChatMediaGalleryViewModel {
             hasMoreVoice = response.page < response.totalPages
         } catch {
             // Silent pagination failure
+        }
+    }
+
+    // MARK: - Sending from Shared Media
+
+    @MainActor
+    func sendImage(_ image: UIImage) async {
+        guard let data = image.jpegData(compressionQuality: 0.82) else { return }
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let upload = try await APIClient.shared.uploadConversationMedia(
+                data: data, conversationId: conversationId, mediaType: "image",
+                fileName: "chat_image.jpg", mimeType: "image/jpeg"
+            )
+            let _: ChatMessage = try await APIClient.shared.request(
+                .sendMessage(conversationId: conversationId,
+                             request: SendMessageRequest(type: "image", mediaUrl: upload.mediaUrl))
+            )
+            await loadPhotos()
+            Analytics.capture("message_sent", ["type": "image", "source": "shared_media"])
+        } catch {
+            errorMessage = "Could not send photo."
+        }
+    }
+
+    @MainActor
+    func sendVoice(data: Data, duration: Double) async {
+        isLoading = true
+        defer { isLoading = false }
+        do {
+            let upload = try await APIClient.shared.uploadConversationMedia(
+                data: data, conversationId: conversationId, mediaType: "voice",
+                fileName: "voice_note.m4a", mimeType: "audio/mp4", duration: duration
+            )
+            let _: ChatMessage = try await APIClient.shared.request(
+                .sendMessage(conversationId: conversationId,
+                             request: SendMessageRequest(type: "voice", mediaUrl: upload.mediaUrl, mediaDuration: upload.mediaDuration))
+            )
+            await loadVoiceNotes()
+            Analytics.capture("message_sent", ["type": "voice", "source": "shared_media"])
+        } catch {
+            errorMessage = "Could not send voice note."
         }
     }
 }
