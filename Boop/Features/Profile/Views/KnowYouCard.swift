@@ -42,22 +42,17 @@ struct KnowYouCard: View {
 
     var body: some View {
         Button(action: onTap) {
-            HStack(alignment: .center, spacing: BoopSpacing.lg) {
+            HStack(alignment: .center, spacing: BoopSpacing.md) {
                 focusOrbs
 
-                VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                VStack(alignment: .leading, spacing: 3) {
                     EyebrowLabel(text: stageText)
 
                     Text("Help us see the real you")
-                        .font(BoopTypography.cineTitle)
+                        .font(BoopTypography.cineBody)
                         .foregroundStyle(BoopColors.textPrimary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Text("Every answer helps us introduce you to people who truly fit.")
-                        .font(BoopTypography.cineBodyLight)
-                        .foregroundStyle(BoopColors.textSecondary)
-                        .lineSpacing(3)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
 
                     HStack(spacing: BoopSpacing.xs) {
                         Text(ctaText)
@@ -67,11 +62,11 @@ struct KnowYouCard: View {
                             .font(.system(size: 10, weight: .thin))
                     }
                     .foregroundStyle(BoopColors.accentColor)
-                    .padding(.top, BoopSpacing.xxs)
+                    .padding(.top, 2)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(BoopSpacing.lg)
+            .padding(BoopSpacing.md)
             .boopCard(radius: BoopRadius.xl, shadow: false)
         }
         .buttonStyle(.plain)
@@ -86,11 +81,11 @@ struct KnowYouCard: View {
                         colors: [Color(hex: "FFB07A"), Color(hex: "FF5C72"), Color(hex: "D7335F")],
                         center: UnitPoint(x: 0.42, y: 0.38),
                         startRadius: 1,
-                        endRadius: 26
+                        endRadius: 18
                     )
                 )
-                .frame(width: 44, height: 44)
-                .offset(x: -11)
+                .frame(width: 30, height: 30)
+                .offset(x: -8)
                 .opacity(0.95)
 
             Circle()
@@ -99,21 +94,21 @@ struct KnowYouCard: View {
                         colors: [Color(hex: "9DB6FF"), Color(hex: "6E84E6"), Color(hex: "4E5FC9")],
                         center: UnitPoint(x: 0.58, y: 0.38),
                         startRadius: 1,
-                        endRadius: 26
+                        endRadius: 18
                     )
                 )
-                .frame(width: 44, height: 44)
-                .offset(x: 11)
+                .frame(width: 30, height: 30)
+                .offset(x: 8)
                 .opacity(0.95)
 
             Circle()
                 .fill(Color(hex: "F0D2F2"))
-                .frame(width: 20, height: 20)
+                .frame(width: 13, height: 13)
                 .opacity(0.55)
-                .blur(radius: 4)
+                .blur(radius: 3)
         }
-        .frame(width: 70, height: 56)
-        .blur(radius: orbBlur)
+        .frame(width: 50, height: 38)
+        .blur(radius: orbBlur * 0.7)
         .animation(.easeInOut(duration: 0.6), value: orbBlur)
     }
 }
