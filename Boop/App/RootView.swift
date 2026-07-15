@@ -15,6 +15,8 @@ struct RootView: View {
             // renders the Me-tab focus card at three stages without signing in.
             if ProcessInfo.processInfo.environment["BOOP_UI_GALLERY"] == "knowyou" {
                 KnowYouGalleryView()
+            } else if ProcessInfo.processInfo.environment["BOOP_UI_GALLERY"] == "youtwo" {
+                YouTwoGalleryView()
             } else if !splashFinished {
                 SplashView(isFinished: $splashFinished)
             } else if !hasSeenIntro && !introFinished {

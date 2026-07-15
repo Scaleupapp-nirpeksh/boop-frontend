@@ -40,7 +40,7 @@ struct MainTabView: View {
             NavigationStack(path: $homeNavigationPath) {
                 HomeView()
                     .navigationDestination(for: MatchRoute.self) { route in
-                        MatchDetailView(matchId: route.matchId)
+                        PartnerProfileView(matchId: route.matchId)
                     }
                     .navigationDestination(for: GameRoute.self) { route in
                         GameSessionView(gameId: route.gameId)

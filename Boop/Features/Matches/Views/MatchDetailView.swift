@@ -213,19 +213,6 @@ struct MatchDetailView: View {
                     .padding(.top, BoopSpacing.xs)
                 }
 
-                NavigationLink {
-                    PartnerProfileView(matchId: matchId, firstName: viewModel.detail?.otherUser?.firstName)
-                } label: {
-                    HStack(spacing: BoopSpacing.xs) {
-                        Text("VIEW PROFILE")
-                            .font(BoopTypography.cineLabel)
-                            .tracking(2)
-                        Image(systemName: "arrow.right")
-                            .font(.system(size: 10, weight: .regular))
-                    }
-                    .foregroundStyle(BoopColors.accentColor)
-                }
-                .padding(.top, BoopSpacing.xs)
             }
             .padding(.horizontal, -BoopSpacing.xl)
 
@@ -387,14 +374,22 @@ struct MatchDetailView: View {
 
     private var growthInsightsTeaser: some View {
         let comfort = min(100, max(0, viewModel.comfort?.score ?? viewModel.detail?.comfortScore ?? 0))
-        let trend = comfortTrend
+        let stage = viewModel.detail?.stage ?? ""
+        let revealed = stage == "revealed" || stage == "dating"
+        let phrase: String = {
+            if revealed { return "In full colour" }
+            if comfort >= 70 { return "Ready for the reveal" }
+            if comfort >= 45 { return "The fog is lifting" }
+            if comfort >= 25 { return "Warming up" }
+            return "Just beginning"
+        }()
 
         return NavigationLink {
             GrowthInsightsView(matchId: matchId)
         } label: {
             VStack(alignment: .leading, spacing: BoopSpacing.md) {
                 HStack(alignment: .top) {
-                    EyebrowLabel(text: "Growth & Insights")
+                    EyebrowLabel(text: "You Two")
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.system(size: 13, weight: .thin))
@@ -402,22 +397,13 @@ struct MatchDetailView: View {
                 }
                 AccentRule()
 
-                HStack(alignment: .firstTextBaseline, spacing: BoopSpacing.sm) {
-                    Text("Comfort \(comfort)/100")
-                        .font(BoopTypography.cineTitle)
-                        .foregroundStyle(BoopColors.textPrimary)
-                    if let trend {
-                        HStack(spacing: 3) {
-                            Image(systemName: trend >= 0 ? "arrow.up.right" : "arrow.down.right")
-                                .font(.system(size: 10, weight: .light))
-                            Text(trend >= 0 ? "+\(trend)" : "\(trend)")
-                                .font(.system(size: 13, weight: .light))
-                        }
-                        .foregroundStyle(trend >= 0 ? BoopColors.success : BoopColors.error)
-                    }
-                }
+                Text(phrase)
+                    .font(BoopTypography.cineTitle)
+                    .foregroundStyle(BoopColors.textPrimary)
 
-                Text("Tap to see what grows it + your insights.")
+                Text(revealed
+                     ? "See what's blooming between you."
+                     : "See what's blooming — and what brings you closer.")
                     .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)

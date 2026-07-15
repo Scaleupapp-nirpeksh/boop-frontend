@@ -14,7 +14,7 @@ struct HomeView: View {
 
                     if let hero = heroMatch {
                         NavigationLink {
-                            MatchDetailView(matchId: hero.matchId)
+                            PartnerProfileView(matchId: hero.matchId, firstName: hero.otherUser.firstName)
                         } label: {
                             MomentHeroCard(match: hero)
                                 .padding(.horizontal, BoopSpacing.xl)

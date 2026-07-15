@@ -13,7 +13,7 @@ struct YourPeopleRow: View {
                 HStack(spacing: BoopSpacing.sm) {
                     ForEach(matches) { match in
                         NavigationLink {
-                            MatchDetailView(matchId: match.matchId)
+                            PartnerProfileView(matchId: match.matchId, firstName: match.otherUser.firstName)
                         } label: {
                             personCell(match)
                         }

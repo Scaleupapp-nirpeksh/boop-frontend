@@ -25,6 +25,8 @@ struct PartnerProfileView: View {
 
                         typeSection(partner)
 
+                        connectionCard
+
                         compareSection(partner)
                     }
                     .padding(.horizontal, BoopSpacing.xl)
@@ -171,6 +173,54 @@ struct PartnerProfileView: View {
                     .font(BoopTypography.cineBodyLight)
                     .foregroundStyle(BoopColors.textSecondary)
             }
+        }
+    }
+
+    // MARK: - Your connection (opens the connection page)
+
+    @ViewBuilder
+    private var connectionCard: some View {
+        if let detail = viewModel.matchDetail {
+            let comfort = min(100, max(0, detail.comfortScore ?? 0))
+            let revealed = detail.stage == "revealed" || detail.stage == "dating"
+            let pts = max(0, 70 - comfort)
+            let phrase: String = {
+                if revealed { return "In full colour" }
+                if comfort >= 70 { return "Ready for the reveal" }
+                if comfort >= 45 { return "The fog is lifting" }
+                if comfort >= 25 { return "Warming up" }
+                return "Just beginning"
+            }()
+
+            NavigationLink {
+                MatchDetailView(matchId: matchId)
+            } label: {
+                HStack(spacing: BoopSpacing.md) {
+                    Text("🫧")
+                        .font(.system(size: 24))
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        EyebrowLabel(text: "Your Connection", color: BoopColors.accentColor)
+                        Text(phrase)
+                            .font(BoopTypography.cineBody)
+                            .foregroundStyle(BoopColors.textPrimary)
+                        if !revealed && pts > 0 {
+                            Text("\(pts) points to the reveal")
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textSecondary)
+                        }
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .thin))
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+                .padding(BoopSpacing.lg)
+                .boopCard(radius: BoopRadius.xl, shadow: false)
+            }
+            .buttonStyle(.plain)
         }
     }
 

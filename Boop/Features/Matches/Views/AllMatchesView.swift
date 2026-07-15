@@ -19,7 +19,7 @@ struct AllMatchesView: View {
                 LazyVStack(spacing: BoopSpacing.md) {
                     ForEach(matches) { match in
                         NavigationLink {
-                            MatchDetailView(matchId: match.matchId)
+                            PartnerProfileView(matchId: match.matchId, firstName: match.otherUser.firstName)
                         } label: {
                             row(match)
                         }

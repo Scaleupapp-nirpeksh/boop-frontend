@@ -5,6 +5,7 @@ final class PartnerProfileViewModel {
     var partner: PartnerProfile?
     var myFacets: [PersonalityFacet] = []
     var compatibilityScore: Int?
+    var matchDetail: MatchDetail?
     var isLoading = false
     var errorMessage: String?
 
@@ -28,6 +29,7 @@ final class PartnerProfileViewModel {
             myFacets = me.analysis?.facets ?? []
         }
         if let detail: MatchDetail = try? await APIClient.shared.request(.getMatchById(matchId: matchId)) {
+            matchDetail = detail
             compatibilityScore = detail.compatibilityScore
         }
     }
