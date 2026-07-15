@@ -188,7 +188,7 @@ struct MatchInfo: Codable, Identifiable {
         case "mutual": return "✨"
         case "connecting": return "💬"
         case "reveal_ready": return "🔓"
-        case "revealed": return "📸"
+        case "revealed": return "🌆"
         case "dating": return "☕"
         default: return "✨"
         }
@@ -196,11 +196,11 @@ struct MatchInfo: Codable, Identifiable {
 
     var stageLabel: String {
         switch stage {
-        case "mutual": return "Just Matched"
-        case "connecting": return "Getting to Know"
-        case "reveal_ready": return "Ready to Reveal"
-        case "revealed": return "Photos Revealed"
-        case "dating": return "Date Ready"
+        case "mutual": return "Initiated"
+        case "connecting": return "Connecting"
+        case "reveal_ready": return "Reveal Ready"
+        case "revealed": return "Plan a Date"
+        case "dating": return "Dating"
         default: return "New"
         }
     }

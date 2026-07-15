@@ -137,15 +137,16 @@ final class MatchDetailViewModel {
 
     var stageTitle: String {
         let raw = detail?.stage ?? "mutual"
-        return raw.replacingOccurrences(of: "_", with: " ").capitalized
+        return stageSteps.first(where: { $0.rawValue == raw })?.title
+            ?? raw.replacingOccurrences(of: "_", with: " ").capitalized
     }
 
     var stageSteps: [MatchStageStep] {
         [
-            .init(rawValue: "mutual", title: "Mutual", subtitle: "You matched"),
+            .init(rawValue: "mutual", title: "Initiated", subtitle: "You matched"),
             .init(rawValue: "connecting", title: "Connecting", subtitle: "Talk and listen"),
             .init(rawValue: "reveal_ready", title: "Reveal Ready", subtitle: "Strong signal"),
-            .init(rawValue: "revealed", title: "Revealed", subtitle: "Photos unlocked"),
+            .init(rawValue: "revealed", title: "Plan a Date", subtitle: "Photos unlocked"),
             .init(rawValue: "dating", title: "Dating", subtitle: "Meet offline"),
         ]
     }
@@ -169,7 +170,7 @@ final class MatchDetailViewModel {
         case "reveal_ready":
             return "You have enough momentum to decide whether you both want to reveal photos."
         case "revealed":
-            return "Photos are unlocked. Now check if the energy still holds and plan something real."
+            return "Photos are unlocked. Time to plan the first date and see if the energy holds in person."
         case "dating":
             return "You’ve moved beyond the app stage. Keep the momentum and make the next step concrete."
         case "archived":
