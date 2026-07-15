@@ -68,6 +68,7 @@ enum APIEndpoint {
     case submitGameResponse(gameId: String, answer: String)
     case cancelGame(gameId: String)
     case getGamesForMatch(matchId: String)
+    case getGameChemistry(matchId: String)
 
     // Score History & Insights
     case getScoreHistory(matchId: String, limit: Int = 50)
@@ -155,6 +156,7 @@ enum APIEndpoint {
         case .submitGameResponse(let gameId, _): return "/games/\(gameId)/respond"
         case .cancelGame(let gameId): return "/games/\(gameId)/cancel"
         case .getGamesForMatch(let matchId): return "/games/match/\(matchId)"
+        case .getGameChemistry(let matchId): return "/games/match/\(matchId)/chemistry"
         case .getScoreHistory(let matchId, let limit): return "/matches/\(matchId)/score-history?limit=\(limit)"
         case .getRelationshipInsights(let matchId): return "/matches/\(matchId)/insights"
         case .getConversationStarters(let matchId): return "/matches/\(matchId)/conversation-starters"
@@ -204,7 +206,7 @@ enum APIEndpoint {
              .getCandidates, .getDiscoverStats, .getPendingLikes, .suggestNote, .getMatches, .getMatchById,
              .getMatchPartner,
              .getComfortScore, .getDateReadiness, .getDatePlans, .getVenueSuggestions,
-             .getGame, .getGamesForMatch,
+             .getGame, .getGamesForMatch, .getGameChemistry,
              .getScoreHistory, .getRelationshipInsights, .getConversationStarters, .getCompatibilityDeepDive,
              .getAnswerSync,
              .getNotifications, .getUnreadNotificationCount,

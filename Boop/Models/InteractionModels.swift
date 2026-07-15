@@ -474,3 +474,35 @@ struct AnswerSyncQuestion: Decodable, Identifiable {
 
     var id: Int { questionNumber }
 }
+
+// MARK: - Game Chemistry (You Two · "How you play")
+
+struct GameChemistryResponse: Decodable {
+    let matchId: String
+    let gamesPlayed: Int
+    let roundsCompared: Int
+    let sameCount: Int
+    let inSync: [GameChemistrySame]
+    let differentTakes: [GameChemistryDifferent]
+    let tryTogether: [GameChemistryFirst]
+}
+
+struct GameChemistrySame: Decodable, Identifiable {
+    let gameType: String
+    let prompt: String
+    let answer: String
+    var id: String { prompt + answer }
+}
+
+struct GameChemistryDifferent: Decodable, Identifiable {
+    let gameType: String
+    let prompt: String
+    let you: String
+    let them: String
+    var id: String { prompt + you }
+}
+
+struct GameChemistryFirst: Decodable, Identifiable {
+    let prompt: String
+    var id: String { prompt }
+}

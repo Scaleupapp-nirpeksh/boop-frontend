@@ -25,6 +25,7 @@ final class MatchDetailViewModel {
     var readiness: DateReadinessResponse?
     var scoreHistory: ScoreHistoryResponse?
     var insights: RelationshipInsightsResponse?
+    var chemistry: GameChemistryResponse?
     var isLoading = false
     var isWorking = false
     var isLoadingInsights = false
@@ -51,6 +52,7 @@ final class MatchDetailViewModel {
             comfort = try? await comfortTask
             readiness = try? await readinessTask
             scoreHistory = try? await historyTask
+            chemistry = try? await APIClient.shared.request(.getGameChemistry(matchId: matchId))
             errorMessage = nil
         } catch let error as APIError {
             errorMessage = error.errorDescription

@@ -40,6 +40,8 @@ struct GrowthInsightsView: View {
                     bloomingCard
                 }
 
+                howYouPlayCard
+
                 if !suggestions.isEmpty {
                     closerCard
                 }
@@ -210,6 +212,130 @@ struct GrowthInsightsView: View {
         .boopCard(radius: BoopRadius.xl, shadow: false)
     }
 
+    // MARK: - How you play (game chemistry — real answers, told playfully)
+
+    @ViewBuilder
+    private var howYouPlayCard: some View {
+        if let chem = viewModel.chemistry {
+            if chem.roundsCompared > 0 {
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    EyebrowLabel(text: "How you play")
+                    AccentRule()
+
+                    Text(chemistryVerdict(chem))
+                        .font(BoopTypography.cineTitle)
+                        .foregroundStyle(BoopColors.textPrimary)
+
+                    Text("From the games you've played together.")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textMuted)
+
+                    if !chem.inSync.isEmpty {
+                        chemistrySectionLabel("You both picked")
+                        ForEach(chem.inSync) { item in
+                            chemistryRow(symbol: "♥", symbolColor: BoopColors.accentColor, text: sameText(item))
+                        }
+                    }
+
+                    if !chem.differentTakes.isEmpty {
+                        chemistrySectionLabel("Different takes")
+                        ForEach(chem.differentTakes) { item in
+                            chemistryRow(symbol: "⇄", symbolColor: Color(hex: "6E84E6"), text: differentText(item))
+                        }
+                    }
+
+                    if !chem.tryTogether.isEmpty {
+                        chemistrySectionLabel("Firsts to share")
+                        ForEach(chem.tryTogether) { item in
+                            chemistryRow(symbol: "✧", symbolColor: Color(hex: "C9A7EA"),
+                                         text: "\(stripNHIE(item.prompt)) — neither of you has. Yet.")
+                        }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BoopSpacing.lg)
+                .boopCard(radius: BoopRadius.xl, shadow: false)
+            } else {
+                NavigationLink { MatchGamesView(matchId: matchId) } label: {
+                    VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+                        EyebrowLabel(text: "How you play")
+                        AccentRule()
+                        Text("Play a game together and we'll show how your answers dance 🎮")
+                            .font(BoopTypography.cineBodyLight)
+                            .foregroundStyle(BoopColors.textSecondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        HStack(spacing: BoopSpacing.xs) {
+                            Text("Start one")
+                                .font(BoopTypography.cineLabel)
+                                .tracking(1.5)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 10, weight: .thin))
+                        }
+                        .foregroundStyle(BoopColors.accentColor)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(BoopSpacing.lg)
+                    .boopCard(radius: BoopRadius.xl, shadow: false)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func chemistryVerdict(_ chem: GameChemistryResponse) -> String {
+        let ratio = Double(chem.sameCount) / Double(max(1, chem.roundsCompared))
+        if ratio >= 0.75 { return "Same wavelength" }
+        if ratio >= 0.5 { return "More alike than different" }
+        if ratio >= 0.3 { return "Opposites attracting" }
+        return "Beautifully different"
+    }
+
+    private func sameText(_ item: GameChemistrySame) -> String {
+        if item.gameType == "never_have_i_ever" {
+            return "\(stripNHIE(item.prompt)) — you both have 😏"
+        }
+        return item.answer
+    }
+
+    private func differentText(_ item: GameChemistryDifferent) -> String {
+        if item.gameType == "never_have_i_ever" {
+            let youHave = item.you.lowercased() == "i have"
+            return "\(stripNHIE(item.prompt)) — \(youHave ? "you have, they haven't" : "they have, you haven't")"
+        }
+        return "You: \(item.you) · Them: \(item.them)"
+    }
+
+    /// "Never have I ever sung karaoke in public" → "Sung karaoke in public"
+    private func stripNHIE(_ prompt: String) -> String {
+        var text = prompt
+        let prefix = "never have i ever "
+        if text.lowercased().hasPrefix(prefix) {
+            text = String(text.dropFirst(prefix.count))
+        }
+        return text.prefix(1).uppercased() + text.dropFirst()
+    }
+
+    private func chemistrySectionLabel(_ text: String) -> some View {
+        Text(text.uppercased())
+            .font(BoopTypography.cineLabel)
+            .tracking(1.5)
+            .foregroundStyle(BoopColors.textMuted)
+            .padding(.top, BoopSpacing.xs)
+    }
+
+    private func chemistryRow(symbol: String, symbolColor: Color, text: String) -> some View {
+        HStack(alignment: .top, spacing: BoopSpacing.sm) {
+            Text(symbol)
+                .font(.system(size: 15))
+                .foregroundStyle(symbolColor)
+                .frame(width: 18)
+            Text(text)
+                .font(BoopTypography.cineBody)
+                .foregroundStyle(BoopColors.textPrimary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
     // MARK: - What brings you closer (the weak drivers → things to do)
 
     private enum SuggestionLink { case chat, games }
@@ -230,15 +356,20 @@ struct GrowthInsightsView: View {
                 .prefix(2)
                 .map { normalize($0.key) }
         )
-        return breakdown
-            .sorted { $0.value.value < $1.value.value }
-            .compactMap { key, _ -> Suggestion? in
-                let k = normalize(key)
-                guard !celebrated.contains(k) else { return nil }
-                return Self.suggestionCopy[k]
-            }
-            .prefix(3)
-            .map { $0 }
+        // One suggestion per destination — three cards that all open the chat
+        // is just one suggestion wearing three hats.
+        var usedLinks = Set<String>()
+        var picked: [Suggestion] = []
+        for (key, _) in breakdown.sorted(by: { $0.value.value < $1.value.value }) {
+            let k = normalize(key)
+            guard !celebrated.contains(k), let s = Self.suggestionCopy[k] else { continue }
+            let linkKey = s.link.map { String(describing: $0) } ?? "none"
+            guard !usedLinks.contains(linkKey) else { continue }
+            usedLinks.insert(linkKey)
+            picked.append(s)
+            if picked.count == 2 { break }
+        }
+        return picked
     }
 
     private static let suggestionCopy: [String: Suggestion] = [
@@ -431,6 +562,23 @@ struct YouTwoGalleryView: View {
             ],
             matchId: "demo",
             updatedAt: nil
+        )
+        vm.chemistry = GameChemistryResponse(
+            matchId: "demo",
+            gamesPlayed: 2,
+            roundsCompared: 10,
+            sameCount: 8,
+            inSync: [
+                GameChemistrySame(gameType: "would_you_rather", prompt: "Would you rather...", answer: "Have breakfast in bed every morning"),
+                GameChemistrySame(gameType: "would_you_rather", prompt: "Would you rather...", answer: "Move to a new place every few years together"),
+            ],
+            differentTakes: [
+                GameChemistryDifferent(gameType: "would_you_rather", prompt: "Would you rather...", you: "Be the funny one", them: "Be the grounded one"),
+                GameChemistryDifferent(gameType: "never_have_i_ever", prompt: "Never have I ever sung karaoke in public", you: "I have", them: "Never"),
+            ],
+            tryTogether: [
+                GameChemistryFirst(prompt: "Never have I ever made a life-changing decision based on love"),
+            ]
         )
         return vm
     }
