@@ -8,6 +8,7 @@ struct GrowthInsightsView: View {
     let matchId: String
 
     @State private var viewModel: MatchDetailViewModel
+    @State private var answerSync: AnswerSyncResponse?
 
     init(matchId: String) {
         self.matchId = matchId
@@ -64,6 +65,9 @@ struct GrowthInsightsView: View {
         .task {
             if viewModel.detail == nil {
                 await viewModel.load()
+            }
+            if answerSync == nil {
+                answerSync = try? await APIClient.shared.request(.getAnswerSync(matchId: matchId))
             }
         }
     }
@@ -260,12 +264,28 @@ struct GrowthInsightsView: View {
                     VStack(alignment: .leading, spacing: BoopSpacing.sm) {
                         EyebrowLabel(text: "How you play")
                         AccentRule()
-                        Text("Play a game together and we'll show how your answers dance 🎮")
-                            .font(BoopTypography.cineBodyLight)
-                            .foregroundStyle(BoopColors.textSecondary)
-                            .fixedSize(horizontal: false, vertical: true)
+
+                        if let sync = answerSync, sync.totalCommon > 0 {
+                            // No games yet — lean on the question answers they share.
+                            Text(sync.verdict)
+                                .font(BoopTypography.cineTitle)
+                                .foregroundStyle(BoopColors.textPrimary)
+                            Text("From the questions you've both answered.")
+                                .font(BoopTypography.cineCaption)
+                                .foregroundStyle(BoopColors.textMuted)
+                            Text("For deeper insights and connection, play a game together.")
+                                .font(BoopTypography.cineBodyLight)
+                                .foregroundStyle(BoopColors.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        } else {
+                            Text("Play a game together and we'll show how your answers dance 🎮")
+                                .font(BoopTypography.cineBodyLight)
+                                .foregroundStyle(BoopColors.textSecondary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
                         HStack(spacing: BoopSpacing.xs) {
-                            Text("Start one")
+                            Text("Play a game")
                                 .font(BoopTypography.cineLabel)
                                 .tracking(1.5)
                             Image(systemName: "chevron.right")
@@ -294,6 +314,9 @@ struct GrowthInsightsView: View {
         if item.gameType == "never_have_i_ever" {
             return "\(stripNHIE(item.prompt)) — you both have 😏"
         }
+        if item.gameType == "intimacy_spectrum" {
+            return "\(item.prompt) — same place for both of you"
+        }
         return item.answer
     }
 
@@ -301,6 +324,9 @@ struct GrowthInsightsView: View {
         if item.gameType == "never_have_i_ever" {
             let youHave = item.you.lowercased() == "i have"
             return "\(stripNHIE(item.prompt)) — \(youHave ? "you have, they haven't" : "they have, you haven't")"
+        }
+        if item.gameType == "intimacy_spectrum" {
+            return "\(item.prompt) — you're \(item.you), they're \(item.them)"
         }
         return "You: \(item.you) · Them: \(item.them)"
     }

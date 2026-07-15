@@ -21,6 +21,7 @@ struct MatchGamesView: View {
                         .foregroundStyle(BoopColors.accentColor)
                 }
                 liveSection
+                nextAngleBanner
                 gamePicker
                 completedSection
             }
@@ -190,6 +191,55 @@ struct MatchGamesView: View {
     }
 
     // MARK: - Game picker (hairline rows)
+
+    // MARK: - Next angle (360° chemistry — nudge toward unexplored game types)
+
+    /// Each game explores a different side of you two. Suggest whichever angle
+    /// hasn't been touched yet so the picture stays rounded — worded as an
+    /// invitation, never a checklist.
+    private static let angleOrder: [(type: GameTypeOption, angle: String)] = [
+        (.wouldYouRather, "your everyday choices"),
+        (.neverHaveIEver, "your pasts and stories"),
+        (.dreamBoard, "the future you'd build"),
+        (.intimacySpectrum, "emotional closeness"),
+        (.whatWouldYouDo, "how you handle life"),
+        (.twoTruthsALie, "how well you read each other"),
+        (.blindReveal, "honest vulnerability"),
+    ]
+
+    @ViewBuilder
+    private var nextAngleBanner: some View {
+        let playedTypes = Set(
+            viewModel.games
+                .filter { $0.status != "cancelled" }
+                .map { $0.gameType }
+        )
+        if !playedTypes.isEmpty {
+            if let next = Self.angleOrder.first(where: { !playedTypes.contains($0.type.rawValue) }) {
+                VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                    EyebrowLabel(text: "A new side of you two", color: BoopColors.accentColor)
+                    Text("You've been exploring together — try \(next.type.label) next to discover \(next.angle).")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BoopSpacing.lg)
+                .boopCard(radius: BoopRadius.xl, shadow: false)
+            } else {
+                VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                    EyebrowLabel(text: "Every angle explored", color: BoopColors.accentColor)
+                    Text("You two have played every kind of game — your picture of each other is beautifully complete. Keep playing your favourites.")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(BoopSpacing.lg)
+                .boopCard(radius: BoopRadius.xl, shadow: false)
+            }
+        }
+    }
 
     private var gamePicker: some View {
         VStack(alignment: .leading, spacing: 0) {
