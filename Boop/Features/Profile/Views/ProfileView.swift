@@ -9,13 +9,20 @@ struct ProfileView: View {
     @State private var showDeleteConfirm = false
     @State private var showDeleteError = false
     @State private var isDeleting = false
+    @State private var showQuestions = false
+    @State private var freshQuestionsToday: Int?
     @AppStorage("appTheme") private var appTheme = AppTheme.system.rawValue
 
     var body: some View {
         ScrollView(showsIndicators: false) {
             VStack(alignment: .leading, spacing: BoopSpacing.xl) {
                 heroSection
-                statsSection
+                KnowYouCard(
+                    answered: viewModel.user?.questionsAnswered ?? 0,
+                    freshToday: freshQuestionsToday
+                ) {
+                    showQuestions = true
+                }
                 photosSection
                 voiceSection
                 meSection
@@ -26,8 +33,27 @@ struct ProfileView: View {
         .boopBackground()
         .navigationTitle("Me")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showQuestions) {
+            NavigationStack {
+                QuestionsFullView()
+                    .navigationTitle("About You")
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") { showQuestions = false }
+                        }
+                    }
+            }
+            .onDisappear {
+                Task {
+                    await viewModel.loadProfile()
+                    await loadFreshCount()
+                }
+            }
+        }
         .task {
             await viewModel.loadProfile()
+            await loadFreshCount()
         }
         .refreshable {
             await viewModel.loadProfile()
@@ -86,29 +112,10 @@ struct ProfileView: View {
 
     // MARK: - Stats
 
-    private var statsSection: some View {
-        HStack(spacing: BoopSpacing.lg) {
-            statColumn(
-                value: "\(viewModel.user?.questionsAnswered ?? 0)",
-                label: "Answers"
-            )
-            Rectangle()
-                .fill(BoopColors.hairline)
-                .frame(width: 1, height: 44)
-            statColumn(
-                value: "\(viewModel.user?.badges?.count ?? 0)",
-                label: "Badges"
-            )
-            Spacer(minLength: 0)
-        }
-    }
-
-    private func statColumn(value: String, label: String) -> some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.xs) {
-            EyebrowLabel(text: label)
-            Text(value)
-                .font(BoopTypography.cineTitle)
-                .foregroundStyle(BoopColors.textPrimary)
+    @MainActor
+    private func loadFreshCount() async {
+        if let response: AvailableQuestionsResponse = try? await APIClient.shared.request(.getQuestions) {
+            freshQuestionsToday = response.meta.totalRemaining
         }
     }
 

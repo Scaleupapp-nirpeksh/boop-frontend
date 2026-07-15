@@ -11,7 +11,11 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if !splashFinished {
+            // Design-review harness (simctl launch env only; unreachable on devices):
+            // renders the Me-tab focus card at three stages without signing in.
+            if ProcessInfo.processInfo.environment["BOOP_UI_GALLERY"] == "knowyou" {
+                KnowYouGalleryView()
+            } else if !splashFinished {
                 SplashView(isFinished: $splashFinished)
             } else if !hasSeenIntro && !introFinished {
                 OnboardingIntroView(isFinished: $introFinished)

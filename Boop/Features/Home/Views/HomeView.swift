@@ -44,10 +44,6 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
-                    DailyQuestionBand(newCount: viewModel.newQuestionsCount) {
-                        viewModel.showQuestionsSheet = true
-                    }
-
                     if !viewModel.incomingPendingLikes.isEmpty || !viewModel.outgoingPendingLikes.isEmpty {
                         activitySection
                     } else if viewModel.activeMatches.isEmpty {
@@ -78,21 +74,6 @@ struct HomeView: View {
             await notificationVM.refreshUnreadCount()
         }
         .boopBackground()
-        .sheet(isPresented: $viewModel.showQuestionsSheet) {
-            NavigationStack {
-                QuestionsFullView()
-                    .navigationTitle("Today's Questions")
-                    .navigationBarTitleDisplayMode(.inline)
-                    .toolbar {
-                        ToolbarItem(placement: .cancellationAction) {
-                            Button("Done") { viewModel.showQuestionsSheet = false }
-                        }
-                    }
-            }
-            .onDisappear {
-                Task { await viewModel.refresh() }
-            }
-        }
         .onReceive(NotificationCenter.default.publisher(for: .realtimeMatchNew)) { _ in
             Task { await viewModel.refresh() }
         }
@@ -207,13 +188,13 @@ struct HomeView: View {
                 .foregroundStyle(BoopColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            Text("The more you share, the sharper your matches — keep answering to help us find your people.")
+            Text("The more you share, the better we can introduce you — help us get to know you.")
                 .font(BoopTypography.cineCaption)
                 .foregroundStyle(BoopColors.textMuted)
                 .fixedSize(horizontal: false, vertical: true)
 
-            BoopButton(title: "Answer more questions", variant: .outline) {
-                viewModel.showQuestionsSheet = true
+            BoopButton(title: "Tell us about you", variant: .outline) {
+                NotificationRouter.shared.selectedTab = 3
             }
             .padding(.top, BoopSpacing.xs)
         }

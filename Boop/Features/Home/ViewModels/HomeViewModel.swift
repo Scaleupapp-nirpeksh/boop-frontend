@@ -4,7 +4,6 @@ import WidgetKit
 @Observable
 class HomeViewModel {
     // Section data
-    var newQuestionsCount = 0
     var stats = DiscoverStats(newMatches: 0, activeConnections: 0, totalCandidates: 0)
     var activeMatches: [MatchInfo] = []
     var incomingPendingLikes: [PendingLikeProfile] = []
@@ -19,9 +18,6 @@ class HomeViewModel {
     var celebrationMatch: LikeResponse.MutualMatchInfo?
     var celebrationName: String?
 
-    // Navigation
-    var showQuestionsSheet = false
-
     // MARK: - Load All Data
 
     @MainActor
@@ -32,9 +28,8 @@ class HomeViewModel {
         async let statsTask: () = loadStats()
         async let matchesTask: () = loadMatches()
         async let pendingTask: () = loadPendingLikes()
-        async let questionsTask: () = loadNewQuestionsCount()
 
-        _ = await (statsTask, matchesTask, pendingTask, questionsTask)
+        _ = await (statsTask, matchesTask, pendingTask)
         isLoading = false
         updateWidgetData()
     }
@@ -76,18 +71,6 @@ class HomeViewModel {
         } catch {
             incomingPendingLikes = []
             outgoingPendingLikes = []
-        }
-    }
-
-    // MARK: - New Questions Count
-
-    @MainActor
-    private func loadNewQuestionsCount() async {
-        do {
-            let response: AvailableQuestionsResponse = try await APIClient.shared.request(.getQuestions)
-            newQuestionsCount = response.meta.totalRemaining
-        } catch {
-            // Non-critical
         }
     }
 
