@@ -6,7 +6,6 @@ class HomeViewModel {
     // Section data
     var stats = DiscoverStats(newMatches: 0, activeConnections: 0, totalCandidates: 0)
     var activeMatches: [MatchInfo] = []
-    var usPairs: [MatchInfo] = []
     var incomingPendingLikes: [PendingLikeProfile] = []
     var outgoingPendingLikes: [PendingLikeProfile] = []
 
@@ -28,10 +27,9 @@ class HomeViewModel {
 
         async let statsTask: () = loadStats()
         async let matchesTask: () = loadMatches()
-        async let pairsTask: () = loadPairs()
         async let pendingTask: () = loadPendingLikes()
 
-        _ = await (statsTask, matchesTask, pairsTask, pendingTask)
+        _ = await (statsTask, matchesTask, pendingTask)
         isLoading = false
         updateWidgetData()
     }
@@ -53,16 +51,6 @@ class HomeViewModel {
     }
 
     // MARK: - Matches
-
-    @MainActor
-    private func loadPairs() async {
-        do {
-            let response: MatchesResponse = try await APIClient.shared.request(.getMatches(origin: "pair"))
-            usPairs = response.matches
-        } catch {
-            // Non-critical
-        }
-    }
 
     @MainActor
     private func loadMatches() async {

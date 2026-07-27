@@ -1,52 +1,87 @@
 import SwiftUI
 
-// MARK: - Home section: "Us · People you know"
+// MARK: - "Us" tab: people you know
 
-/// The Home-screen home of pairs: people you already know, exploring
-/// compatibility together. Always shows the invite entry — every invite is a
-/// personal, high-intent way for UnMutee to grow.
-struct UsSection: View {
-    let pairs: [MatchInfo]
+/// The Us tab: your own space for people you already know — separate from
+/// dating. Pairs live here, invites start here, codes are redeemed here.
+struct UsTabView: View {
+    @State private var viewModel = UsViewModel()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: BoopSpacing.md) {
-            EyebrowLabel(text: "Us · People you know", color: BoopColors.accentColor)
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: BoopSpacing.xl) {
+                VStack(alignment: .leading, spacing: BoopSpacing.md) {
+                    EyebrowLabel(text: "Us", color: BoopColors.accentColor)
+                    AccentRule()
+                    Text("People you know")
+                        .font(BoopTypography.cineDisplay)
+                        .foregroundStyle(BoopColors.textPrimary)
+                    Text("Someone from your world — see how you two actually match. No stages, no fog. Just you two.")
+                        .font(BoopTypography.cineBodyLight)
+                        .foregroundStyle(BoopColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 .padding(.horizontal, BoopSpacing.xl)
 
-            VStack(spacing: BoopSpacing.md) {
-                ForEach(pairs) { pair in
+                VStack(spacing: BoopSpacing.md) {
+                    if viewModel.pairs.isEmpty && !viewModel.isLoadingPairs {
+                        emptyState
+                    } else {
+                        ForEach(viewModel.pairs) { pair in
+                            NavigationLink {
+                                PartnerProfileView(matchId: pair.matchId, firstName: pair.otherUser.firstName)
+                            } label: {
+                                pairRow(pair)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
                     NavigationLink {
-                        PartnerProfileView(matchId: pair.matchId, firstName: pair.otherUser.firstName)
+                        UsInviteView()
                     } label: {
-                        pairRow(pair)
+                        inviteCard
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        UsRedeemView()
+                    } label: {
+                        HStack(spacing: BoopSpacing.xs) {
+                            Text("Have a code?")
+                                .font(BoopTypography.cineLabel)
+                                .tracking(1.5)
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 10, weight: .thin))
+                        }
+                        .foregroundStyle(BoopColors.textMuted)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .buttonStyle(.plain)
                 }
-
-                NavigationLink {
-                    UsInviteView()
-                } label: {
-                    inviteCard
-                }
-                .buttonStyle(.plain)
-
-                NavigationLink {
-                    UsRedeemView()
-                } label: {
-                    HStack(spacing: BoopSpacing.xs) {
-                        Text("Have a code?")
-                            .font(BoopTypography.cineLabel)
-                            .tracking(1.5)
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 10, weight: .thin))
-                    }
-                    .foregroundStyle(BoopColors.textMuted)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .buttonStyle(.plain)
+                .padding(.horizontal, BoopSpacing.xl)
             }
-            .padding(.horizontal, BoopSpacing.xl)
+            .padding(.vertical, BoopSpacing.lg)
         }
+        .boopBackground()
+        .navigationBarHidden(true)
+        .task { await viewModel.loadPairs() }
+        .refreshable { await viewModel.loadPairs() }
+    }
+
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: BoopSpacing.sm) {
+            Text("Nobody here yet ✧")
+                .font(BoopTypography.cineHeadline)
+                .foregroundStyle(BoopColors.textPrimary)
+            Text("A crush, a maybe, or the one you're already with — invite them and find out what you two are made of.")
+                .font(BoopTypography.cineBodyLight)
+                .foregroundStyle(BoopColors.textSecondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(BoopSpacing.xl)
+        .boopCard(radius: BoopRadius.xxl, shadow: false)
     }
 
     private func pairRow(_ pair: MatchInfo) -> some View {

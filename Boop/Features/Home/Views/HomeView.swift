@@ -44,7 +44,6 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
-                    UsSection(pairs: viewModel.usPairs)
 
                     if !viewModel.incomingPendingLikes.isEmpty || !viewModel.outgoingPendingLikes.isEmpty {
                         activitySection
@@ -196,7 +195,7 @@ struct HomeView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             BoopButton(title: "Tell us about you", variant: .outline) {
-                NotificationRouter.shared.selectedTab = 3
+                NotificationRouter.shared.selectedTab = 4
             }
             .padding(.top, BoopSpacing.xs)
         }

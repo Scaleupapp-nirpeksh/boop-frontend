@@ -34,11 +34,25 @@ struct PairPartner: Decodable {
 final class UsViewModel {
     var currentCode: PairInviteInfo?
     var activeInvites: [PairInviteInfo] = []
+    var pairs: [MatchInfo] = []
+    var isLoadingPairs = false
     var isWorking = false
     var errorMessage: String?
 
     // Redeem state
     var redeemResult: PairRedeemResponse?
+
+    @MainActor
+    func loadPairs() async {
+        isLoadingPairs = pairs.isEmpty
+        defer { isLoadingPairs = false }
+        do {
+            let response: MatchesResponse = try await APIClient.shared.request(.getMatches(origin: "pair"))
+            pairs = response.matches
+        } catch {
+            // Non-critical
+        }
+    }
 
     @MainActor
     func loadInvites() async {

@@ -78,13 +78,22 @@ struct MainTabView: View {
                 .tag(2)
 
             NavigationStack {
+                UsTabView()
+            }
+                .tabItem {
+                    Image(systemName: "sparkles")
+                    Text("Us")
+                }
+                .tag(3)
+
+            NavigationStack {
                 ProfileView()
             }
                 .tabItem {
                     Image(systemName: "person")
                     Text("Me")
                 }
-                .tag(3)
+                .tag(4)
         }
         .tint(BoopColors.accentColor)
         .task {
