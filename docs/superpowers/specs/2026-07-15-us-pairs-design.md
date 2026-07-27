@@ -135,7 +135,23 @@ Reuses `PartnerProfileView` with a pair variant:
 - Tab bar unchanged, but Discover shows an invitation to complete the dating profile instead of candidates (with the "Show me in Discover" toggle).
 - Me tab: "Come into focus" card copy adapts: *"Every answer sharpens how we show you two fit."* Questions flow identical.
 
-### 5.4 Share message (v1)
+### 5.4 Day-0 experience & page states (decided)
+
+Pairs are almost always **asymmetric at birth** (inviter has 15–60 answers, archetype, photos; invitee usually has zero). Analysis is **instant whenever data exists** (answer-sync and game chemistry compute on-the-fly), so the design problem is the empty/partial states — the pair page is a **state machine**, never a page of empty sections:
+
+| Stage | Trigger | "You Two" shows | Primary CTA |
+|---|---|---|---|
+| **0 · Day one** | paired, no games, no common answers | "Your story starts here — a quick game sparks your first chemistry" + promise line ("as you both answer daily questions, we'll compare minds too") | **Play your first game** (works with zero history) |
+| **1 · First chemistry** | ≥1 game done, few/no common questions | "How you play" verdict + rows; questions section shows warm progress ("2 questions in common so far — grows every day") | keep playing / nudge questions |
+| **2 · Full picture** | real question overlap | verdict + per-question sync + you-vs-them compare + firsts | everything |
+
+**Mirrored views:** shared sections (You Two / How you play / How you answer) are identical for both; the person section flips. When the partner is brand-new, their archetype slot reuses the **"coming into focus"** metaphor — blurred merge-orbs + "〔Name〕 has answered 3 questions; their type appears as they share more" — giving the inviter a reason to nudge and the invitee a visible reason to answer. (No fog on photos in Us — focus applies to the *type*, not the face.)
+
+**Joined moment:** redemption push to the inviter ("〔Name〕 joined your Us 🎉"); both see a one-time "You two are paired — day one" ribbon; Us-list cards carry state lines ("New — play your first game" → chemistry verdict once games exist).
+
+**Two existing users pairing:** skip Stage 0 entirely — their question overlap already exists, so "How you two answer" and the compatibility vibe are populated **from the first second**, plus game CTA.
+
+### 5.5 Share message (v1)
 > *"I want to see how we actually match 👀 My UnMutee code: ROSE42 — get the app: 〔App Store link〕"*
 
 ---
