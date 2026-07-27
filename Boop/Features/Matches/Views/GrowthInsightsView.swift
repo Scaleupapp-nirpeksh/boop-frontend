@@ -565,6 +565,8 @@ struct YouTwoGalleryView: View {
         vm.detail = MatchDetail(
             matchId: "demo",
             stage: "connecting",
+            origin: "discover",
+            usLinked: false,
             compatibilityScore: 92,
             matchTier: "platinum",
             dimensionScores: nil,

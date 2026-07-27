@@ -506,6 +506,8 @@ struct ProfileView: View {
             return "Questions pending"
         case .voicePending:
             return "Voice pending"
+        case .pairOnly:
+            return "Us only"
         case .incomplete, nil:
             return "In progress"
         }

@@ -40,7 +40,11 @@ enum APIEndpoint {
     case suggestNote(targetUserId: String)
 
     // Matches
-    case getMatches(stage: String? = nil, page: Int = 1)
+    case getMatches(stage: String? = nil, page: Int = 1, origin: String? = nil)
+    case createPairInvite
+    case getPairInvites
+    case revokePairInvite(code: String)
+    case redeemPairCode(code: String)
     case getMatchById(matchId: String)
     case getMatchPartner(matchId: String)
     case advanceMatchStage(matchId: String)
@@ -129,9 +133,14 @@ enum APIEndpoint {
         case .likeUser: return "/discover/like"
         case .passUser: return "/discover/pass"
         case .suggestNote(let targetUserId): return "/discover/suggest-note/\(targetUserId)"
-        case .getMatches(let stage, let page):
+        case .createPairInvite: return "/pairs/invites"
+        case .getPairInvites: return "/pairs/invites"
+        case .revokePairInvite(let code): return "/pairs/invites/\(code)"
+        case .redeemPairCode: return "/pairs/redeem"
+        case .getMatches(let stage, let page, let origin):
             var path = "/matches?page=\(page)"
             if let stage { path += "&stage=\(stage)" }
+            if let origin { path += "&origin=\(origin)" }
             return path
         case .getMatchById(let matchId): return "/matches/\(matchId)"
         case .getMatchPartner(let matchId): return "/matches/\(matchId)/partner"
@@ -199,8 +208,11 @@ enum APIEndpoint {
              .proposeDatePlan, .setSafetyContact, .toggleLocationSharing, .submitCheckIn,
              .uploadConversationMedia,
              .sendMessage, .addReaction,
-             .blockUser, .reportUser:
+             .blockUser, .reportUser,
+             .createPairInvite, .redeemPairCode:
             return .POST
+        case .getPairInvites: return .GET
+        case .revokePairInvite: return .DELETE
         case .me, .getProfile, .getQuestions, .getQuestionsProgress, .getQuestionHistory, .getPersonalityAnalysis,
              .getBadges,
              .getCandidates, .getDiscoverStats, .getPendingLikes, .suggestNote, .getMatches, .getMatchById,
@@ -259,6 +271,7 @@ enum APIEndpoint {
         case .toggleLocationSharing(_, let enabled): return ["enabled": enabled]
         case .submitCheckIn(_, let status): return ["status": status]
         case .blockUser(let userId): return ["userId": userId]
+        case .redeemPairCode(let code): return ["code": code]
         case .reportUser(let req): return req
         default: return nil
         }

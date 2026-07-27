@@ -82,7 +82,7 @@ struct RootView: View {
             return .auth
         }
         if let user = authManager.currentUser,
-           user.profileStage == .ready || user.profileStage == .preview {
+           user.profileStage == .ready || user.profileStage == .preview || user.profileStage == .pairOnly {
             return .main
         }
         return .onboarding

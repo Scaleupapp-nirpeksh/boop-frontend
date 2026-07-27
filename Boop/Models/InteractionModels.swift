@@ -5,6 +5,8 @@ import Foundation
 struct MatchDetail: Codable, Identifiable {
     let matchId: String
     let stage: String
+    let origin: String?
+    let usLinked: Bool?
     let compatibilityScore: Int?
     let matchTier: String?
     let dimensionScores: [String: Double]?

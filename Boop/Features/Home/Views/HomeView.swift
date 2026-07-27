@@ -44,6 +44,8 @@ struct HomeView: View {
                         .buttonStyle(.plain)
                     }
 
+                    UsSection(pairs: viewModel.usPairs)
+
                     if !viewModel.incomingPendingLikes.isEmpty || !viewModel.outgoingPendingLikes.isEmpty {
                         activitySection
                     } else if viewModel.activeMatches.isEmpty {

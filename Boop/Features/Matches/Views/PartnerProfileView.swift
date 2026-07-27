@@ -180,7 +180,34 @@ struct PartnerProfileView: View {
 
     @ViewBuilder
     private var connectionCard: some View {
-        if let detail = viewModel.matchDetail {
+        if let detail = viewModel.matchDetail, detail.origin == "pair" || detail.usLinked == true {
+            NavigationLink {
+                PairHubView(matchId: matchId, partnerName: viewModel.partner?.firstName ?? firstName ?? "them")
+            } label: {
+                HStack(spacing: BoopSpacing.md) {
+                    Text("✧")
+                        .font(.system(size: 24))
+                        .foregroundStyle(BoopColors.accentColor)
+
+                    VStack(alignment: .leading, spacing: 3) {
+                        EyebrowLabel(text: "Your Us", color: BoopColors.accentColor)
+                        Text("Games, questions and chemistry — just you two")
+                            .font(BoopTypography.cineBody)
+                            .foregroundStyle(BoopColors.textPrimary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 13, weight: .thin))
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+                .padding(BoopSpacing.lg)
+                .boopCard(radius: BoopRadius.xl, shadow: false)
+            }
+            .buttonStyle(.plain)
+        } else if let detail = viewModel.matchDetail {
             let comfort = min(100, max(0, detail.comfortScore ?? 0))
             let revealed = detail.stage == "revealed" || detail.stage == "dating"
             let pts = max(0, 70 - comfort)

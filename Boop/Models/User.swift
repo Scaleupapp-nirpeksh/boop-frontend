@@ -66,6 +66,7 @@ enum ProfileStage: String, Codable {
     case questionsPending = "questions_pending"
     case preview
     case ready
+    case pairOnly = "pair_only"
 }
 
 struct UserLocation: Codable {

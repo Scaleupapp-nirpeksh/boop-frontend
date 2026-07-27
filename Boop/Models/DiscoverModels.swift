@@ -168,6 +168,8 @@ struct MatchInfo: Codable, Identifiable {
     let lastBoop: BoopData?
     let boopCount: Int?
     let streak: StreakData?
+    let origin: String?
+    let usLinked: Bool?
     let otherUser: MatchOtherUser
 
     var id: String { matchId }
@@ -190,6 +192,7 @@ struct MatchInfo: Codable, Identifiable {
         case "reveal_ready": return "🔓"
         case "revealed": return "🌆"
         case "dating": return "☕"
+        case "paired": return "✧"
         default: return "✨"
         }
     }
@@ -201,6 +204,7 @@ struct MatchInfo: Codable, Identifiable {
         case "reveal_ready": return "Reveal Ready"
         case "revealed": return "Plan a Date"
         case "dating": return "Dating"
+        case "paired": return "Us"
         default: return "New"
         }
     }
@@ -215,7 +219,7 @@ extension MatchInfo {
     /// Best available portrait for the current stage: clear if revealed, else
     /// blurred, else silhouette. BlurredPortrait adds the comfort-based fog on top.
     var heroPhotoURL: String? {
-        if stage == "revealed" || stage == "dating" {
+        if stage == "revealed" || stage == "dating" || stage == "paired" {
             return otherUser.photos.profilePhotoUrl ?? otherUser.photos.blurredUrl
         }
         return otherUser.photos.blurredUrl ?? otherUser.photos.silhouetteUrl ?? otherUser.photos.profilePhotoUrl

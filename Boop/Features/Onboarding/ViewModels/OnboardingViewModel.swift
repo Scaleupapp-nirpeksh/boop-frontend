@@ -76,7 +76,7 @@ class OnboardingViewModel {
             currentStep = .basicInfo
         case .voicePending, .questionsPending:
             currentStep = .questions
-        case .preview, .ready:
+        case .preview, .ready, .pairOnly:
             isComplete = true
         }
     }
