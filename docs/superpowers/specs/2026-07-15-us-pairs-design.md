@@ -50,7 +50,13 @@ UnMutee today only serves strangers meeting through Discover. **"Us"** lets two 
 ### 3.2 Pair invite rules
 - Code: 6 chars from `A-Z2-9` minus lookalikes (no 0/O/1/I); unique; expires in **7 days**; single redemption.
 - Max **5 active codes** per user (rate limit); codes revocable.
-- Guards: cannot redeem your own code; redeeming when a Match (any origin) already exists between the two → friendly rejection pointing to the existing connection (unique `pairKey` enforces); blocked users cannot pair; 18+ enforced for everyone.
+- Guards: cannot redeem your own code; blocked users cannot pair (generic "code isn't valid" — never reveals a block); 18+ enforced for everyone.
+
+### 3.2.1 Redemption when the two are already connected (decided)
+- **Already matched, not yet revealed:** the existing match **auto-reveals and merges** — photos unlock, all history (chat, games, comfort) is kept, and the connection gains the Us view. Celebration moment: *"You found each other twice ✨"*. No duplicate match (unique `pairKey`).
+- **Already matched and revealed/dating:** no state change; warm "you two are already connected" cheer pointing at the existing connection.
+- **Previously ended pair (archived):** a fresh code **reactivates** the archived match as a fresh start (pairKey blocks creating a second one).
+- **Both on the app, never matched:** normal pair creation — and paired people are **excluded from each other's Discover** (new exclusion: anyone you share an active Match with, any origin, never appears in your candidates).
 
 ### 3.3 Account modes & the dating pool
 - New field `User.discoverable: Boolean` (default `true` for normal signups, `false` for pair-only signups).
@@ -135,11 +141,11 @@ Reuses `PartnerProfileView` with a pair variant:
 ---
 
 ## 6. Risks & Edge Cases
-- **Existing-match collision:** redeem between already-connected users → 409 with friendly copy; client points to the existing connection.
+- **Existing-match collision:** resolved by merge/auto-reveal rules in §3.2.1 (never a cold error).
 - **`requireCompleteProfile` relaxation** is the highest-risk change — must not accidentally open dating features to pair-only accounts. Mitigation: origin check lives server-side per-resource; add unit tests for every pair-scoped route with a `pair_only` caller.
 - **Answer-sync sparsity:** a brand-new invitee has answered nothing → "How you two answer" empty state nudges them to the Me questions ("Answer a few and watch this fill in").
 - **Privacy:** pairs never appear in Discover, public profiles, or the dating lists of either person; a pair is visible only to its two members.
-- **Abuse:** codes are single-use, expiring, revocable, rate-limited; block/report identical to dating.
+- **Abuse & safety:** codes are single-use, expiring, revocable, rate-limited. Blocking inside a pair deactivates it for both instantly (chat closes, disappears from both Us lists). Redemption against a block fails generically. Reports flow through the existing moderation pipeline unchanged.
 - **Old app versions:** unaware clients never see pairs (origin filter defaults to `discover`) — no breakage.
 
 ## 7. Monetisation hooks (later, noted only)
