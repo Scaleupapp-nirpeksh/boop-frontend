@@ -53,6 +53,14 @@ final class ProfileViewModel {
         }
     }
 
+    /// "Show me in Discover" — flips the dating side on/off server-side,
+    /// then refreshes so stage/discoverability reflect the backend's answer.
+    @MainActor
+    func setDatingMode(_ enabled: Bool) async {
+        try? await APIClient.shared.requestVoid(.setDatingMode(enabled: enabled))
+        await loadProfile()
+    }
+
     @MainActor
     func saveProfile() async {
         isSaving = true

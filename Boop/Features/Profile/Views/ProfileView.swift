@@ -350,6 +350,32 @@ struct ProfileView: View {
         }
     }
 
+    // MARK: - Dating on/off ("Us" pair-only accounts start off)
+
+    private var datingRow: some View {
+        VStack(spacing: 0) {
+            Rectangle().fill(BoopColors.hairline).frame(height: 1)
+            VStack(alignment: .leading, spacing: BoopSpacing.xs) {
+                Toggle(isOn: Binding(
+                    get: { viewModel.user?.datingOptIn ?? true },
+                    set: { on in Task { await viewModel.setDatingMode(on) } }
+                )) {
+                    Text("Show me in Discover")
+                        .font(BoopTypography.cineBody)
+                        .foregroundStyle(BoopColors.textPrimary)
+                }
+                .tint(BoopColors.accentColor)
+
+                if viewModel.user?.profileStage == .pairOnly {
+                    Text("You're here for Us right now. Flip this on to meet new people too.")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textMuted)
+                }
+            }
+            .padding(.vertical, BoopSpacing.md)
+        }
+    }
+
     // MARK: - Me / settings
 
     private var meSection: some View {
@@ -386,6 +412,8 @@ struct ProfileView: View {
             } label: {
                 HairlineRow("Question progress", showChevron: true)
             }
+
+            datingRow
 
             NavigationLink {
                 NotificationSettingsView()

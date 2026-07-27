@@ -45,6 +45,7 @@ enum APIEndpoint {
     case getPairInvites
     case revokePairInvite(code: String)
     case redeemPairCode(code: String)
+    case setDatingMode(enabled: Bool)
     case getMatchById(matchId: String)
     case getMatchPartner(matchId: String)
     case advanceMatchStage(matchId: String)
@@ -137,6 +138,7 @@ enum APIEndpoint {
         case .getPairInvites: return "/pairs/invites"
         case .revokePairInvite(let code): return "/pairs/invites/\(code)"
         case .redeemPairCode: return "/pairs/redeem"
+        case .setDatingMode: return "/profile/dating-mode"
         case .getMatches(let stage, let page, let origin):
             var path = "/matches?page=\(page)"
             if let stage { path += "&stage=\(stage)" }
@@ -225,7 +227,7 @@ enum APIEndpoint {
              .getConversations, .getMessages, .getConversationMedia,
              .getBlockedUsers:
             return .GET
-        case .updateBasicInfo, .reorderPhotos, .updateFCMToken, .updateNotificationPreferences:
+        case .updateBasicInfo, .reorderPhotos, .updateFCMToken, .updateNotificationPreferences, .setDatingMode:
             return .PUT
         case .advanceMatchStage, .archiveMatch, .respondToDatePlan, .completeDatePlan,
              .cancelGame, .markConversationRead,
@@ -272,6 +274,7 @@ enum APIEndpoint {
         case .submitCheckIn(_, let status): return ["status": status]
         case .blockUser(let userId): return ["userId": userId]
         case .redeemPairCode(let code): return ["code": code]
+        case .setDatingMode(let enabled): return ["enabled": enabled]
         case .reportUser(let req): return req
         default: return nil
         }

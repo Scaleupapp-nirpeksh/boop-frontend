@@ -26,6 +26,11 @@ class OnboardingViewModel {
     var errorMessage: String?
     var isComplete = false
 
+    // "Us" invited-user fork: set after basic info when a pending pair code
+    // redeems successfully — asks whether they also want the dating side.
+    var showPairFork = false
+    var pairPartnerName: String?
+
     // Basic Info
     var firstName = ""
     var dateOfBirth = Calendar.current.date(byAdding: .year, value: -22, to: Date()) ?? Date()
@@ -81,6 +86,40 @@ class OnboardingViewModel {
         }
     }
 
+    // MARK: - "Us" pair fork (invited users)
+
+    @MainActor
+    private func redeemPendingPairCodeIfAny() async {
+        guard let code = UserDefaults.standard.string(forKey: "pendingPairCode"),
+              !code.isEmpty else { return }
+        UserDefaults.standard.removeObject(forKey: "pendingPairCode")
+        do {
+            let result: PairRedeemResponse = try await APIClient.shared.request(
+                .redeemPairCode(code: code)
+            )
+            pairPartnerName = result.partner.firstName
+            showPairFork = true
+        } catch {
+            // Invalid/expired code — continue onboarding normally.
+        }
+    }
+
+    /// Fork: "Yes, show me around" — they want dating too.
+    @MainActor
+    func choosePairAndDating() async {
+        _ = try? await APIClient.shared.requestVoid(.setDatingMode(enabled: true))
+        await AuthManager.shared.fetchCurrentUser()
+        showPairFork = false
+    }
+
+    /// Fork: "Not now — just Us" — pair-only account, straight to the app.
+    @MainActor
+    func choosePairOnly() async {
+        await AuthManager.shared.fetchCurrentUser()
+        showPairFork = false
+        isComplete = true
+    }
+
     // MARK: - Submit Basic Info + Location + Bio
 
     @MainActor
@@ -109,6 +148,7 @@ class OnboardingViewModel {
         do {
             let wrapper: UserWrapper = try await APIClient.shared.request(.updateBasicInfo(request))
             AuthManager.shared.updateUser(wrapper.user)
+            await redeemPendingPairCodeIfAny()
             advanceStep()
         } catch let error as APIError {
             errorMessage = error.errorDescription
@@ -133,6 +173,7 @@ class OnboardingViewModel {
         do {
             let wrapper: UserWrapper = try await APIClient.shared.request(.updateBasicInfo(request))
             AuthManager.shared.updateUser(wrapper.user)
+            await redeemPendingPairCodeIfAny()
             advanceStep()
         } catch let error as APIError {
             errorMessage = error.errorDescription

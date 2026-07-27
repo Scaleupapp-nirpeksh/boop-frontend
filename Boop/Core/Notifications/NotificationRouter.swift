@@ -37,6 +37,11 @@ final class NotificationRouter {
                 pendingDestination = .game(gameId: gameId)
                 selectedTab = 0
             }
+        case "pair_joined":
+            if let matchId = userInfo["matchId"] as? String {
+                pendingDestination = .match(matchId: matchId)
+                selectedTab = 0
+            }
         case "reveal_request", "reveal_complete":
             if let matchId = userInfo["matchId"] as? String {
                 pendingDestination = .match(matchId: matchId)

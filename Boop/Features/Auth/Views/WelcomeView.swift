@@ -65,6 +65,16 @@ struct WelcomeView: View {
                             .shadow(color: BoopColors.accentColor.opacity(0.25), radius: 8, x: 0, y: 4)
                     }
                     .padding(.top, BoopSpacing.xs)
+
+                    NavigationLink {
+                        PairCodeGateView()
+                    } label: {
+                        Text("Have a code from someone? Start with Us")
+                            .font(BoopTypography.cineCaption)
+                            .foregroundStyle(BoopColors.textSecondary)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .padding(.top, BoopSpacing.sm)
                 }
                 .opacity(appeared ? 1 : 0)
                 .offset(y: appeared ? 0 : 24)
@@ -169,5 +179,78 @@ private struct VoiceWave: Shape {
 #Preview {
     NavigationStack {
         WelcomeView()
+    }
+}
+
+
+// MARK: - Pair code gate ("Us" invites)
+
+/// Entry for people who arrived with a friend's pair code. There is no account
+/// yet, so the code is kept locally and redeemed right after basic info.
+private struct PairCodeGateView: View {
+    @State private var code = ""
+    @State private var proceed = false
+
+    var body: some View {
+        ScrollView(showsIndicators: false) {
+            VStack(alignment: .leading, spacing: BoopSpacing.lg) {
+                Spacer(minLength: 40)
+
+                EyebrowLabel(text: "Us", color: BoopColors.accentColor)
+                AccentRule()
+
+                Text("Someone saved you a spot")
+                    .font(BoopTypography.cineDisplay)
+                    .foregroundStyle(BoopColors.textPrimary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Enter the six characters they sent you. Once you're set up, you two are linked — no searching, no waiting.")
+                    .font(BoopTypography.cineBodyLight)
+                    .foregroundStyle(BoopColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                TextField("ROSE42", text: $code)
+                    .font(.system(size: 34, weight: .semibold))
+                    .tracking(10)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+                    .multilineTextAlignment(.center)
+                    .padding(.vertical, BoopSpacing.lg)
+                    .background(
+                        RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous)
+                            .fill(BoopColors.surface)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: BoopRadius.lg, style: .continuous)
+                            .stroke(code.count == 6 ? BoopColors.accentColor : BoopColors.hairline, lineWidth: 1.5)
+                    )
+                    .onChange(of: code) { _, newValue in
+                        code = String(newValue.uppercased().filter { $0.isLetter || $0.isNumber }.prefix(6))
+                    }
+
+                BoopButton(title: "Continue", isDisabled: code.count != 6) {
+                    UserDefaults.standard.set(code, forKey: "pendingPairCode")
+                    proceed = true
+                }
+
+                Button {
+                    UserDefaults.standard.removeObject(forKey: "pendingPairCode")
+                    proceed = true
+                } label: {
+                    Text("I'll enter it later")
+                        .font(BoopTypography.cineCaption)
+                        .foregroundStyle(BoopColors.textMuted)
+                        .frame(maxWidth: .infinity)
+                }
+                .padding(.top, BoopSpacing.xs)
+
+                Spacer(minLength: BoopSpacing.xxl)
+            }
+            .padding(.horizontal, BoopSpacing.xl)
+        }
+        .boopBackground()
+        .navigationDestination(isPresented: $proceed) {
+            PhoneInputView()
+        }
     }
 }

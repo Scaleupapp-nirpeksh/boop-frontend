@@ -1,6 +1,8 @@
 import Foundation
 
 struct User: Codable, Identifiable {
+    var discoverable: Bool?
+    var datingOptIn: Bool?
     let id: String
     let phone: String
     let phoneVerified: Bool
@@ -59,6 +61,9 @@ enum InterestedIn: String, Codable, CaseIterable {
         }
     }
 }
+
+// "Us" dating-mode fields (optional — older payloads decode fine)
+// discoverable: appears in Discover; datingOptIn: wants the dating side at all.
 
 enum ProfileStage: String, Codable {
     case incomplete
