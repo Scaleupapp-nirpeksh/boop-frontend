@@ -187,8 +187,10 @@ actor APIClient {
             throw APIError.networkError(URLError(.badServerResponse))
         }
 
-        // Handle 401 — attempt token refresh
-        if httpResponse.statusCode == 401 {
+        // Handle 401 — attempt token refresh. The logout call itself is
+        // exempt: refreshing/logging-out on its failure loops (build 33).
+        let isLogoutCall = request.url?.path.hasSuffix("/auth/logout") == true
+        if httpResponse.statusCode == 401 && !isLogoutCall {
             let refreshed = await AuthManager.shared.refreshTokenIfNeeded()
             if refreshed {
                 // Retry with new token
@@ -212,7 +214,8 @@ actor APIClient {
 
     private func parseResponse<T: Decodable>(data: Data, statusCode: Int) throws -> T {
         if statusCode == 429 {
-            throw APIError.rateLimited(retryAfter: nil)
+            let serverMessage = (try? decoder.decode(RateLimitEnvelope.self, from: data))?.message
+            throw APIError.rateLimited(retryAfter: nil, message: serverMessage)
         }
         // 413 bodies aren't JSON (multer/proxy reject) — decode would throw a cryptic error
         if statusCode == 413 {
@@ -243,4 +246,9 @@ struct AnyEncodable: Encodable {
     func encode(to encoder: Encoder) throws {
         try encode(encoder)
     }
+}
+
+/// Minimal decode of a 429 body — the server's message includes the wait time.
+private struct RateLimitEnvelope: Decodable {
+    let message: String?
 }

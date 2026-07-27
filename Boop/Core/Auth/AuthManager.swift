@@ -15,6 +15,7 @@ final class AuthManager: @unchecked Sendable {
     }
 
     private var isRefreshing = false
+    private var isLoggingOut = false
     private let refreshLock = NSLock()
 
     private init() {}
@@ -127,8 +128,11 @@ final class AuthManager: @unchecked Sendable {
 
     @MainActor
     func logout() {
+        guard !isLoggingOut else { return }
+        isLoggingOut = true
         Task.detached {
             try? await APIClient.shared.requestVoid(.logout)
+            await MainActor.run { AuthManager.shared.isLoggingOut = false }
         }
         clearAuth()
     }

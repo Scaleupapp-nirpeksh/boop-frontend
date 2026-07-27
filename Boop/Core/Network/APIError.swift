@@ -8,7 +8,7 @@ enum APIError: LocalizedError {
     case networkError(Error)
     case unauthorized
     case tokenExpired
-    case rateLimited(retryAfter: Int?)
+    case rateLimited(retryAfter: Int?, message: String? = nil)
     case validationError(String, errors: [String]?)
 
     /// Machine-readable error code from the backend body (e.g. "complete_setup_required").
@@ -39,8 +39,8 @@ enum APIError: LocalizedError {
             return "Please log in again"
         case .tokenExpired:
             return "Your session has expired"
-        case .rateLimited:
-            return "Too many requests. Please wait a moment."
+        case .rateLimited(_, let message):
+            return message ?? "Too many requests. Please wait a moment."
         case .validationError(let message, _):
             return message
         }
